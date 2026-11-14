@@ -1,0 +1,257 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "siloli-sector",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -67.88,
+          -22.12
+        ]
+      },
+      "properties": {
+        "id": "siloli-sector",
+        "name": "Siloli — sector de estudio",
+        "country": "Bolivia",
+        "targetBody": "mars",
+        "evidenceStatus": "computed_unreviewed",
+        "referenceRegionId": "jezero-sector",
+        "metrics": [
+          {
+            "key": "slope_median_deg",
+            "label": "Pendiente mediana",
+            "value": 5.8307,
+            "unit": "deg",
+            "sourceIds": [
+              "nasadem"
+            ],
+            "methodId": "regional-dem-average-central-difference-v1",
+            "analysisScaleM": 1000,
+            "validCoverageFraction": 1.0,
+            "status": "computed_unreviewed",
+            "missingReason": null
+          },
+          {
+            "key": "slope_p90_deg",
+            "label": "Pendiente P90",
+            "value": 12.2152,
+            "unit": "deg",
+            "sourceIds": [
+              "nasadem"
+            ],
+            "methodId": "regional-dem-average-central-difference-v1",
+            "analysisScaleM": 1000,
+            "validCoverageFraction": 1.0,
+            "status": "computed_unreviewed",
+            "missingReason": null
+          },
+          {
+            "key": "relief_p95_p5_m",
+            "label": "Relieve P95–P5",
+            "value": 949.8344,
+            "unit": "m",
+            "sourceIds": [
+              "nasadem"
+            ],
+            "methodId": "regional-dem-average-central-difference-v1",
+            "analysisScaleM": 1000,
+            "validCoverageFraction": 1.0,
+            "status": "computed_unreviewed",
+            "missingReason": null
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "coipasa-sector",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -68.12,
+          -19.38
+        ]
+      },
+      "properties": {
+        "id": "coipasa-sector",
+        "name": "Coipasa — sector de estudio",
+        "country": "Bolivia",
+        "targetBody": "mars",
+        "evidenceStatus": "computed_unreviewed",
+        "referenceRegionId": "jezero-sector",
+        "metrics": [
+          {
+            "key": "slope_median_deg",
+            "label": "Pendiente mediana",
+            "value": 0.0,
+            "unit": "deg",
+            "sourceIds": [
+              "nasadem"
+            ],
+            "methodId": "regional-dem-average-central-difference-v1",
+            "analysisScaleM": 1000,
+            "validCoverageFraction": 1.0,
+            "status": "computed_unreviewed",
+            "missingReason": null
+          },
+          {
+            "key": "slope_p90_deg",
+            "label": "Pendiente P90",
+            "value": 0.1271,
+            "unit": "deg",
+            "sourceIds": [
+              "nasadem"
+            ],
+            "methodId": "regional-dem-average-central-difference-v1",
+            "analysisScaleM": 1000,
+            "validCoverageFraction": 1.0,
+            "status": "computed_unreviewed",
+            "missingReason": null
+          },
+          {
+            "key": "relief_p95_p5_m",
+            "label": "Relieve P95–P5",
+            "value": 5.7914,
+            "unit": "m",
+            "sourceIds": [
+              "nasadem"
+            ],
+            "methodId": "regional-dem-average-central-difference-v1",
+            "analysisScaleM": 1000,
+            "validCoverageFraction": 1.0,
+            "status": "computed_unreviewed",
+            "missingReason": null
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "amboy-sector",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -115.78,
+          34.55
+        ]
+      },
+      "properties": {
+        "id": "amboy-sector",
+        "name": "Amboy — sector de estudio",
+        "country": "Estados Unidos",
+        "targetBody": "moon",
+        "evidenceStatus": "computed_unreviewed",
+        "referenceRegionId": "lunar-south-sector",
+        "metrics": [
+          {
+            "key": "slope_median_deg",
+            "label": "Pendiente mediana",
+            "value": 0.7619,
+            "unit": "deg",
+            "sourceIds": [
+              "nasadem"
+            ],
+            "methodId": "regional-dem-average-central-difference-v1",
+            "analysisScaleM": 1000,
+            "validCoverageFraction": 1.0,
+            "status": "computed_unreviewed",
+            "missingReason": null
+          },
+          {
+            "key": "slope_p90_deg",
+            "label": "Pendiente P90",
+            "value": 4.4814,
+            "unit": "deg",
+            "sourceIds": [
+              "nasadem"
+            ],
+            "methodId": "regional-dem-average-central-difference-v1",
+            "analysisScaleM": 1000,
+            "validCoverageFraction": 1.0,
+            "status": "computed_unreviewed",
+            "missingReason": null
+          },
+          {
+            "key": "relief_p95_p5_m",
+            "label": "Relieve P95–P5",
+            "value": 398.7227,
+            "unit": "m",
+            "sourceIds": [
+              "nasadem"
+            ],
+            "methodId": "regional-dem-average-central-difference-v1",
+            "analysisScaleM": 1000,
+            "validCoverageFraction": 1.0,
+            "status": "computed_unreviewed",
+            "missingReason": null
+          }
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "payun-sector",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -69.241,
+          -36.422
+        ]
+      },
+      "properties": {
+        "id": "payun-sector",
+        "name": "Payún Matrú — sector de estudio",
+        "country": "Argentina",
+        "targetBody": "moon",
+        "evidenceStatus": "computed_unreviewed",
+        "referenceRegionId": "lunar-south-sector",
+        "metrics": [
+          {
+            "key": "slope_median_deg",
+            "label": "Pendiente mediana",
+            "value": 7.0572,
+            "unit": "deg",
+            "sourceIds": [
+              "nasadem"
+            ],
+            "methodId": "regional-dem-average-central-difference-v1",
+            "analysisScaleM": 1000,
+            "validCoverageFraction": 1.0,
+            "status": "computed_unreviewed",
+            "missingReason": null
+          },
+          {
+            "key": "slope_p90_deg",
+            "label": "Pendiente P90",
+            "value": 12.2433,
+            "unit": "deg",
+            "sourceIds": [
+              "nasadem"
+            ],
+            "methodId": "regional-dem-average-central-difference-v1",
+            "analysisScaleM": 1000,
+            "validCoverageFraction": 1.0,
+            "status": "computed_unreviewed",
+            "missingReason": null
+          },
+          {
+            "key": "relief_p95_p5_m",
+            "label": "Relieve P95–P5",
+            "value": 1174.3484,
+            "unit": "m",
+            "sourceIds": [
+              "nasadem"
+            ],
+            "methodId": "regional-dem-average-central-difference-v1",
+            "analysisScaleM": 1000,
+            "validCoverageFraction": 1.0,
+            "status": "computed_unreviewed",
+            "missingReason": null
+          }
+        ]
+      }
+    }
+  ]
+}
