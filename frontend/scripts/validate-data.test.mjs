@@ -6,7 +6,7 @@ import { describe, it } from 'node:test';
 import { validateDataset } from './validate-data.mjs';
 
 const fixture = JSON.parse(
-  readFileSync(new URL('../public/data/analogs.v1.json', import.meta.url), 'utf8'),
+  readFileSync(new URL('./fixtures/analogs.fixture.json', import.meta.url), 'utf8'),
 );
 const clone = () => structuredClone(fixture);
 const codes = (dataset, options) => validateDataset(dataset, options).errors.map((e) => e.code);

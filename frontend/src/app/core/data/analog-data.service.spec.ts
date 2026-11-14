@@ -190,6 +190,27 @@ describe('AnalogDataService', () => {
     expect(slope.comparable).toBe(false);
   });
 
+  it('no compara métodos distintos aunque compartan escala', async () => {
+    const changed = structuredClone(DATASET);
+    Object.assign(changed.sites[0].metrics[0], { methodId: 'another-method' });
+    await respond(changed);
+    expect(service.compare('moon-ref', ['a'])[0].comparable).toBe(false);
+  });
+
+  it('no compara un sitio evaluado contra otra región', async () => {
+    const changed = structuredClone(DATASET);
+    Object.assign(changed.sites[1].metrics[0], { analysisScaleM: 500 });
+    await respond(changed);
+    expect(service.compare('moon-ref', ['b'])[0].comparable).toBe(false);
+  });
+
+  it('no mezcla valores calculados y de ejemplo', async () => {
+    const changed = structuredClone(DATASET);
+    Object.assign(changed.sites[0].metrics[0], { status: 'computed' });
+    await respond(changed);
+    expect(service.compare('moon-ref', ['a'])[0].comparable).toBe(false);
+  });
+
   it('expone el error si el archivo no carga', async () => {
     http
       .expectOne(ANALOG_DATASET_URL)

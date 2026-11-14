@@ -14,7 +14,7 @@
     "pretest": "node scripts/generate-primeui-license.mjs",
     "test": "ng test",
     "validate:data": "node scripts/validate-data.mjs",
-    "test:data": "node --test scripts/"
+    "test:data": "node --test scripts/*.test.mjs"
   },
   "private": true,
   "packageManager": "npm@12.2.0",

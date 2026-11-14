@@ -1,11 +1,11 @@
-# Contrato de datos v1.0.0
+# Contrato de datos v1.1.0
 
 Este contrato define qué datos entrega ciencia (Persona 2) y qué datos consume el frontend (Persona 1). Persona 3 lo mantiene, valida los datos y los publica.
 
 | Archivo | Para qué sirve |
 | --- | --- |
 | [`planetary-analogs.schema.json`](planetary-analogs.schema.json) | El contrato, escrito en JSON Schema 2020-12 |
-| [`../frontend/public/data/analogs.v1.json`](../frontend/public/data/analogs.v1.json) | El dataset publicado. Ahora mismo es un **FIXTURE** |
+| [`../frontend/public/data/analogs.v1.json`](../frontend/public/data/analogs.v1.json) | El dataset publicado. Ahora contiene un **draft con datos reales** |
 | [`../frontend/scripts/validate-data.mjs`](../frontend/scripts/validate-data.mjs) | El validador: revisa el esquema y además las reglas de abajo |
 | [`../frontend/src/app/core/data/`](../frontend/src/app/core/data/) | Los tipos TypeScript y `AnalogDataService` |
 
@@ -73,8 +73,8 @@ npm run test:data                            # prueba el validador contra 25 tip
 
 ## Cómo entrega Persona 2 los datos reales
 
-1. El pipeline genera un JSON que cumple este esquema. Los rásteres no se suben al repositorio; solo se sube el JSON pequeño.
-2. Hay que reemplazar `frontend/public/data/analogs.v1.json`, poner `status: "draft"` y marcar cada entidad real con `analysis_computed` o `candidate_investigated`.
+1. El pipeline genera `data/processed/catalog.json`. Ejecutar `python processing/export_frontend.py` desde la raíz para exportarlo al contrato. Se versionan los JSON y las mallas procesadas pequeñas; los originales pesados quedan fuera de Git.
+2. El exportador reemplaza `frontend/public/data/analogs.v1.json`, mantiene `status: "draft"` y marca los indicadores y entidades calculados. La revisión científica sigue pendiente.
 3. `npm run validate:data` tiene que pasar. El CI lo ejecuta en cada pull request.
 4. Antes de la entrega final, poner `status: "release"` y comprobar que `npm run validate:data -- --release` pasa.
 
@@ -86,3 +86,13 @@ npm run test:data                            # prueba el validador contra 25 tip
 - **Cambio compatible** (añadir un campo opcional o un valor nuevo en un `enum`): sube el número menor.
 
 Cualquier cambio del contrato se acuerda antes con Persona 1 y Persona 2.
+
+## Marcos nativos y compatibilidad 1.1.0
+
+Se siguen aceptando datasets 1.0.0. La versión 1.1.0 añade los identificadores internos `MOON_ME_DE421_PLANETOCENTRIC` y `MARS_IAU2000_PLANETOCENTRIC` para conservar los marcos declarados por los productos LOLA/MOLA utilizados. No son códigos EPSG/IAU registrados ni equivalen a una transformación a IAU2015. El validador exige coherencia de cuerpo y coincidencia del marco de la fuente con el de la referencia.
+
+Se añaden campos opcionales de fuente: `nativeCrs`, `verticalReference` y `nativeResolutionDescription`. Las fuentes bibliográficas contextuales usan `crs: "not_applicable"` y no se citan como origen de métricas.
+
+El dataset de ejemplo original permanece en `frontend/scripts/fixtures/analogs.fixture.json` para probar compatibilidad y rechazo de valores inventados. La aplicación carga el dataset real. El control `--release` comprueba ausencia de fixtures; pasar ese control no convierte un `draft` en revisión científica aprobada.
+
+Ver [entrega para Persona 1](../docs/entrega-persona-1.md).

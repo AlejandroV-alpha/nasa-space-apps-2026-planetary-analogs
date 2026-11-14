@@ -1,3 +1,4 @@
+import { provideHttpClient } from '@angular/common/http';
 import { type ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { TitleStrategy, provideRouter } from '@angular/router';
 import { providePrimeNG } from 'primeng/config';
@@ -9,6 +10,7 @@ import { PLANETARY_THEME_PRESET } from './core/theme/planetary-theme.preset';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    provideHttpClient(),
     provideRouter(routes),
     { provide: TitleStrategy, useClass: AppTitleStrategy },
     providePrimeNG({

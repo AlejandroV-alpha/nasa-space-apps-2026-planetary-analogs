@@ -27,6 +27,12 @@ export const BODY_CRS = {
   mars: 'IAU_2015:49900',
 };
 
+export const ACCEPTED_BODY_CRS = {
+  moon: [BODY_CRS.moon, 'MOON_ME_DE421_PLANETOCENTRIC'],
+  mars: [BODY_CRS.mars, 'MARS_IAU2000_PLANETOCENTRIC'],
+};
+const planetaryFrames = new Set(Object.values(ACCEPTED_BODY_CRS).flat());
+
 let compiledSchema;
 
 function getSchemaValidator() {
@@ -134,7 +140,7 @@ export function validateDataset(dataset, options = {}) {
       for (const id of metric.sourceIds) {
         const source = sources.get(id);
         if (!source) continue;
-        const isPlanetary = source.crs.startsWith('IAU_');
+        const isPlanetary = source.crs.startsWith('IAU_') || planetaryFrames.has(source.crs);
         if (expectedCrs === 'EPSG:4326' ? isPlanetary : source.crs !== expectedCrs) {
           error(
             'source-body-mismatch',
@@ -212,7 +218,7 @@ export function validateDataset(dataset, options = {}) {
   // --- Regiones de referencia -----------------------------------------------------
   ds.referenceRegions.forEach((region, i) => {
     const path = `/referenceRegions/${i}`;
-    if (region.crs !== BODY_CRS[region.targetBody]) {
+    if (!ACCEPTED_BODY_CRS[region.targetBody].includes(region.crs)) {
       error(
         'crs-mismatch',
         `${path}/crs`,

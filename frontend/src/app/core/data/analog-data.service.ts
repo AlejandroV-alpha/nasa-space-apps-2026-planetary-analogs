@@ -127,7 +127,13 @@ export class AnalogDataService {
       const all = [reference, ...siteMetrics];
       const unit = all.find((m): m is Metric => m !== null)!.unit;
       const scales = new Set(all.map((m) => m?.analysisScaleM));
-      const comparable = all.every((m) => m !== null && m.value !== null) && scales.size === 1;
+      const methods = new Set(all.map((m) => m?.methodId));
+      const statuses = new Set(all.map((m) => m?.status));
+      const comparable = sites.length >= 1 && sites.length <= 3 &&
+        sites.every((site) => site?.assessments.some((a) => a.referenceRegionId === regionId)) &&
+        all.every((m) => m !== null && m.value !== null && Number.isFinite(m.value) &&
+          m.unit === unit && m.methodId !== null && m.analysisScaleM !== null) &&
+        scales.size === 1 && methods.size === 1 && statuses.size === 1;
       return { key, unit, reference, sites: siteMetrics, comparable };
     });
   }

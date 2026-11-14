@@ -1,228 +1,2156 @@
 {
   "$schema": "../../../schema/planetary-analogs.schema.json",
-  "schemaVersion": "1.0.0",
-  "datasetId": "planetary-analogs-fixture",
-  "generatedAt": "2026-11-14T00:00:00Z",
-  "status": "fixture",
-  "notes": "FIXTURE de desarrollo. Coordenadas aproximadas y valores de métricas inventados para construir la interfaz; no son resultados científicos. Persona 2 los reemplazará por análisis reales.",
+  "schemaVersion": "1.1.0",
+  "datasetId": "planetary-analogs-regional-terrain-draft",
+  "generatedAt": "2026-11-14T20:21:58.294510+00:00",
+  "status": "draft",
+  "notes": "Indicadores calculados; revisión científica independiente y validación del análogo pendientes. La cobertura indica celdas finitas, incluidas interpolaciones, no observaciones directas ni confianza. Cuatro sectores terrestres y dos referencias planetarias. Malla principal 1 km y sensibilidad 2 km. analysis_computed significa cálculo reproducible, no validación científica ni validación NASA. Las referencias conservan ME/DE421 lunar e IAU2000 marciano; no se realizó una transformación a IAU 2015. Amboy y Coipasa son contrastes conocidos; no se afirma descubrimiento. La trazabilidad y sensibilidad estructuradas se conservan en analogs.v1.provenance.json y en el catálogo científico original.",
   "sources": [
     {
-      "id": "srtmgl1-v003",
-      "agency": "NASA LP DAAC",
-      "product": "SRTMGL1 NASA SRTM Global 1 arc second",
-      "version": "003",
-      "doi": "10.5067/MEaSUREs/SRTM/SRTMGL1.003",
-      "url": "https://www.earthdata.nasa.gov/data/catalog/lpcloud-srtmgl1-003",
+      "id": "nasadem",
+      "agency": "NASA JPL / LP DAAC",
+      "product": "NASADEM_HGT.001",
+      "version": "001",
+      "url": "https://www.earthdata.nasa.gov/data/catalog/lpcloud-nasadem-hgt-001",
       "accessedAt": "2026-11-14",
-      "observationInterval": { "start": "2000-02-11", "end": "2000-02-21" },
-      "nativeResolutionM": 30,
-      "license": "Datos abiertos NASA (sin restricciones de uso)",
-      "attribution": "NASA JPL. NASA Shuttle Radar Topography Mission Global 1 arc second V003. NASA LP DAAC.",
-      "crs": "EPSG:4326"
+      "license": "NASA product citation/data policy applies. Mirror STAC declares proprietary without a license link; retain this discrepancy for publication review. Do not infer a new license from the mirror.",
+      "attribution": "NASA JPL (2020), NASADEM_HGT.001; COG delivery by Microsoft Planetary Computer",
+      "crs": "EPSG:4326",
+      "nativeCrs": "WGS84 geographic (EPSG:4326)",
+      "verticalReference": "Height in metres relative to EGM96 geoid, merged DEM",
+      "nativeResolutionDescription": "1 arc second (~30 m at equator); not uniform metres",
+      "observationInterval": {
+        "start": "2000-02-11",
+        "end": "2000-02-21"
+      },
+      "doi": "10.5067/MEaSUREs/NASADEM/NASADEM_HGT.001"
     },
     {
-      "id": "lola-ldem-polar",
-      "agency": "NASA PDS Geosciences Node",
-      "product": "LRO LOLA GDR / LDEM polar",
-      "version": "LRO-L-LOLA-4-GDR-V1.0",
-      "url": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/float_img/",
+      "id": "lola",
+      "agency": "NASA GSFC / PDS Geosciences",
+      "product": "LDEM_75S_240M, V2.1",
+      "version": "2.1",
+      "url": "https://pds-geosciences.wustl.edu/missions/lro/lola.htm",
       "accessedAt": "2026-11-14",
-      "license": "Datos públicos NASA PDS",
-      "attribution": "Smith et al., LRO Lunar Orbiter Laser Altimeter, NASA PDS Geosciences Node.",
-      "crs": "IAU_2015:30100"
+      "license": "Public NASA PDS archive; cite instrument, product and method.",
+      "attribution": "LOLA Science Team / NASA GSFC / PDS",
+      "crs": "MOON_ME_DE421_PLANETOCENTRIC",
+      "nativeCrs": "Spherical polar stereographic, radius 1,737,400 m; ME/DE421",
+      "verticalReference": "Height in km relative to sphere radius 1737.4 km, converted to m; not areoid elevation",
+      "nativeResolutionDescription": "240 m/pixel true at pole",
+      "observationInterval": {
+        "start": "2009-07-13",
+        "end": "2017-02-02"
+      },
+      "file": "ldem_75s_240m_float.img"
     },
     {
-      "id": "mola-megdr",
-      "agency": "NASA PDS Geosciences Node",
-      "product": "MGS MOLA Mission Experiment Gridded Data Record (MEGDR)",
-      "version": "urn:nasa:pds:mgs_mola_topography_derived",
-      "url": "https://pds-geosciences.wustl.edu/mgs/urn-nasa-pds-mgs_mola_topography_derived/",
+      "id": "mola",
+      "agency": "NASA GSFC / PDS Geosciences",
+      "product": "MGS MOLA MEGDR MEGT44N000HB, product V2.0 / maintained PDS4 bundle",
+      "version": "2.0",
+      "url": "https://pds-geosciences.wustl.edu/missions/mgs/mola.html",
       "accessedAt": "2026-11-14",
-      "nativeResolutionM": 463,
-      "license": "Datos públicos NASA PDS",
-      "attribution": "Smith et al., MGS Mars Orbiter Laser Altimeter, NASA PDS Geosciences Node.",
-      "crs": "IAU_2015:49900"
+      "license": "Public NASA PDS archive; cite instrument, product and method.",
+      "attribution": "MOLA Science Team / NASA GSFC / PDS",
+      "crs": "MARS_IAU2000_PLANETOCENTRIC",
+      "nativeCrs": "IAU2000 planetocentric, east-positive; sphere radius 3,396,000 m",
+      "verticalReference": "Topography in metres relative to GMM3 areoid (degree/order 50)",
+      "nativeResolutionDescription": "128 pixels/degree; 463.0576672 m projected equatorial spacing",
+      "observationInterval": {
+        "start": "1997-09-15",
+        "end": "2001-06-30"
+      },
+      "file": "megt44n000hb.img"
+    },
+    {
+      "id": "nasa-coipasa",
+      "agency": "NASA Earth Observatory",
+      "product": "Bolivian Salt Flats",
+      "version": "Recurso contextual sin versión de producto declarada",
+      "url": "https://science.nasa.gov/earth/earth-observatory/bolivian-salt-flats-151813/",
+      "accessedAt": "2026-11-14",
+      "license": "Recurso bibliográfico: consultar las condiciones del editor; no se redistribuye su contenido.",
+      "attribution": "NASA Earth Observatory — Bolivian Salt Flats",
+      "crs": "not_applicable"
+    },
+    {
+      "id": "blm-amboy",
+      "agency": "US Bureau of Land Management",
+      "product": "Amboy Crater National Natural Landmark",
+      "version": "Recurso contextual sin versión de producto declarada",
+      "url": "https://www.blm.gov/visit/amboy-crater-national-natural-landmark",
+      "accessedAt": "2026-11-14",
+      "license": "Recurso bibliográfico: consultar las condiciones del editor; no se redistribuye su contenido.",
+      "attribution": "US Bureau of Land Management — Amboy Crater National Natural Landmark",
+      "crs": "not_applicable"
+    },
+    {
+      "id": "gvp-payun",
+      "agency": "Smithsonian Global Volcanism Program",
+      "product": "Payún Matrú, volcano 357066",
+      "version": "Recurso contextual sin versión de producto declarada",
+      "url": "https://volcano.si.edu/volcano.cfm?vn=357066",
+      "accessedAt": "2026-11-14",
+      "license": "Recurso bibliográfico: consultar las condiciones del editor; no se redistribuye su contenido.",
+      "attribution": "Smithsonian Global Volcanism Program — Payún Matrú, volcano 357066",
+      "crs": "not_applicable"
+    },
+    {
+      "id": "nasa-lunar-regions",
+      "agency": "NASA",
+      "product": "Lunar south polar exploration context, historical 2024 release",
+      "version": "Recurso contextual sin versión de producto declarada",
+      "url": "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/",
+      "accessedAt": "2026-11-14",
+      "license": "Recurso bibliográfico: consultar las condiciones del editor; no se redistribuye su contenido.",
+      "attribution": "NASA — Lunar south polar exploration context, historical 2024 release",
+      "crs": "not_applicable"
+    },
+    {
+      "id": "nasa-jezero",
+      "agency": "NASA JPL",
+      "product": "Jezero candidate landing site data sheet (historical context)",
+      "version": "Recurso contextual sin versión de producto declarada",
+      "url": "https://marsnext.jpl.nasa.gov/documents/LandingSiteWorksheet_Jezero_final.pdf",
+      "accessedAt": "2026-11-14",
+      "license": "Recurso bibliográfico: consultar las condiciones del editor; no se redistribuye su contenido.",
+      "attribution": "NASA JPL — Jezero candidate landing site data sheet (historical context)",
+      "crs": "not_applicable"
     }
   ],
   "methods": [
     {
-      "id": "slope-horn-harmonized",
-      "name": "Pendiente (Horn) sobre malla armonizada",
-      "description": "Pendiente en grados calculada con el algoritmo de Horn tras reproyectar a una proyección métrica del cuerpo y armonizar la escala efectiva. Se reportan mediana y percentil 90.",
-      "resampling": "average"
-    },
-    {
-      "id": "relief-p95-p5",
-      "name": "Relieve local P95–P5",
-      "description": "Diferencia entre los percentiles 95 y 5 de la elevación dentro del área de estudio, en metros.",
-      "resampling": "average"
+      "id": "regional-dem-average-central-difference-v1",
+      "name": "Relieve regional y pendientes por diferencias centrales",
+      "description": "Cuadrados locales de 20 × 20 km, agregación GDAL average a 1000 m, margen de dos celdas. Pendiente = atan(hypot(dz/dx,dz/dy)) en grados con diferencias centrales de cuatro vecinos; no es Horn. Mediana y P90 de pendientes; relieve P95–P5 de alturas, percentiles lineales. Se exige 95% de celdas finitas. Tierra WGS84, Luna radio 1737400 m, Marte radio 3396000 m. No se comparan altitudes absolutas ni se iguala la resolución efectiva observacional entre productos.",
+      "resampling": "average",
+      "windowM": 20000,
+      "documentationUrl": "https://github.com/AlejandroV-alpha/nasa-space-apps-2026-planetary-analogs/blob/69583ce/docs/metodologia-cientifica.md"
     }
   ],
   "referenceRegions": [
     {
-      "id": "moon-south-pole",
-      "name": "Entorno del polo sur lunar (FIXTURE)",
+      "id": "lunar-south-sector",
+      "name": "Polo sur lunar — sector 0° E, 89.5° S",
       "targetBody": "moon",
-      "crs": "IAU_2015:30100",
-      "center": { "type": "Point", "coordinates": [0, -89.5] },
+      "crs": "MOON_ME_DE421_PLANETOCENTRIC",
+      "center": {
+        "type": "Point",
+        "coordinates": [
+          0,
+          -89.5
+        ]
+      },
       "geometry": {
         "type": "Polygon",
-        "coordinates": [[[-30, -88.5], [30, -88.5], [30, -90], [-30, -90], [-30, -88.5]]]
+        "coordinates": [
+          [
+            [
+              -62.699349333,
+              -89.62888469
+            ],
+            [
+              -59.463922665,
+              -89.66498063
+            ],
+            [
+              -55.463722944,
+              -89.699753663
+            ],
+            [
+              -50.448030866,
+              -89.732687024
+            ],
+            [
+              -44.088600585,
+              -89.763012511
+            ],
+            [
+              -35.998731179,
+              -89.789599447
+            ],
+            [
+              -25.842665892,
+              -89.810864614
+            ],
+            [
+              -13.613158913,
+              -89.824858699
+            ],
+            [
+              0.0,
+              -89.829778862
+            ],
+            [
+              13.613158913,
+              -89.824858699
+            ],
+            [
+              25.842665892,
+              -89.810864614
+            ],
+            [
+              35.998731179,
+              -89.789599447
+            ],
+            [
+              44.088600585,
+              -89.763012511
+            ],
+            [
+              50.448030866,
+              -89.732687024
+            ],
+            [
+              55.463722944,
+              -89.699753663
+            ],
+            [
+              59.463922665,
+              -89.66498063
+            ],
+            [
+              62.699349333,
+              -89.62888469
+            ],
+            [
+              57.333954896,
+              -89.608260687
+            ],
+            [
+              52.542444907,
+              -89.584558824
+            ],
+            [
+              48.294209916,
+              -89.558274273
+            ],
+            [
+              44.541154303,
+              -89.529839995
+            ],
+            [
+              41.228537938,
+              -89.499622334
+            ],
+            [
+              38.301752253,
+              -89.46792505
+            ],
+            [
+              35.709976617,
+              -89.434997113
+            ],
+            [
+              33.40778112,
+              -89.401041456
+            ],
+            [
+              31.35552027,
+              -89.366223243
+            ],
+            [
+              29.519087159,
+              -89.330677071
+            ],
+            [
+              27.869375543,
+              -89.294512966
+            ],
+            [
+              26.381645902,
+              -89.257821253
+            ],
+            [
+              25.034897588,
+              -89.22067645
+            ],
+            [
+              23.811294571,
+              -89.183140365
+            ],
+            [
+              22.695662345,
+              -89.145264545
+            ],
+            [
+              21.675058017,
+              -89.107092224
+            ],
+            [
+              19.175788507,
+              -89.121480961
+            ],
+            [
+              16.598384867,
+              -89.134144592
+            ],
+            [
+              13.950016335,
+              -89.145006461
+            ],
+            [
+              11.239457285,
+              -89.153997166
+            ],
+            [
+              8.477004152,
+              -89.161056547
+            ],
+            [
+              5.674308462,
+              -89.166135551
+            ],
+            [
+              2.844127138,
+              -89.169197858
+            ],
+            [
+              0.0,
+              -89.170221138
+            ],
+            [
+              -2.844127138,
+              -89.169197858
+            ],
+            [
+              -5.674308462,
+              -89.166135551
+            ],
+            [
+              -8.477004152,
+              -89.161056547
+            ],
+            [
+              -11.239457285,
+              -89.153997166
+            ],
+            [
+              -13.950016335,
+              -89.145006461
+            ],
+            [
+              -16.598384867,
+              -89.134144592
+            ],
+            [
+              -19.175788507,
+              -89.121480961
+            ],
+            [
+              -21.675058017,
+              -89.107092224
+            ],
+            [
+              -22.695662345,
+              -89.145264545
+            ],
+            [
+              -23.811294571,
+              -89.183140365
+            ],
+            [
+              -25.034897588,
+              -89.22067645
+            ],
+            [
+              -26.381645902,
+              -89.257821253
+            ],
+            [
+              -27.869375543,
+              -89.294512966
+            ],
+            [
+              -29.519087159,
+              -89.330677071
+            ],
+            [
+              -31.35552027,
+              -89.366223243
+            ],
+            [
+              -33.40778112,
+              -89.401041456
+            ],
+            [
+              -35.709976617,
+              -89.434997113
+            ],
+            [
+              -38.301752253,
+              -89.46792505
+            ],
+            [
+              -41.228537938,
+              -89.499622334
+            ],
+            [
+              -44.541154303,
+              -89.529839995
+            ],
+            [
+              -48.294209916,
+              -89.558274273
+            ],
+            [
+              -52.542444907,
+              -89.584558824
+            ],
+            [
+              -57.333954896,
+              -89.608260687
+            ],
+            [
+              -62.699349333,
+              -89.62888469
+            ]
+          ]
+        ]
       },
-      "description": "Región lunar de referencia propuesta. Delimitación exacta pendiente de Persona 2.",
-      "selectionRationale": "Propuesta inicial del plan del equipo; pendiente de evidencia.",
-      "sourceIds": ["lola-ldem-polar"],
-      "evidenceStatus": "fixture",
+      "description": "Indicadores calculados; revisión científica independiente y validación del análogo pendientes. La cobertura indica celdas finitas, incluidas interpolaciones, no observaciones directas ni confianza. Ventana del equipo en la región polar de interés para exploración; no es un polígono oficial de aterrizaje o base. Ventana del equipo de 20 × 20 km. No se evaluaron iluminación, hielo, temperatura ni restricciones de aterrizaje. Análisis exploratorio del relieve regional, no validación de un análogo ni certificación de movilidad. La Tierra no reproduce gravedad, vacío/atmósfera ni radiación del destino. El cuadrado de estudio fue elegido por el equipo y puede incluir terrenos diferentes al accidente que le da nombre. Una malla común no elimina diferencias de muestreo, interpolación, precisión y datum entre productos.",
+      "selectionRationale": "Ventana del equipo en la región polar de interés para exploración; no es un polígono oficial de aterrizaje o base.",
+      "sourceIds": [
+        "lola",
+        "nasa-lunar-regions"
+      ],
+      "evidenceStatus": "analysis_computed",
       "metrics": [
-        { "key": "slope-median", "value": 9.5, "unit": "deg", "status": "fixture", "sourceIds": ["lola-ldem-polar"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 0.97 },
-        { "key": "slope-p90", "value": 21, "unit": "deg", "status": "fixture", "sourceIds": ["lola-ldem-polar"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 0.97 },
-        { "key": "relief-p95-p5", "value": 3100, "unit": "m", "status": "fixture", "sourceIds": ["lola-ldem-polar"], "methodId": "relief-p95-p5", "analysisScaleM": 500, "validCoverageFraction": 0.97 }
+        {
+          "value": 6.6365,
+          "unit": "deg",
+          "sourceIds": [
+            "lola"
+          ],
+          "methodId": "regional-dem-average-central-difference-v1",
+          "analysisScaleM": 1000,
+          "validCoverageFraction": 1.0,
+          "key": "slope-median",
+          "status": "computed"
+        },
+        {
+          "value": 12.5568,
+          "unit": "deg",
+          "sourceIds": [
+            "lola"
+          ],
+          "methodId": "regional-dem-average-central-difference-v1",
+          "analysisScaleM": 1000,
+          "validCoverageFraction": 1.0,
+          "key": "slope-p90",
+          "status": "computed"
+        },
+        {
+          "value": 1663.0127,
+          "unit": "m",
+          "sourceIds": [
+            "lola"
+          ],
+          "methodId": "regional-dem-average-central-difference-v1",
+          "analysisScaleM": 1000,
+          "validCoverageFraction": 1.0,
+          "key": "relief-p95-p5",
+          "status": "computed"
+        }
       ]
     },
     {
-      "id": "mars-jezero",
-      "name": "Cráter Jezero (FIXTURE)",
+      "id": "jezero-sector",
+      "name": "Jezero — sector 77.58° E, 18.44° N",
       "targetBody": "mars",
-      "crs": "IAU_2015:49900",
-      "center": { "type": "Point", "coordinates": [77.5, 18.4] },
+      "crs": "MARS_IAU2000_PLANETOCENTRIC",
+      "center": {
+        "type": "Point",
+        "coordinates": [
+          77.58,
+          18.44
+        ]
+      },
       "geometry": {
         "type": "Polygon",
-        "coordinates": [[[77.2, 18.1], [77.8, 18.1], [77.8, 18.7], [77.2, 18.7], [77.2, 18.1]]]
+        "coordinates": [
+          [
+            [
+              77.402327023,
+              18.271202012
+            ],
+            [
+              77.424536133,
+              18.271221348
+            ],
+            [
+              77.446745249,
+              18.271238106
+            ],
+            [
+              77.468954368,
+              18.271252286
+            ],
+            [
+              77.49116349,
+              18.271263887
+            ],
+            [
+              77.513372615,
+              18.271272911
+            ],
+            [
+              77.535581742,
+              18.271279356
+            ],
+            [
+              77.557790871,
+              18.271283224
+            ],
+            [
+              77.58,
+              18.271284513
+            ],
+            [
+              77.602209129,
+              18.271283224
+            ],
+            [
+              77.624418258,
+              18.271279356
+            ],
+            [
+              77.646627385,
+              18.271272911
+            ],
+            [
+              77.66883651,
+              18.271263887
+            ],
+            [
+              77.691045632,
+              18.271252286
+            ],
+            [
+              77.713254751,
+              18.271238106
+            ],
+            [
+              77.735463867,
+              18.271221348
+            ],
+            [
+              77.757672977,
+              18.271202012
+            ],
+            [
+              77.757694644,
+              18.292291407
+            ],
+            [
+              77.757716332,
+              18.313380803
+            ],
+            [
+              77.757738041,
+              18.334470198
+            ],
+            [
+              77.757759772,
+              18.355559593
+            ],
+            [
+              77.757781524,
+              18.376648989
+            ],
+            [
+              77.757803298,
+              18.397738384
+            ],
+            [
+              77.757825092,
+              18.418827779
+            ],
+            [
+              77.757846909,
+              18.439917175
+            ],
+            [
+              77.757868746,
+              18.46100657
+            ],
+            [
+              77.757890606,
+              18.482095965
+            ],
+            [
+              77.757912486,
+              18.50318536
+            ],
+            [
+              77.757934388,
+              18.524274756
+            ],
+            [
+              77.757956312,
+              18.545364151
+            ],
+            [
+              77.757978257,
+              18.566453546
+            ],
+            [
+              77.758000223,
+              18.587542941
+            ],
+            [
+              77.758022211,
+              18.608632336
+            ],
+            [
+              77.735769447,
+              18.608651825
+            ],
+            [
+              77.713516677,
+              18.608668715
+            ],
+            [
+              77.691263904,
+              18.608683006
+            ],
+            [
+              77.669011127,
+              18.6086947
+            ],
+            [
+              77.646758348,
+              18.608703794
+            ],
+            [
+              77.624505566,
+              18.60871029
+            ],
+            [
+              77.602252784,
+              18.608714188
+            ],
+            [
+              77.58,
+              18.608715487
+            ],
+            [
+              77.557747216,
+              18.608714188
+            ],
+            [
+              77.535494434,
+              18.60871029
+            ],
+            [
+              77.513241652,
+              18.608703794
+            ],
+            [
+              77.490988873,
+              18.6086947
+            ],
+            [
+              77.468736096,
+              18.608683006
+            ],
+            [
+              77.446483323,
+              18.608668715
+            ],
+            [
+              77.424230553,
+              18.608651825
+            ],
+            [
+              77.401977789,
+              18.608632336
+            ],
+            [
+              77.401999777,
+              18.587542941
+            ],
+            [
+              77.402021743,
+              18.566453546
+            ],
+            [
+              77.402043688,
+              18.545364151
+            ],
+            [
+              77.402065612,
+              18.524274756
+            ],
+            [
+              77.402087514,
+              18.50318536
+            ],
+            [
+              77.402109394,
+              18.482095965
+            ],
+            [
+              77.402131254,
+              18.46100657
+            ],
+            [
+              77.402153091,
+              18.439917175
+            ],
+            [
+              77.402174908,
+              18.418827779
+            ],
+            [
+              77.402196702,
+              18.397738384
+            ],
+            [
+              77.402218476,
+              18.376648989
+            ],
+            [
+              77.402240228,
+              18.355559593
+            ],
+            [
+              77.402261959,
+              18.334470198
+            ],
+            [
+              77.402283668,
+              18.313380803
+            ],
+            [
+              77.402305356,
+              18.292291407
+            ],
+            [
+              77.402327023,
+              18.271202012
+            ]
+          ]
+        ]
       },
-      "description": "Región marciana de referencia a investigar. No está aprobada como referencia definitiva.",
-      "selectionRationale": "Opción mencionada en el plan del equipo (Jezero/Gale).",
-      "sourceIds": ["mola-megdr"],
-      "evidenceStatus": "fixture",
+      "description": "Indicadores calculados; revisión científica independiente y validación del análogo pendientes. La cobertura indica celdas finitas, incluidas interpolaciones, no observaciones directas ni confianza. Ventana del equipo dentro del entorno de Jezero para contrastar relieve de una región de exploración. El centro no se declara punto exacto de aterrizaje. Ventana del equipo de 20 × 20 km. El relieve por sí solo no demuestra equivalencia sedimentológica ni habitabilidad. MOLA incorpora interpolaciones y no resuelve obstáculos pequeños. Análisis exploratorio del relieve regional, no validación de un análogo ni certificación de movilidad. La Tierra no reproduce gravedad, vacío/atmósfera ni radiación del destino. El cuadrado de estudio fue elegido por el equipo y puede incluir terrenos diferentes al accidente que le da nombre. Una malla común no elimina diferencias de muestreo, interpolación, precisión y datum entre productos.",
+      "selectionRationale": "Ventana del equipo dentro del entorno de Jezero para contrastar relieve de una región de exploración. El centro no se declara punto exacto de aterrizaje.",
+      "sourceIds": [
+        "mola",
+        "nasa-jezero"
+      ],
+      "evidenceStatus": "analysis_computed",
       "metrics": [
-        { "key": "slope-median", "value": 2.1, "unit": "deg", "status": "fixture", "sourceIds": ["mola-megdr"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 1 },
-        { "key": "slope-p90", "value": 6.4, "unit": "deg", "status": "fixture", "sourceIds": ["mola-megdr"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 1 },
-        { "key": "relief-p95-p5", "value": 820, "unit": "m", "status": "fixture", "sourceIds": ["mola-megdr"], "methodId": "relief-p95-p5", "analysisScaleM": 500, "validCoverageFraction": 1 }
+        {
+          "value": 0.6587,
+          "unit": "deg",
+          "sourceIds": [
+            "mola"
+          ],
+          "methodId": "regional-dem-average-central-difference-v1",
+          "analysisScaleM": 1000,
+          "validCoverageFraction": 1.0,
+          "key": "slope-median",
+          "status": "computed"
+        },
+        {
+          "value": 1.5112,
+          "unit": "deg",
+          "sourceIds": [
+            "mola"
+          ],
+          "methodId": "regional-dem-average-central-difference-v1",
+          "analysisScaleM": 1000,
+          "validCoverageFraction": 1.0,
+          "key": "slope-p90",
+          "status": "computed"
+        },
+        {
+          "value": 188.3348,
+          "unit": "m",
+          "sourceIds": [
+            "mola"
+          ],
+          "methodId": "regional-dem-average-central-difference-v1",
+          "analysisScaleM": 1000,
+          "validCoverageFraction": 1.0,
+          "key": "relief-p95-p5",
+          "status": "computed"
+        }
       ]
     }
   ],
   "sites": [
     {
-      "id": "siloli-desert",
-      "name": "Desierto de Siloli (FIXTURE)",
+      "id": "siloli-sector",
+      "name": "Siloli — sector de estudio",
       "country": "BO",
       "kind": "candidate",
-      "geometry": { "type": "Point", "coordinates": [-67.7, -22.1] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -67.88,
+          -22.12
+        ]
+      },
       "studyArea": {
         "type": "Polygon",
-        "coordinates": [[[-67.95, -22.35], [-67.45, -22.35], [-67.45, -21.85], [-67.95, -21.85], [-67.95, -22.35]]]
+        "coordinates": [
+          [
+            [
+              -67.976984503,
+              -22.210278899
+            ],
+            [
+              -67.964861443,
+              -22.210285654
+            ],
+            [
+              -67.952738382,
+              -22.210291507
+            ],
+            [
+              -67.940615319,
+              -22.21029646
+            ],
+            [
+              -67.928492256,
+              -22.210300512
+            ],
+            [
+              -67.916369193,
+              -22.210303664
+            ],
+            [
+              -67.904246129,
+              -22.210305916
+            ],
+            [
+              -67.892123064,
+              -22.210307266
+            ],
+            [
+              -67.88,
+              -22.210307717
+            ],
+            [
+              -67.867876936,
+              -22.210307266
+            ],
+            [
+              -67.855753871,
+              -22.210305916
+            ],
+            [
+              -67.843630807,
+              -22.210303664
+            ],
+            [
+              -67.831507744,
+              -22.210300512
+            ],
+            [
+              -67.819384681,
+              -22.21029646
+            ],
+            [
+              -67.807261618,
+              -22.210291507
+            ],
+            [
+              -67.795138557,
+              -22.210285654
+            ],
+            [
+              -67.783015497,
+              -22.210278899
+            ],
+            [
+              -67.783023242,
+              -22.198990496
+            ],
+            [
+              -67.783030984,
+              -22.187702078
+            ],
+            [
+              -67.783038721,
+              -22.176413644
+            ],
+            [
+              -67.783046455,
+              -22.165125194
+            ],
+            [
+              -67.783054185,
+              -22.153836728
+            ],
+            [
+              -67.783061912,
+              -22.142548247
+            ],
+            [
+              -67.783069635,
+              -22.13125975
+            ],
+            [
+              -67.783077354,
+              -22.119971238
+            ],
+            [
+              -67.783085069,
+              -22.10868271
+            ],
+            [
+              -67.78309278,
+              -22.097394166
+            ],
+            [
+              -67.783100488,
+              -22.086105607
+            ],
+            [
+              -67.783108192,
+              -22.074817033
+            ],
+            [
+              -67.783115893,
+              -22.063528442
+            ],
+            [
+              -67.78312359,
+              -22.052239837
+            ],
+            [
+              -67.783131283,
+              -22.040951215
+            ],
+            [
+              -67.783138972,
+              -22.029662578
+            ],
+            [
+              -67.795246598,
+              -22.029669306
+            ],
+            [
+              -67.807354225,
+              -22.029675137
+            ],
+            [
+              -67.819461852,
+              -22.029680071
+            ],
+            [
+              -67.831569481,
+              -22.029684108
+            ],
+            [
+              -67.84367711,
+              -22.029687248
+            ],
+            [
+              -67.85578474,
+              -22.029689491
+            ],
+            [
+              -67.86789237,
+              -22.029690837
+            ],
+            [
+              -67.88,
+              -22.029691285
+            ],
+            [
+              -67.89210763,
+              -22.029690837
+            ],
+            [
+              -67.90421526,
+              -22.029689491
+            ],
+            [
+              -67.91632289,
+              -22.029687248
+            ],
+            [
+              -67.928430519,
+              -22.029684108
+            ],
+            [
+              -67.940538148,
+              -22.029680071
+            ],
+            [
+              -67.952645775,
+              -22.029675137
+            ],
+            [
+              -67.964753402,
+              -22.029669306
+            ],
+            [
+              -67.976861028,
+              -22.029662578
+            ],
+            [
+              -67.976868717,
+              -22.040951215
+            ],
+            [
+              -67.97687641,
+              -22.052239837
+            ],
+            [
+              -67.976884107,
+              -22.063528442
+            ],
+            [
+              -67.976891808,
+              -22.074817033
+            ],
+            [
+              -67.976899512,
+              -22.086105607
+            ],
+            [
+              -67.97690722,
+              -22.097394166
+            ],
+            [
+              -67.976914931,
+              -22.10868271
+            ],
+            [
+              -67.976922646,
+              -22.119971238
+            ],
+            [
+              -67.976930365,
+              -22.13125975
+            ],
+            [
+              -67.976938088,
+              -22.142548247
+            ],
+            [
+              -67.976945815,
+              -22.153836728
+            ],
+            [
+              -67.976953545,
+              -22.165125194
+            ],
+            [
+              -67.976961279,
+              -22.176413644
+            ],
+            [
+              -67.976969016,
+              -22.187702078
+            ],
+            [
+              -67.976976758,
+              -22.198990496
+            ],
+            [
+              -67.976984503,
+              -22.210278899
+            ]
+          ]
+        ]
       },
-      "summary": "Candidato poco estudiado del altiplano boliviano; idoneidad y novedad pendientes de investigación.",
-      "evidenceStatus": "fixture",
-      "sourceIds": ["srtmgl1-v003"],
-      "assessments": [
+      "summary": "No se atribuye composición mineral ni aridez medida. Falta una fuente geológica específica del polígono. No evaluada mediante revisión bibliográfica exhaustiva.",
+      "evidenceStatus": "analysis_computed",
+      "sourceIds": [
+        "nasadem"
+      ],
+      "metrics": [
         {
-          "targetBody": "mars",
-          "referenceRegionId": "mars-jezero",
-          "testUseCase": "Ensayos de navegación de rover en terreno árido de gran altitud.",
-          "interpretation": "Texto de ejemplo: el relieve regional podría ser comparable a escala de 500 m.",
-          "limitations": ["Valores de ejemplo, no calculados.", "No reproduce gravedad, atmósfera ni radiación marciana."],
-          "evidenceStatus": "fixture"
+          "value": 5.8307,
+          "unit": "deg",
+          "sourceIds": [
+            "nasadem"
+          ],
+          "methodId": "regional-dem-average-central-difference-v1",
+          "analysisScaleM": 1000,
+          "validCoverageFraction": 1.0,
+          "key": "slope-median",
+          "status": "computed"
         },
         {
-          "targetBody": "moon",
-          "referenceRegionId": "moon-south-pole",
-          "testUseCase": "Reconocimiento de campo para logística de base en terreno irregular.",
-          "interpretation": "Texto de ejemplo: el relieve es mucho menor que el del polo sur lunar.",
-          "limitations": ["Valores de ejemplo, no calculados.", "No reproduce vacío, iluminación rasante ni frío extremo."],
-          "evidenceStatus": "fixture"
-        }
-      ],
-      "metrics": [
-        { "key": "slope-median", "value": 3.2, "unit": "deg", "status": "fixture", "sourceIds": ["srtmgl1-v003"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 0.99 },
-        { "key": "slope-p90", "value": 9.8, "unit": "deg", "status": "fixture", "sourceIds": ["srtmgl1-v003"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 0.99 },
-        { "key": "relief-p95-p5", "value": 640, "unit": "m", "status": "fixture", "sourceIds": ["srtmgl1-v003"], "methodId": "relief-p95-p5", "analysisScaleM": 500, "validCoverageFraction": 0.99 },
-        { "key": "lst-day-night-diff", "value": null, "unit": "K", "status": "missing", "missingReason": "Complemento térmico MODIS (P1) aún no evaluado.", "sourceIds": [], "methodId": null, "analysisScaleM": null, "validCoverageFraction": null }
-      ]
-    },
-    {
-      "id": "tunupa-volcanic-field",
-      "name": "Sector volcánico de Tunupa (FIXTURE)",
-      "country": "BO",
-      "kind": "candidate",
-      "geometry": { "type": "Point", "coordinates": [-67.6, -19.85] },
-      "studyArea": {
-        "type": "Polygon",
-        "coordinates": [[[-67.85, -20.1], [-67.35, -20.1], [-67.35, -19.6], [-67.85, -19.6], [-67.85, -20.1]]]
-      },
-      "summary": "Sector volcánico del altiplano a investigar como análogo de relieve volcánico.",
-      "evidenceStatus": "fixture",
-      "sourceIds": ["srtmgl1-v003"],
-      "assessments": [
+          "value": 12.2152,
+          "unit": "deg",
+          "sourceIds": [
+            "nasadem"
+          ],
+          "methodId": "regional-dem-average-central-difference-v1",
+          "analysisScaleM": 1000,
+          "validCoverageFraction": 1.0,
+          "key": "slope-p90",
+          "status": "computed"
+        },
         {
-          "targetBody": "moon",
-          "referenceRegionId": "moon-south-pole",
-          "testUseCase": "Pruebas de movilidad en pendientes pronunciadas.",
-          "interpretation": "Texto de ejemplo: pendientes altas en flancos volcánicos.",
-          "limitations": ["Valores de ejemplo, no calculados."],
-          "evidenceStatus": "fixture"
+          "value": 949.8344,
+          "unit": "m",
+          "sourceIds": [
+            "nasadem"
+          ],
+          "methodId": "regional-dem-average-central-difference-v1",
+          "analysisScaleM": 1000,
+          "validCoverageFraction": 1.0,
+          "key": "relief-p95-p5",
+          "status": "computed"
         }
       ],
-      "metrics": [
-        { "key": "slope-median", "value": 7.9, "unit": "deg", "status": "fixture", "sourceIds": ["srtmgl1-v003"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 0.98 },
-        { "key": "slope-p90", "value": 19.5, "unit": "deg", "status": "fixture", "sourceIds": ["srtmgl1-v003"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 0.98 },
-        { "key": "relief-p95-p5", "value": 1450, "unit": "m", "status": "fixture", "sourceIds": ["srtmgl1-v003"], "methodId": "relief-p95-p5", "analysisScaleM": 500, "validCoverageFraction": 0.98 }
-      ]
-    },
-    {
-      "id": "atacama-yungay",
-      "name": "Atacama, Yungay (FIXTURE)",
-      "country": "CL",
-      "kind": "known_reference",
-      "geometry": { "type": "Point", "coordinates": [-70.0, -24.1] },
-      "studyArea": {
-        "type": "Polygon",
-        "coordinates": [[[-70.25, -24.35], [-69.75, -24.35], [-69.75, -23.85], [-70.25, -23.85], [-70.25, -24.35]]]
-      },
-      "summary": "Análogo marciano conocido; se usa como referencia contextual, no como candidato nuevo.",
-      "evidenceStatus": "fixture",
-      "sourceIds": ["srtmgl1-v003"],
       "assessments": [
         {
           "targetBody": "mars",
-          "referenceRegionId": "mars-jezero",
-          "testUseCase": "Contexto: análogo conocido de aridez extrema para instrumentación.",
-          "interpretation": "Texto de ejemplo para comparar con candidatos nuevos.",
-          "limitations": ["Valores de ejemplo, no calculados."],
-          "evidenceStatus": "fixture"
+          "referenceRegionId": "jezero-sector",
+          "testUseCase": "Evaluar el relieve regional como candidato para planificar reconocimiento y campañas geológicas.",
+          "interpretation": "Indicadores calculados; revisión científica independiente y validación del análogo pendientes. Ventana de 20 × 20 km. A 1 km: Pendiente mediana: 5.8307 deg; Pendiente P90: 12.2152 deg; Relieve P95–P5: 949.8344 m. Diferencias candidato menos referencia: slope_median_deg: 5.172 deg; slope_p90_deg: 10.704 deg; relief_p95_p5_m: 761.4996 m. A 2 km: Pendiente mediana: 4.2964 deg; Pendiente P90: 9.0019 deg; Relieve P95–P5: 870.409 m. Las coincidencias dependen de la escala; no constituyen un ranking ni una recomendación.",
+          "limitations": [
+            "Ubicación nominal orientativa; el polígono define exactamente el sector analizado.",
+            "La hipótesis geológica y ambiental del sector permanece sin validar.",
+            "Análisis exploratorio del relieve regional, no validación de un análogo ni certificación de movilidad.",
+            "La Tierra no reproduce gravedad, vacío/atmósfera ni radiación del destino.",
+            "El cuadrado de estudio fue elegido por el equipo y puede incluir terrenos diferentes al accidente que le da nombre.",
+            "Una malla común no elimina diferencias de muestreo, interpolación, precisión y datum entre productos.",
+            "La cobertura indica celdas finitas, incluidas interpolaciones, no observaciones directas ni confianza.",
+            "La clasificación candidate no demuestra novedad científica."
+          ],
+          "evidenceStatus": "analysis_computed"
         }
-      ],
-      "metrics": [
-        { "key": "slope-median", "value": 2.6, "unit": "deg", "status": "fixture", "sourceIds": ["srtmgl1-v003"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 1 },
-        { "key": "slope-p90", "value": 7.1, "unit": "deg", "status": "fixture", "sourceIds": ["srtmgl1-v003"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 1 },
-        { "key": "relief-p95-p5", "value": 510, "unit": "m", "status": "fixture", "sourceIds": ["srtmgl1-v003"], "methodId": "relief-p95-p5", "analysisScaleM": 500, "validCoverageFraction": 1 }
       ]
     },
     {
-      "id": "haughton-crater",
-      "name": "Cráter Haughton, isla Devon (FIXTURE)",
-      "country": "CA",
+      "id": "coipasa-sector",
+      "name": "Coipasa — sector de estudio",
+      "country": "BO",
       "kind": "known_reference",
-      "geometry": { "type": "Point", "coordinates": [-89.68, 75.38] },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -68.12,
+          -19.38
+        ]
+      },
       "studyArea": {
         "type": "Polygon",
-        "coordinates": [[[-90.0, 75.25], [-89.35, 75.25], [-89.35, 75.5], [-90.0, 75.5], [-90.0, 75.25]]]
+        "coordinates": [
+          [
+            [
+              -68.215244716,
+              -19.470311569
+            ],
+            [
+              -68.203339129,
+              -19.470317417
+            ],
+            [
+              -68.191433541,
+              -19.470322485
+            ],
+            [
+              -68.179527951,
+              -19.470326774
+            ],
+            [
+              -68.167622362,
+              -19.470330283
+            ],
+            [
+              -68.155716772,
+              -19.470333012
+            ],
+            [
+              -68.143811181,
+              -19.470334962
+            ],
+            [
+              -68.131905591,
+              -19.470336131
+            ],
+            [
+              -68.12,
+              -19.470336521
+            ],
+            [
+              -68.108094409,
+              -19.470336131
+            ],
+            [
+              -68.096188819,
+              -19.470334962
+            ],
+            [
+              -68.084283228,
+              -19.470333012
+            ],
+            [
+              -68.072377638,
+              -19.470330283
+            ],
+            [
+              -68.060472049,
+              -19.470326774
+            ],
+            [
+              -68.048566459,
+              -19.470322485
+            ],
+            [
+              -68.036660871,
+              -19.470317417
+            ],
+            [
+              -68.024755284,
+              -19.470311569
+            ],
+            [
+              -68.024761869,
+              -19.459019559
+            ],
+            [
+              -68.024768451,
+              -19.447727535
+            ],
+            [
+              -68.024775029,
+              -19.436435497
+            ],
+            [
+              -68.024781604,
+              -19.425143446
+            ],
+            [
+              -68.024788176,
+              -19.41385138
+            ],
+            [
+              -68.024794745,
+              -19.4025593
+            ],
+            [
+              -68.02480131,
+              -19.391267206
+            ],
+            [
+              -68.024807871,
+              -19.379975098
+            ],
+            [
+              -68.02481443,
+              -19.368682976
+            ],
+            [
+              -68.024820985,
+              -19.35739084
+            ],
+            [
+              -68.024827536,
+              -19.34609869
+            ],
+            [
+              -68.024834085,
+              -19.334806527
+            ],
+            [
+              -68.02484063,
+              -19.323514349
+            ],
+            [
+              -68.024847171,
+              -19.312222157
+            ],
+            [
+              -68.02485371,
+              -19.300929951
+            ],
+            [
+              -68.024860245,
+              -19.289637731
+            ],
+            [
+              -68.036752712,
+              -19.289643556
+            ],
+            [
+              -68.04864518,
+              -19.289648604
+            ],
+            [
+              -68.060537649,
+              -19.289652875
+            ],
+            [
+              -68.072430119,
+              -19.28965637
+            ],
+            [
+              -68.084322589,
+              -19.289659088
+            ],
+            [
+              -68.096215059,
+              -19.289661029
+            ],
+            [
+              -68.108107529,
+              -19.289662194
+            ],
+            [
+              -68.12,
+              -19.289662583
+            ],
+            [
+              -68.131892471,
+              -19.289662194
+            ],
+            [
+              -68.143784941,
+              -19.289661029
+            ],
+            [
+              -68.155677411,
+              -19.289659088
+            ],
+            [
+              -68.167569881,
+              -19.28965637
+            ],
+            [
+              -68.179462351,
+              -19.289652875
+            ],
+            [
+              -68.19135482,
+              -19.289648604
+            ],
+            [
+              -68.203247288,
+              -19.289643556
+            ],
+            [
+              -68.215139755,
+              -19.289637731
+            ],
+            [
+              -68.21514629,
+              -19.300929951
+            ],
+            [
+              -68.215152829,
+              -19.312222157
+            ],
+            [
+              -68.21515937,
+              -19.323514349
+            ],
+            [
+              -68.215165915,
+              -19.334806527
+            ],
+            [
+              -68.215172464,
+              -19.34609869
+            ],
+            [
+              -68.215179015,
+              -19.35739084
+            ],
+            [
+              -68.21518557,
+              -19.368682976
+            ],
+            [
+              -68.215192129,
+              -19.379975098
+            ],
+            [
+              -68.21519869,
+              -19.391267206
+            ],
+            [
+              -68.215205255,
+              -19.4025593
+            ],
+            [
+              -68.215211824,
+              -19.41385138
+            ],
+            [
+              -68.215218396,
+              -19.425143446
+            ],
+            [
+              -68.215224971,
+              -19.436435497
+            ],
+            [
+              -68.215231549,
+              -19.447727535
+            ],
+            [
+              -68.215238131,
+              -19.459019559
+            ],
+            [
+              -68.215244716,
+              -19.470311569
+            ]
+          ]
+        ]
       },
-      "summary": "Análogo lunar/marciano conocido. Ejemplo de métricas ausentes: queda fuera de la cobertura de SRTM.",
-      "evidenceStatus": "fixture",
-      "sourceIds": [],
+      "summary": "NASA documenta el interés de los salares andinos para investigar ambientes marcianos. Esa evidencia regional no demuestra equivalencia química con Jezero ni con este polígono. Análogo regional ya discutido en la literatura; no se afirma descubrimiento.",
+      "evidenceStatus": "analysis_computed",
+      "sourceIds": [
+        "nasadem",
+        "nasa-coipasa"
+      ],
+      "metrics": [
+        {
+          "value": 0.0,
+          "unit": "deg",
+          "sourceIds": [
+            "nasadem"
+          ],
+          "methodId": "regional-dem-average-central-difference-v1",
+          "analysisScaleM": 1000,
+          "validCoverageFraction": 1.0,
+          "key": "slope-median",
+          "status": "computed"
+        },
+        {
+          "value": 0.1271,
+          "unit": "deg",
+          "sourceIds": [
+            "nasadem"
+          ],
+          "methodId": "regional-dem-average-central-difference-v1",
+          "analysisScaleM": 1000,
+          "validCoverageFraction": 1.0,
+          "key": "slope-p90",
+          "status": "computed"
+        },
+        {
+          "value": 5.7914,
+          "unit": "m",
+          "sourceIds": [
+            "nasadem"
+          ],
+          "methodId": "regional-dem-average-central-difference-v1",
+          "analysisScaleM": 1000,
+          "validCoverageFraction": 1.0,
+          "key": "relief-p95-p5",
+          "status": "computed"
+        }
+      ],
+      "assessments": [
+        {
+          "targetBody": "mars",
+          "referenceRegionId": "jezero-sector",
+          "testUseCase": "Examinar un sector del entorno de Coipasa como contraste de relieve para reconocimiento de cuencas.",
+          "interpretation": "Indicadores calculados; revisión científica independiente y validación del análogo pendientes. Ventana de 20 × 20 km. A 1 km: Pendiente mediana: 0.0 deg; Pendiente P90: 0.1271 deg; Relieve P95–P5: 5.7914 m. Diferencias candidato menos referencia: slope_median_deg: -0.6587 deg; slope_p90_deg: -1.3841 deg; relief_p95_p5_m: -182.5434 m. A 2 km: Pendiente mediana: 0.0051 deg; Pendiente P90: 0.0748 deg; Relieve P95–P5: 5.6365 m. Las coincidencias dependen de la escala; no constituyen un ranking ni una recomendación.",
+          "limitations": [
+            "No se midieron sales, arcillas, salmuera, estacionalidad ni capacidad portante.",
+            "Los DEM de superficies muy planas o agua pueden contener aplanamientos y errores comparables al relieve.",
+            "Análisis exploratorio del relieve regional, no validación de un análogo ni certificación de movilidad.",
+            "La Tierra no reproduce gravedad, vacío/atmósfera ni radiación del destino.",
+            "El cuadrado de estudio fue elegido por el equipo y puede incluir terrenos diferentes al accidente que le da nombre.",
+            "Una malla común no elimina diferencias de muestreo, interpolación, precisión y datum entre productos.",
+            "La cobertura indica celdas finitas, incluidas interpolaciones, no observaciones directas ni confianza.",
+            "La clasificación candidate no demuestra novedad científica."
+          ],
+          "evidenceStatus": "analysis_computed"
+        }
+      ]
+    },
+    {
+      "id": "amboy-sector",
+      "name": "Amboy — sector de estudio",
+      "country": "US",
+      "kind": "known_reference",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -115.78,
+          34.55
+        ]
+      },
+      "studyArea": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -115.888832809,
+              34.459805793
+            ],
+            [
+              -115.875228716,
+              34.459817164
+            ],
+            [
+              -115.86162462,
+              34.45982702
+            ],
+            [
+              -115.848020521,
+              34.459835359
+            ],
+            [
+              -115.83441642,
+              34.459842182
+            ],
+            [
+              -115.820812317,
+              34.459847488
+            ],
+            [
+              -115.807208212,
+              34.459851279
+            ],
+            [
+              -115.793604106,
+              34.459853553
+            ],
+            [
+              -115.78,
+              34.459854311
+            ],
+            [
+              -115.766395894,
+              34.459853553
+            ],
+            [
+              -115.752791788,
+              34.459851279
+            ],
+            [
+              -115.739187683,
+              34.459847488
+            ],
+            [
+              -115.72558358,
+              34.459842182
+            ],
+            [
+              -115.711979479,
+              34.459835359
+            ],
+            [
+              -115.69837538,
+              34.45982702
+            ],
+            [
+              -115.684771284,
+              34.459817164
+            ],
+            [
+              -115.671167191,
+              34.459805793
+            ],
+            [
+              -115.671152555,
+              34.471074066
+            ],
+            [
+              -115.671137912,
+              34.482342318
+            ],
+            [
+              -115.671123263,
+              34.493610549
+            ],
+            [
+              -115.671108607,
+              34.50487876
+            ],
+            [
+              -115.671093944,
+              34.516146949
+            ],
+            [
+              -115.671079274,
+              34.527415118
+            ],
+            [
+              -115.671064598,
+              34.538683266
+            ],
+            [
+              -115.671049914,
+              34.549951393
+            ],
+            [
+              -115.671035224,
+              34.5612195
+            ],
+            [
+              -115.671020528,
+              34.572487585
+            ],
+            [
+              -115.671005824,
+              34.58375565
+            ],
+            [
+              -115.670991114,
+              34.595023694
+            ],
+            [
+              -115.670976397,
+              34.606291716
+            ],
+            [
+              -115.670961673,
+              34.617559719
+            ],
+            [
+              -115.670946943,
+              34.6288277
+            ],
+            [
+              -115.670932205,
+              34.64009566
+            ],
+            [
+              -115.684565671,
+              34.640107073
+            ],
+            [
+              -115.69819914,
+              34.640116964
+            ],
+            [
+              -115.711832612,
+              34.640125334
+            ],
+            [
+              -115.725466087,
+              34.640132182
+            ],
+            [
+              -115.739099563,
+              34.640137508
+            ],
+            [
+              -115.752733041,
+              34.640141312
+            ],
+            [
+              -115.76636652,
+              34.640143595
+            ],
+            [
+              -115.78,
+              34.640144356
+            ],
+            [
+              -115.79363348,
+              34.640143595
+            ],
+            [
+              -115.807266959,
+              34.640141312
+            ],
+            [
+              -115.820900437,
+              34.640137508
+            ],
+            [
+              -115.834533913,
+              34.640132182
+            ],
+            [
+              -115.848167388,
+              34.640125334
+            ],
+            [
+              -115.86180086,
+              34.640116964
+            ],
+            [
+              -115.875434329,
+              34.640107073
+            ],
+            [
+              -115.889067795,
+              34.64009566
+            ],
+            [
+              -115.889053057,
+              34.6288277
+            ],
+            [
+              -115.889038327,
+              34.617559719
+            ],
+            [
+              -115.889023603,
+              34.606291716
+            ],
+            [
+              -115.889008886,
+              34.595023694
+            ],
+            [
+              -115.888994176,
+              34.58375565
+            ],
+            [
+              -115.888979472,
+              34.572487585
+            ],
+            [
+              -115.888964776,
+              34.5612195
+            ],
+            [
+              -115.888950086,
+              34.549951393
+            ],
+            [
+              -115.888935402,
+              34.538683266
+            ],
+            [
+              -115.888920726,
+              34.527415118
+            ],
+            [
+              -115.888906056,
+              34.516146949
+            ],
+            [
+              -115.888891393,
+              34.50487876
+            ],
+            [
+              -115.888876737,
+              34.493610549
+            ],
+            [
+              -115.888862088,
+              34.482342318
+            ],
+            [
+              -115.888847445,
+              34.471074066
+            ],
+            [
+              -115.888832809,
+              34.459805793
+            ]
+          ]
+        ]
+      },
+      "summary": "BLM describe un cono de cenizas/escorias y coladas basálticas en Amboy. El área de análisis es mayor que el cono. Sitio volcánico conocido; candidato de contraste, no descubrimiento.",
+      "evidenceStatus": "analysis_computed",
+      "sourceIds": [
+        "nasadem",
+        "blm-amboy"
+      ],
+      "metrics": [
+        {
+          "value": 0.7619,
+          "unit": "deg",
+          "sourceIds": [
+            "nasadem"
+          ],
+          "methodId": "regional-dem-average-central-difference-v1",
+          "analysisScaleM": 1000,
+          "validCoverageFraction": 1.0,
+          "key": "slope-median",
+          "status": "computed"
+        },
+        {
+          "value": 4.4814,
+          "unit": "deg",
+          "sourceIds": [
+            "nasadem"
+          ],
+          "methodId": "regional-dem-average-central-difference-v1",
+          "analysisScaleM": 1000,
+          "validCoverageFraction": 1.0,
+          "key": "slope-p90",
+          "status": "computed"
+        },
+        {
+          "value": 398.7227,
+          "unit": "m",
+          "sourceIds": [
+            "nasadem"
+          ],
+          "methodId": "regional-dem-average-central-difference-v1",
+          "analysisScaleM": 1000,
+          "validCoverageFraction": 1.0,
+          "key": "relief-p95-p5",
+          "status": "computed"
+        }
+      ],
       "assessments": [
         {
           "targetBody": "moon",
-          "referenceRegionId": "moon-south-pole",
-          "testUseCase": "Contexto: análogo de cráter de impacto en ambiente polar.",
-          "interpretation": "Sin métricas topográficas comparables con el método actual.",
-          "limitations": ["SRTMGL1 solo cubre de 60° N a 56° S; haría falta otro DEM (p. ej. ArcticDEM)."],
-          "evidenceStatus": "fixture"
+          "referenceRegionId": "lunar-south-sector",
+          "testUseCase": "Evaluar el relieve de un campo volcánico y su entorno para preparar cartografía de campo.",
+          "interpretation": "Indicadores calculados; revisión científica independiente y validación del análogo pendientes. Ventana de 20 × 20 km. A 1 km: Pendiente mediana: 0.7619 deg; Pendiente P90: 4.4814 deg; Relieve P95–P5: 398.7227 m. Diferencias candidato menos referencia: slope_median_deg: -5.8746 deg; slope_p90_deg: -8.0754 deg; relief_p95_p5_m: -1264.29 m. A 2 km: Pendiente mediana: 0.6313 deg; Pendiente P90: 3.6428 deg; Relieve P95–P5: 403.2726 m. Las coincidencias dependen de la escala; no constituyen un ranking ni una recomendación.",
+          "limitations": [
+            "El cono volcánico de Amboy no comparte origen de impacto con los cráteres lunares.",
+            "A 1 km, el cono de ~457 m de diámetro descrito por BLM queda por debajo del tamaño de celda.",
+            "Análisis exploratorio del relieve regional, no validación de un análogo ni certificación de movilidad.",
+            "La Tierra no reproduce gravedad, vacío/atmósfera ni radiación del destino.",
+            "El cuadrado de estudio fue elegido por el equipo y puede incluir terrenos diferentes al accidente que le da nombre.",
+            "Una malla común no elimina diferencias de muestreo, interpolación, precisión y datum entre productos.",
+            "La cobertura indica celdas finitas, incluidas interpolaciones, no observaciones directas ni confianza.",
+            "La clasificación candidate no demuestra novedad científica."
+          ],
+          "evidenceStatus": "analysis_computed"
         }
+      ]
+    },
+    {
+      "id": "payun-sector",
+      "name": "Payún Matrú — sector de estudio",
+      "country": "AR",
+      "kind": "candidate",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -69.241,
+          -36.422
+        ]
+      },
+      "studyArea": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -69.352635529,
+              -36.512064167
+            ],
+            [
+              -69.338681098,
+              -36.512076392
+            ],
+            [
+              -69.324726663,
+              -36.512086987
+            ],
+            [
+              -69.310772225,
+              -36.512095952
+            ],
+            [
+              -69.296817783,
+              -36.512103287
+            ],
+            [
+              -69.282863339,
+              -36.512108993
+            ],
+            [
+              -69.268908894,
+              -36.512113068
+            ],
+            [
+              -69.254954447,
+              -36.512115513
+            ],
+            [
+              -69.241,
+              -36.512116328
+            ],
+            [
+              -69.227045553,
+              -36.512115513
+            ],
+            [
+              -69.213091106,
+              -36.512113068
+            ],
+            [
+              -69.199136661,
+              -36.512108993
+            ],
+            [
+              -69.185182217,
+              -36.512103287
+            ],
+            [
+              -69.171227775,
+              -36.512095952
+            ],
+            [
+              -69.157273337,
+              -36.512086987
+            ],
+            [
+              -69.143318902,
+              -36.512076392
+            ],
+            [
+              -69.129364471,
+              -36.512064167
+            ],
+            [
+              -69.129380633,
+              -36.500799712
+            ],
+            [
+              -69.129396787,
+              -36.489535237
+            ],
+            [
+              -69.129412934,
+              -36.47827074
+            ],
+            [
+              -69.129429074,
+              -36.467006222
+            ],
+            [
+              -69.129445206,
+              -36.455741682
+            ],
+            [
+              -69.12946133,
+              -36.444477121
+            ],
+            [
+              -69.129477447,
+              -36.433212539
+            ],
+            [
+              -69.129493556,
+              -36.421947936
+            ],
+            [
+              -69.129509658,
+              -36.410683311
+            ],
+            [
+              -69.129525752,
+              -36.399418665
+            ],
+            [
+              -69.129541839,
+              -36.388153997
+            ],
+            [
+              -69.129557918,
+              -36.376889309
+            ],
+            [
+              -69.12957399,
+              -36.365624599
+            ],
+            [
+              -69.129590054,
+              -36.354359867
+            ],
+            [
+              -69.129606111,
+              -36.343095115
+            ],
+            [
+              -69.12962216,
+              -36.331830341
+            ],
+            [
+              -69.14354438,
+              -36.331842521
+            ],
+            [
+              -69.157466604,
+              -36.331853077
+            ],
+            [
+              -69.171388831,
+              -36.331862009
+            ],
+            [
+              -69.185311061,
+              -36.331869317
+            ],
+            [
+              -69.199233294,
+              -36.331875001
+            ],
+            [
+              -69.213155528,
+              -36.331879061
+            ],
+            [
+              -69.227077764,
+              -36.331881497
+            ],
+            [
+              -69.241,
+              -36.331882309
+            ],
+            [
+              -69.254922236,
+              -36.331881497
+            ],
+            [
+              -69.268844472,
+              -36.331879061
+            ],
+            [
+              -69.282766706,
+              -36.331875001
+            ],
+            [
+              -69.296688939,
+              -36.331869317
+            ],
+            [
+              -69.310611169,
+              -36.331862009
+            ],
+            [
+              -69.324533396,
+              -36.331853077
+            ],
+            [
+              -69.33845562,
+              -36.331842521
+            ],
+            [
+              -69.35237784,
+              -36.331830341
+            ],
+            [
+              -69.352393889,
+              -36.343095115
+            ],
+            [
+              -69.352409946,
+              -36.354359867
+            ],
+            [
+              -69.35242601,
+              -36.365624599
+            ],
+            [
+              -69.352442082,
+              -36.376889309
+            ],
+            [
+              -69.352458161,
+              -36.388153997
+            ],
+            [
+              -69.352474248,
+              -36.399418665
+            ],
+            [
+              -69.352490342,
+              -36.410683311
+            ],
+            [
+              -69.352506444,
+              -36.421947936
+            ],
+            [
+              -69.352522553,
+              -36.433212539
+            ],
+            [
+              -69.35253867,
+              -36.444477121
+            ],
+            [
+              -69.352554794,
+              -36.455741682
+            ],
+            [
+              -69.352570926,
+              -36.467006222
+            ],
+            [
+              -69.352587066,
+              -36.47827074
+            ],
+            [
+              -69.352603213,
+              -36.489535237
+            ],
+            [
+              -69.352619367,
+              -36.500799712
+            ],
+            [
+              -69.352635529,
+              -36.512064167
+            ]
+          ]
+        ]
+      },
+      "summary": "Smithsonian GVP clasifica Payún Matrú como conjunto/campo volcánico con escudo y caldera. La analogía aquí solo evalúa relieve, no igualdad litológica. Novedad como análogo no evaluada; sistema volcánico conocido.",
+      "evidenceStatus": "analysis_computed",
+      "sourceIds": [
+        "nasadem",
+        "gvp-payun"
       ],
       "metrics": [
-        { "key": "slope-median", "value": null, "unit": "deg", "status": "missing", "missingReason": "Fuera de la cobertura de SRTMGL1 (60° N–56° S).", "sourceIds": [], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 0 },
-        { "key": "relief-p95-p5", "value": null, "unit": "m", "status": "missing", "missingReason": "Fuera de la cobertura de SRTMGL1 (60° N–56° S).", "sourceIds": [], "methodId": "relief-p95-p5", "analysisScaleM": 500, "validCoverageFraction": 0 }
+        {
+          "value": 7.0572,
+          "unit": "deg",
+          "sourceIds": [
+            "nasadem"
+          ],
+          "methodId": "regional-dem-average-central-difference-v1",
+          "analysisScaleM": 1000,
+          "validCoverageFraction": 1.0,
+          "key": "slope-median",
+          "status": "computed"
+        },
+        {
+          "value": 12.2433,
+          "unit": "deg",
+          "sourceIds": [
+            "nasadem"
+          ],
+          "methodId": "regional-dem-average-central-difference-v1",
+          "analysisScaleM": 1000,
+          "validCoverageFraction": 1.0,
+          "key": "slope-p90",
+          "status": "computed"
+        },
+        {
+          "value": 1174.3484,
+          "unit": "m",
+          "sourceIds": [
+            "nasadem"
+          ],
+          "methodId": "regional-dem-average-central-difference-v1",
+          "analysisScaleM": 1000,
+          "validCoverageFraction": 1.0,
+          "key": "relief-p95-p5",
+          "status": "computed"
+        }
+      ],
+      "assessments": [
+        {
+          "targetBody": "moon",
+          "referenceRegionId": "lunar-south-sector",
+          "testUseCase": "Examinar un sector volcánico de mayor relieve para contrastar la preparación de reconocimiento regional.",
+          "interpretation": "Indicadores calculados; revisión científica independiente y validación del análogo pendientes. Ventana de 20 × 20 km. A 1 km: Pendiente mediana: 7.0572 deg; Pendiente P90: 12.2433 deg; Relieve P95–P5: 1174.3484 m. Diferencias candidato menos referencia: slope_median_deg: 0.4207 deg; slope_p90_deg: -0.3135 deg; relief_p95_p5_m: -488.6643 m. A 2 km: Pendiente mediana: 6.9942 deg; Pendiente P90: 10.6358 deg; Relieve P95–P5: 1139.1185 m. Las coincidencias dependen de la escala; no constituyen un ranking ni una recomendación.",
+          "limitations": [
+            "Una caldera volcánica no equivale a un cráter de impacto.",
+            "La pendiente regional no mide bloques, polvo, cohesión ni obstáculos a escala de rover.",
+            "Análisis exploratorio del relieve regional, no validación de un análogo ni certificación de movilidad.",
+            "La Tierra no reproduce gravedad, vacío/atmósfera ni radiación del destino.",
+            "El cuadrado de estudio fue elegido por el equipo y puede incluir terrenos diferentes al accidente que le da nombre.",
+            "Una malla común no elimina diferencias de muestreo, interpolación, precisión y datum entre productos.",
+            "La cobertura indica celdas finitas, incluidas interpolaciones, no observaciones directas ni confianza.",
+            "La clasificación candidate no demuestra novedad científica."
+          ],
+          "evidenceStatus": "analysis_computed"
+        }
       ]
     }
   ]

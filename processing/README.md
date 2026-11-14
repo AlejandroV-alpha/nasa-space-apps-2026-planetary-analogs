@@ -69,3 +69,17 @@ Las pruebas usan superficies con pendientes analíticas, planos de altura cero, 
 Abrir `data/processed/rasters/*.tif` en QGIS para inspección externa: cada archivo contiene su CRS. La revisión visual de esta entrega usa una figura reproducible de Matplotlib; no se afirma que haya sido revisada en QGIS.
 
 Para cambiar áreas o productos, editar la configuración y retirar únicamente el manifiesto de entradas de la región modificada en `data/raw/`, si el proceso detecta cambios. Mantener el dataset anterior versionado para comparar. No editar manualmente los números del catálogo.
+
+## Exportación para el frontend (contrato 1.1.0)
+
+Después de recalcular el catálogo:
+
+```bash
+python processing/export_frontend.py
+python processing/export_frontend.py --check
+npm --prefix frontend run validate:data
+```
+
+La exportación usa solo la biblioteca estándar. Conserva valores y fuentes, traduce claves/estados al contrato y mantiene `draft`: `analysis_computed` no significa validación científica independiente. Genera además `analogs.v1.provenance.json` para conservar sensibilidad y trazabilidad estructuradas. CI comprueba que ambas salidas estén actualizadas. No editar los números exportados manualmente.
+
+Los marcos planetarios nativos y el método de diferencias centrales se preservan explícitamente. Ver [guía de entrega](../docs/entrega-persona-1.md).

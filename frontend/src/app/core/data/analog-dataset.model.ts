@@ -1,4 +1,4 @@
-// Tipos TypeScript del contrato schema/planetary-analogs.schema.json (v1.0.0).
+// Tipos TypeScript del contrato schema/planetary-analogs.schema.json (v1.1.0; compatible con v1.0.0).
 // Si cambia el esquema, actualizar estos tipos y SUPPORTED_SCHEMA_MAJOR.
 
 export const SUPPORTED_SCHEMA_MAJOR = 1;
@@ -38,6 +38,9 @@ export interface Source {
   readonly license: string;
   readonly attribution: string;
   readonly crs: string;
+  readonly nativeCrs?: string;
+  readonly verticalReference?: string;
+  readonly nativeResolutionDescription?: string;
 }
 
 export interface Method {
@@ -80,7 +83,7 @@ export interface ReferenceRegion {
   readonly name: string;
   readonly targetBody: TargetBody;
   /** Coordenadas planetocéntricas del cuerpo, NO WGS84 terrestre. */
-  readonly crs: 'IAU_2015:30100' | 'IAU_2015:49900';
+  readonly crs: 'IAU_2015:30100' | 'IAU_2015:49900' | 'MOON_ME_DE421_PLANETOCENTRIC' | 'MARS_IAU2000_PLANETOCENTRIC';
   readonly center: PointGeometry;
   readonly geometry: PolygonGeometry;
   readonly description: string;
@@ -134,6 +137,6 @@ export interface ComparisonRow {
   readonly reference: Metric | null;
   /** Mismo orden que los sitios pedidos; null si el sitio no declara la métrica. */
   readonly sites: readonly (Metric | null)[];
-  /** true solo si todos los valores existen y comparten escala de análisis. */
+  /** true si hay 1–3 sitios de la referencia y las métricas comparten unidad, método, escala y estado. */
   readonly comparable: boolean;
 }

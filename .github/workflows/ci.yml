@@ -23,6 +23,8 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm install -g npm@12.2.0
       - run: npm ci
+      - name: Verificar exportación científica reproducible
+        run: python3 ../processing/export_frontend.py --check
       - name: Validar dataset contra el contrato
         run: npm run validate:data
       - name: Pruebas del validador

@@ -5,24 +5,69 @@
   "description": "Contrato de datos compartido entre ciencia (Persona 2), frontend (Persona 1) e integración (Persona 3). Ver schema/README.md.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "datasetId", "generatedAt", "status", "sources", "methods", "referenceRegions", "sites"],
+  "required": [
+    "schemaVersion",
+    "datasetId",
+    "generatedAt",
+    "status",
+    "sources",
+    "methods",
+    "referenceRegions",
+    "sites"
+  ],
   "properties": {
-    "$schema": { "type": "string" },
+    "$schema": {
+      "type": "string"
+    },
     "schemaVersion": {
       "description": "Versión del contrato (semver). Un cambio incompatible sube el número mayor.",
-      "const": "1.0.0"
+      "enum": [
+        "1.0.0",
+        "1.1.0"
+      ]
     },
-    "datasetId": { "$ref": "#/$defs/id" },
-    "generatedAt": { "type": "string", "format": "date-time" },
+    "datasetId": {
+      "$ref": "#/$defs/id"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
     "status": {
       "description": "fixture: datos de ejemplo; draft: mezcla de datos reales y pendientes; release: solo análisis reales, sin fixtures.",
-      "enum": ["fixture", "draft", "release"]
+      "enum": [
+        "fixture",
+        "draft",
+        "release"
+      ]
     },
-    "notes": { "type": "string" },
-    "sources": { "type": "array", "items": { "$ref": "#/$defs/source" } },
-    "methods": { "type": "array", "items": { "$ref": "#/$defs/method" } },
-    "referenceRegions": { "type": "array", "items": { "$ref": "#/$defs/referenceRegion" } },
-    "sites": { "type": "array", "items": { "$ref": "#/$defs/site" } }
+    "notes": {
+      "type": "string"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/source"
+      }
+    },
+    "methods": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/method"
+      }
+    },
+    "referenceRegions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/referenceRegion"
+      }
+    },
+    "sites": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/site"
+      }
+    }
   },
   "$defs": {
     "id": {
@@ -32,21 +77,43 @@
     },
     "idList": {
       "type": "array",
-      "items": { "$ref": "#/$defs/id" },
+      "items": {
+        "$ref": "#/$defs/id"
+      },
       "uniqueItems": true
     },
-    "nonEmptyText": { "type": "string", "minLength": 1 },
+    "nonEmptyText": {
+      "type": "string",
+      "minLength": 1
+    },
     "evidenceStatus": {
       "description": "fixture: inventado para desarrollo; candidate_investigated: hipótesis con fuentes, sin cálculo; analysis_computed: métricas calculadas de forma reproducible.",
-      "enum": ["fixture", "candidate_investigated", "analysis_computed"]
+      "enum": [
+        "fixture",
+        "candidate_investigated",
+        "analysis_computed"
+      ]
     },
-    "targetBody": { "enum": ["moon", "mars"] },
+    "targetBody": {
+      "enum": [
+        "moon",
+        "mars"
+      ]
+    },
     "position": {
       "description": "[longitud, latitud] en grados.",
       "type": "array",
       "prefixItems": [
-        { "type": "number", "minimum": -180, "maximum": 360 },
-        { "type": "number", "minimum": -90, "maximum": 90 }
+        {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 360
+        },
+        {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        }
       ],
       "minItems": 2,
       "maxItems": 2
@@ -54,25 +121,39 @@
     "pointGeometry": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["type", "coordinates"],
+      "required": [
+        "type",
+        "coordinates"
+      ],
       "properties": {
-        "type": { "const": "Point" },
-        "coordinates": { "$ref": "#/$defs/position" }
+        "type": {
+          "const": "Point"
+        },
+        "coordinates": {
+          "$ref": "#/$defs/position"
+        }
       }
     },
     "polygonGeometry": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["type", "coordinates"],
+      "required": [
+        "type",
+        "coordinates"
+      ],
       "properties": {
-        "type": { "const": "Polygon" },
+        "type": {
+          "const": "Polygon"
+        },
         "coordinates": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "array",
             "minItems": 4,
-            "items": { "$ref": "#/$defs/position" }
+            "items": {
+              "$ref": "#/$defs/position"
+            }
           }
         }
       }
@@ -80,84 +161,249 @@
     "source": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "agency", "product", "version", "url", "accessedAt", "license", "attribution", "crs"],
+      "required": [
+        "id",
+        "agency",
+        "product",
+        "version",
+        "url",
+        "accessedAt",
+        "license",
+        "attribution",
+        "crs"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/id" },
-        "agency": { "$ref": "#/$defs/nonEmptyText" },
-        "product": { "$ref": "#/$defs/nonEmptyText" },
-        "version": { "$ref": "#/$defs/nonEmptyText" },
-        "doi": { "type": "string", "pattern": "^10\\.\\d{4,9}/\\S+$" },
-        "url": { "type": "string", "format": "uri", "pattern": "^https?://" },
-        "file": { "type": "string" },
-        "accessedAt": { "type": "string", "format": "date" },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "agency": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "product": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "version": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "doi": {
+          "type": "string",
+          "pattern": "^10\\.\\d{4,9}/\\S+$"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https?://"
+        },
+        "file": {
+          "type": "string"
+        },
+        "accessedAt": {
+          "type": "string",
+          "format": "date"
+        },
         "observationInterval": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["start", "end"],
+          "required": [
+            "start",
+            "end"
+          ],
           "properties": {
-            "start": { "type": "string", "format": "date" },
-            "end": { "type": "string", "format": "date" }
+            "start": {
+              "type": "string",
+              "format": "date"
+            },
+            "end": {
+              "type": "string",
+              "format": "date"
+            }
           }
         },
-        "nativeResolutionM": { "type": "number", "exclusiveMinimum": 0 },
-        "license": { "$ref": "#/$defs/nonEmptyText" },
-        "attribution": { "$ref": "#/$defs/nonEmptyText" },
+        "nativeResolutionM": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "license": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "attribution": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
         "crs": {
           "description": "Sistema de coordenadas del producto, p. ej. EPSG:4326 o IAU_2015:30100.",
           "$ref": "#/$defs/nonEmptyText"
+        },
+        "nativeCrs": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verticalReference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "nativeResolutionDescription": {
+          "type": "string",
+          "minLength": 1
         }
       }
     },
     "method": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "name", "description"],
+      "required": [
+        "id",
+        "name",
+        "description"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/id" },
-        "name": { "$ref": "#/$defs/nonEmptyText" },
-        "description": { "$ref": "#/$defs/nonEmptyText" },
-        "resampling": { "type": "string" },
-        "windowM": { "type": "number", "exclusiveMinimum": 0 },
-        "documentationUrl": { "type": "string", "format": "uri" }
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "description": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "resampling": {
+          "type": "string"
+        },
+        "windowM": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "documentationUrl": {
+          "type": "string",
+          "format": "uri"
+        }
       }
     },
     "metricKey": {
       "description": "Unidad obligatoria por clave: slope-median y slope-p90 en deg; relief-p95-p5 y roughness en m; lst-day-night-diff en K.",
-      "enum": ["slope-median", "slope-p90", "relief-p95-p5", "roughness", "lst-day-night-diff"]
+      "enum": [
+        "slope-median",
+        "slope-p90",
+        "relief-p95-p5",
+        "roughness",
+        "lst-day-night-diff"
+      ]
     },
     "metric": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["key", "value", "unit", "status", "sourceIds", "methodId", "analysisScaleM", "validCoverageFraction"],
+      "required": [
+        "key",
+        "value",
+        "unit",
+        "status",
+        "sourceIds",
+        "methodId",
+        "analysisScaleM",
+        "validCoverageFraction"
+      ],
       "properties": {
-        "key": { "$ref": "#/$defs/metricKey" },
-        "value": { "type": ["number", "null"] },
-        "unit": { "enum": ["deg", "m", "K"] },
+        "key": {
+          "$ref": "#/$defs/metricKey"
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "unit": {
+          "enum": [
+            "deg",
+            "m",
+            "K"
+          ]
+        },
         "status": {
           "description": "computed: calculado; fixture: valor de ejemplo; missing: sin dato (value null); not_applicable: la métrica no aplica (value null).",
-          "enum": ["computed", "fixture", "missing", "not_applicable"]
+          "enum": [
+            "computed",
+            "fixture",
+            "missing",
+            "not_applicable"
+          ]
         },
-        "missingReason": { "$ref": "#/$defs/nonEmptyText" },
-        "sourceIds": { "$ref": "#/$defs/idList" },
-        "methodId": { "anyOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] },
-        "analysisScaleM": { "type": ["number", "null"], "exclusiveMinimum": 0 },
-        "validCoverageFraction": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+        "missingReason": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "sourceIds": {
+          "$ref": "#/$defs/idList"
+        },
+        "methodId": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/id"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "analysisScaleM": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "validCoverageFraction": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        }
       },
       "allOf": [
         {
-          "if": { "properties": { "status": { "enum": ["missing", "not_applicable"] } } },
+          "if": {
+            "properties": {
+              "status": {
+                "enum": [
+                  "missing",
+                  "not_applicable"
+                ]
+              }
+            }
+          },
           "then": {
-            "required": ["missingReason"],
-            "properties": { "value": { "type": "null" } }
+            "required": [
+              "missingReason"
+            ],
+            "properties": {
+              "value": {
+                "type": "null"
+              }
+            }
           },
           "else": {
-            "not": { "required": ["missingReason"] },
+            "not": {
+              "required": [
+                "missingReason"
+              ]
+            },
             "properties": {
-              "value": { "type": "number" },
-              "methodId": { "$ref": "#/$defs/id" },
-              "analysisScaleM": { "type": "number" },
-              "validCoverageFraction": { "type": "number" },
-              "sourceIds": { "type": "array", "minItems": 1 }
+              "value": {
+                "type": "number"
+              },
+              "methodId": {
+                "$ref": "#/$defs/id"
+              },
+              "analysisScaleM": {
+                "type": "number"
+              },
+              "validCoverageFraction": {
+                "type": "number"
+              },
+              "sourceIds": {
+                "type": "array",
+                "minItems": 1
+              }
             }
           }
         }
@@ -166,44 +412,122 @@
     "referenceRegion": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "name", "targetBody", "crs", "center", "geometry", "description", "sourceIds", "evidenceStatus", "metrics"],
+      "required": [
+        "id",
+        "name",
+        "targetBody",
+        "crs",
+        "center",
+        "geometry",
+        "description",
+        "sourceIds",
+        "evidenceStatus",
+        "metrics"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/id" },
-        "name": { "$ref": "#/$defs/nonEmptyText" },
-        "targetBody": { "$ref": "#/$defs/targetBody" },
-        "crs": {
-          "description": "Coordenadas planetocéntricas del cuerpo, nunca WGS84 terrestre. Luna: IAU_2015:30100; Marte: IAU_2015:49900.",
-          "enum": ["IAU_2015:30100", "IAU_2015:49900"]
+        "id": {
+          "$ref": "#/$defs/id"
         },
-        "center": { "$ref": "#/$defs/pointGeometry" },
-        "geometry": { "$ref": "#/$defs/polygonGeometry" },
-        "description": { "$ref": "#/$defs/nonEmptyText" },
-        "selectionRationale": { "type": "string" },
-        "sourceIds": { "$ref": "#/$defs/idList" },
-        "evidenceStatus": { "$ref": "#/$defs/evidenceStatus" },
-        "metrics": { "type": "array", "items": { "$ref": "#/$defs/metric" } }
+        "name": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "targetBody": {
+          "$ref": "#/$defs/targetBody"
+        },
+        "crs": {
+          "description": "Marco geográfico del cuerpo. Conservar el marco nativo del producto; no afirmar una transformación a IAU 2015 que no se realizó.",
+          "enum": [
+            "IAU_2015:30100",
+            "IAU_2015:49900",
+            "MOON_ME_DE421_PLANETOCENTRIC",
+            "MARS_IAU2000_PLANETOCENTRIC"
+          ]
+        },
+        "center": {
+          "$ref": "#/$defs/pointGeometry"
+        },
+        "geometry": {
+          "$ref": "#/$defs/polygonGeometry"
+        },
+        "description": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "selectionRationale": {
+          "type": "string"
+        },
+        "sourceIds": {
+          "$ref": "#/$defs/idList"
+        },
+        "evidenceStatus": {
+          "$ref": "#/$defs/evidenceStatus"
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/metric"
+          }
+        }
       }
     },
     "assessment": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["targetBody", "referenceRegionId", "testUseCase", "interpretation", "limitations", "evidenceStatus"],
+      "required": [
+        "targetBody",
+        "referenceRegionId",
+        "testUseCase",
+        "interpretation",
+        "limitations",
+        "evidenceStatus"
+      ],
       "properties": {
-        "targetBody": { "$ref": "#/$defs/targetBody" },
-        "referenceRegionId": { "$ref": "#/$defs/id" },
-        "testUseCase": { "$ref": "#/$defs/nonEmptyText" },
-        "interpretation": { "$ref": "#/$defs/nonEmptyText" },
-        "limitations": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/nonEmptyText" } },
-        "evidenceStatus": { "$ref": "#/$defs/evidenceStatus" }
+        "targetBody": {
+          "$ref": "#/$defs/targetBody"
+        },
+        "referenceRegionId": {
+          "$ref": "#/$defs/id"
+        },
+        "testUseCase": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "interpretation": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/nonEmptyText"
+          }
+        },
+        "evidenceStatus": {
+          "$ref": "#/$defs/evidenceStatus"
+        }
       }
     },
     "site": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "name", "country", "kind", "geometry", "studyArea", "summary", "evidenceStatus", "sourceIds", "assessments", "metrics"],
+      "required": [
+        "id",
+        "name",
+        "country",
+        "kind",
+        "geometry",
+        "studyArea",
+        "summary",
+        "evidenceStatus",
+        "sourceIds",
+        "assessments",
+        "metrics"
+      ],
       "properties": {
-        "id": { "$ref": "#/$defs/id" },
-        "name": { "$ref": "#/$defs/nonEmptyText" },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
         "country": {
           "description": "Código ISO 3166-1 alfa-2.",
           "type": "string",
@@ -211,7 +535,10 @@
         },
         "kind": {
           "description": "candidate: candidato propio; known_reference: análogo ya conocido usado como contexto.",
-          "enum": ["candidate", "known_reference"]
+          "enum": [
+            "candidate",
+            "known_reference"
+          ]
         },
         "geometry": {
           "description": "Punto representativo en WGS84 (EPSG:4326), [lon, lat].",
@@ -221,11 +548,28 @@
           "description": "Polígono del área analizada en WGS84 (EPSG:4326).",
           "$ref": "#/$defs/polygonGeometry"
         },
-        "summary": { "$ref": "#/$defs/nonEmptyText" },
-        "evidenceStatus": { "$ref": "#/$defs/evidenceStatus" },
-        "sourceIds": { "$ref": "#/$defs/idList" },
-        "assessments": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/assessment" } },
-        "metrics": { "type": "array", "items": { "$ref": "#/$defs/metric" } }
+        "summary": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "evidenceStatus": {
+          "$ref": "#/$defs/evidenceStatus"
+        },
+        "sourceIds": {
+          "$ref": "#/$defs/idList"
+        },
+        "assessments": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/assessment"
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/metric"
+          }
+        }
       }
     }
   }
