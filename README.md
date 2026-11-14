@@ -7,6 +7,8 @@ Exploración de candidatos terrestres para preparar actividades relacionadas con
 - [Metodología científica](docs/metodologia-cientifica.md)
 - [Fichas y resultados exploratorios](docs/fichas-cientificas.md)
 - [Entrega lista para Persona 1](docs/entrega-persona-1.md)
+- [Backend FastAPI](backend/README.md)
+- [Endpoints y sus objetivos](docs/backend-endpoints.md)
 - [Frontend Angular](frontend/README.md)
 
 Los indicadores calculados describen relieve regional. Su cálculo no valida la idoneidad de un análogo.

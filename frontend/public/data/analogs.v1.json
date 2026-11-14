@@ -2,7 +2,7 @@
   "$schema": "../../../schema/planetary-analogs.schema.json",
   "schemaVersion": "1.1.0",
   "datasetId": "planetary-analogs-regional-terrain-draft",
-  "generatedAt": "2026-11-14T20:21:58.294510+00:00",
+  "generatedAt": "2026-11-14T20:37:57.588224+00:00",
   "status": "draft",
   "notes": "Indicadores calculados; revisión científica independiente y validación del análogo pendientes. La cobertura indica celdas finitas, incluidas interpolaciones, no observaciones directas ni confianza. Cuatro sectores terrestres y dos referencias planetarias. Malla principal 1 km y sensibilidad 2 km. analysis_computed significa cálculo reproducible, no validación científica ni validación NASA. Las referencias conservan ME/DE421 lunar e IAU2000 marciano; no se realizó una transformación a IAU 2015. Amboy y Coipasa son contrastes conocidos; no se afirma descubrimiento. La trazabilidad y sensibilidad estructuradas se conservan en analogs.v1.provenance.json y en el catálogo científico original.",
   "sources": [

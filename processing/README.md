@@ -1,3 +1,7 @@
+> La implementación del procesamiento se encuentra ahora en `backend/processing/`.
+> Los comandos de esta guía siguen funcionando mediante entradas de compatibilidad.
+> Para ejecutar el flujo completo y servir datos HTTP, ver [backend/README.md](../backend/README.md).
+
 # Ciencia y datos GIS — Persona 2
 
 Este directorio prepara un análisis exploratorio de relieve regional. No selecciona sitios aptos para instalar bases, no calcula probabilidades de similitud y no certifica movilidad.

@@ -4,3 +4,5 @@ processing/.venv/
 .pytest_cache/
 data/raw/
 data/cache/
+
+backend/.venv/

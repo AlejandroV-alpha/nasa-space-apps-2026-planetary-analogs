@@ -1,0 +1,107 @@
+"""HTTP access to computed planetary analog data; see /docs for the API contract."""
+import os
+from typing import Annotated, Literal
+from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, ConfigDict, Field
+from .repository import Repository, get_repository
+
+Body = Literal['moon', 'mars']
+Repo = Annotated[Repository, Depends(get_repository)]
+
+
+class ComparisonRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    reference_region_id: str = Field(min_length=1, examples=['jezero-sector'])
+    site_ids: list[str] = Field(min_length=2, max_length=3, examples=[['siloli-sector', 'coipasa-sector']])
+
+
+def create_app() -> FastAPI:
+    api = FastAPI(title='Planetary Analogs API', version='1.0.0',
+        description='Catálogo científico exploratorio. Indicadores calculados; validación de analogía pendiente. Procesamiento por lotes desde backend/process.py.')
+    origins = [value.strip() for value in os.getenv('CORS_ORIGINS', 'http://localhost:4200,http://127.0.0.1:4200').split(',') if value.strip()]
+    api.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=['GET', 'POST'], allow_headers=['Content-Type'])
+
+    @api.get('/health', tags=['Estado'], summary='Comprobar servidor y disponibilidad del catálogo')
+    def health(repo: Repo):
+        data = repo.load()
+        return {'status':'ok', 'dataset_status':data['status'], 'schema_version':data['schemaVersion'],
+                'sites':len(data['sites']), 'reference_regions':len(data['referenceRegions'])}
+
+    @api.get('/api/v1/catalog', tags=['Catálogo'], summary='Obtener el contrato completo que puede consumir Angular')
+    def catalog(repo: Repo):
+        return repo.load()
+
+    @api.get('/api/v1/provenance', tags=['Ciencia'], summary='Consultar fuentes, hashes y sensibilidad a 2 km')
+    def provenance(repo: Repo):
+        return repo.provenance()
+
+    @api.get('/api/v1/sites', tags=['Sitios'], summary='Listar y filtrar candidatos terrestres')
+    def sites(repo: Repo, target_body: Body | None = None,
+              country: Annotated[str | None, Query(pattern='^[A-Z]{2}$')] = None,
+              reference_region_id: str | None = None):
+        if reference_region_id:
+            repo.find('referenceRegions', reference_region_id)
+        items = repo.load()['sites']
+        items = [s for s in items if (not country or s['country'] == country) and
+                 any((not target_body or a['targetBody'] == target_body) and
+                     (not reference_region_id or a['referenceRegionId'] == reference_region_id)
+                     for a in s['assessments'])]
+        return {'total':len(items), 'items':items}
+
+    @api.get('/api/v1/sites/{site_id}', tags=['Sitios'], summary='Obtener la ficha completa de un candidato')
+    def site(site_id: str, repo: Repo):
+        return repo.find('sites', site_id)
+
+    @api.get('/api/v1/reference-regions', tags=['Referencias'], summary='Listar regiones de la Luna y Marte')
+    def references(repo: Repo, target_body: Body | None = None):
+        items = [r for r in repo.load()['referenceRegions'] if not target_body or r['targetBody'] == target_body]
+        return {'total':len(items), 'items':items}
+
+    @api.get('/api/v1/reference-regions/{region_id}', tags=['Referencias'], summary='Consultar una región planetaria y sus métricas')
+    def reference(region_id: str, repo: Repo):
+        return repo.find('referenceRegions', region_id)
+
+    @api.get('/api/v1/sources', tags=['Ciencia'], summary='Consultar productos, versiones, atribución y marcos de referencia')
+    def sources(repo: Repo):
+        items = repo.load()['sources']
+        return {'total':len(items), 'items':items}
+
+    @api.get('/api/v1/methods', tags=['Ciencia'], summary='Explicar cómo se calcularon las métricas')
+    def methods(repo: Repo):
+        items = repo.load()['methods']
+        return {'total':len(items), 'items':items}
+
+    @api.get('/api/v1/geojson/sites', tags=['Mapa'], summary='Obtener puntos terrestres para MapLibre')
+    def geojson(repo: Repo, target_body: Body | None = None):
+        items = sites(repo, target_body=target_body)
+        return {'type':'FeatureCollection', 'features':[
+            {'type':'Feature', 'id':s['id'], 'geometry':s['geometry'],
+             'properties':{'id':s['id'], 'name':s['name'], 'country':s['country'], 'evidenceStatus':s['evidenceStatus']}}
+            for s in items['items']]}
+
+    @api.post('/api/v1/compare', tags=['Comparación'], summary='Contrastar 2–3 candidatos frente a una referencia explícita')
+    def compare(request: ComparisonRequest, repo: Repo):
+        if len(set(request.site_ids)) != len(request.site_ids):
+            raise HTTPException(422, 'Los candidatos deben ser diferentes.')
+        region = repo.find('referenceRegions', request.reference_region_id)
+        candidates = [repo.find('sites', item) for item in request.site_ids]
+        if any(not any(a['referenceRegionId'] == region['id'] for a in s['assessments']) for s in candidates):
+            raise HTTPException(422, 'Todos los candidatos deben estar evaluados contra la misma región seleccionada.')
+        keys = list(dict.fromkeys(m['key'] for e in [region, *candidates] for m in e['metrics']))
+        rows = []
+        for key in keys:
+            metrics = [next((m for m in e['metrics'] if m['key'] == key), None) for e in [region, *candidates]]
+            compatible = all(m is not None and m['value'] is not None and m['status'] == 'computed' for m in metrics)
+            if compatible:
+                compatible = all(len({m[field] for m in metrics}) == 1 for field in ['unit','methodId','analysisScaleM'])
+            rows.append({'key':key, 'reference':metrics[0], 'sites':metrics[1:], 'comparable':compatible,
+                'signed_differences':[round(m['value'] - metrics[0]['value'],4) for m in metrics[1:]] if compatible else [None]*len(candidates),
+                'reason':None if compatible else 'Faltan mediciones calculadas o no coinciden unidad, método y escala.'})
+        return {'reference_region_id':region['id'], 'site_ids':request.site_ids, 'rows':rows,
+            'dataset_status':repo.load()['status'], 'notice':'Diferencias descriptivas, no ranking ni probabilidad de similitud. Revisión científica pendiente.'}
+
+    return api
+
+
+app = create_app()
