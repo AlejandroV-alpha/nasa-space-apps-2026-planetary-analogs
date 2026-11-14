@@ -12,7 +12,9 @@
     "prewatch": "node scripts/generate-primeui-license.mjs",
     "watch": "ng build --watch --configuration development",
     "pretest": "node scripts/generate-primeui-license.mjs",
-    "test": "ng test"
+    "test": "ng test",
+    "validate:data": "node scripts/validate-data.mjs",
+    "test:data": "node --test scripts/"
   },
   "private": true,
   "packageManager": "npm@12.2.0",
@@ -36,6 +38,8 @@
     "@angular/cli": "^22.2.5",
     "@angular/compiler-cli": "^22.2.0",
     "@tailwindcss/postcss": "^4.1.12",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
     "jsdom": "^30.0.0",
     "postcss": "^8.5.3",
     "prettier": "^3.8.1",

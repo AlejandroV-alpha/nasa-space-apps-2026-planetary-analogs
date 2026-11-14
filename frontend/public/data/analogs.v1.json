@@ -1,0 +1,229 @@
+{
+  "$schema": "../../../schema/planetary-analogs.schema.json",
+  "schemaVersion": "1.0.0",
+  "datasetId": "planetary-analogs-fixture",
+  "generatedAt": "2026-11-14T00:00:00Z",
+  "status": "fixture",
+  "notes": "FIXTURE de desarrollo. Coordenadas aproximadas y valores de métricas inventados para construir la interfaz; no son resultados científicos. Persona 2 los reemplazará por análisis reales.",
+  "sources": [
+    {
+      "id": "srtmgl1-v003",
+      "agency": "NASA LP DAAC",
+      "product": "SRTMGL1 NASA SRTM Global 1 arc second",
+      "version": "003",
+      "doi": "10.5067/MEaSUREs/SRTM/SRTMGL1.003",
+      "url": "https://www.earthdata.nasa.gov/data/catalog/lpcloud-srtmgl1-003",
+      "accessedAt": "2026-11-14",
+      "observationInterval": { "start": "2000-02-11", "end": "2000-02-21" },
+      "nativeResolutionM": 30,
+      "license": "Datos abiertos NASA (sin restricciones de uso)",
+      "attribution": "NASA JPL. NASA Shuttle Radar Topography Mission Global 1 arc second V003. NASA LP DAAC.",
+      "crs": "EPSG:4326"
+    },
+    {
+      "id": "lola-ldem-polar",
+      "agency": "NASA PDS Geosciences Node",
+      "product": "LRO LOLA GDR / LDEM polar",
+      "version": "LRO-L-LOLA-4-GDR-V1.0",
+      "url": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/float_img/",
+      "accessedAt": "2026-11-14",
+      "license": "Datos públicos NASA PDS",
+      "attribution": "Smith et al., LRO Lunar Orbiter Laser Altimeter, NASA PDS Geosciences Node.",
+      "crs": "IAU_2015:30100"
+    },
+    {
+      "id": "mola-megdr",
+      "agency": "NASA PDS Geosciences Node",
+      "product": "MGS MOLA Mission Experiment Gridded Data Record (MEGDR)",
+      "version": "urn:nasa:pds:mgs_mola_topography_derived",
+      "url": "https://pds-geosciences.wustl.edu/mgs/urn-nasa-pds-mgs_mola_topography_derived/",
+      "accessedAt": "2026-11-14",
+      "nativeResolutionM": 463,
+      "license": "Datos públicos NASA PDS",
+      "attribution": "Smith et al., MGS Mars Orbiter Laser Altimeter, NASA PDS Geosciences Node.",
+      "crs": "IAU_2015:49900"
+    }
+  ],
+  "methods": [
+    {
+      "id": "slope-horn-harmonized",
+      "name": "Pendiente (Horn) sobre malla armonizada",
+      "description": "Pendiente en grados calculada con el algoritmo de Horn tras reproyectar a una proyección métrica del cuerpo y armonizar la escala efectiva. Se reportan mediana y percentil 90.",
+      "resampling": "average"
+    },
+    {
+      "id": "relief-p95-p5",
+      "name": "Relieve local P95–P5",
+      "description": "Diferencia entre los percentiles 95 y 5 de la elevación dentro del área de estudio, en metros.",
+      "resampling": "average"
+    }
+  ],
+  "referenceRegions": [
+    {
+      "id": "moon-south-pole",
+      "name": "Entorno del polo sur lunar (FIXTURE)",
+      "targetBody": "moon",
+      "crs": "IAU_2015:30100",
+      "center": { "type": "Point", "coordinates": [0, -89.5] },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-30, -88.5], [30, -88.5], [30, -90], [-30, -90], [-30, -88.5]]]
+      },
+      "description": "Región lunar de referencia propuesta. Delimitación exacta pendiente de Persona 2.",
+      "selectionRationale": "Propuesta inicial del plan del equipo; pendiente de evidencia.",
+      "sourceIds": ["lola-ldem-polar"],
+      "evidenceStatus": "fixture",
+      "metrics": [
+        { "key": "slope-median", "value": 9.5, "unit": "deg", "status": "fixture", "sourceIds": ["lola-ldem-polar"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 0.97 },
+        { "key": "slope-p90", "value": 21, "unit": "deg", "status": "fixture", "sourceIds": ["lola-ldem-polar"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 0.97 },
+        { "key": "relief-p95-p5", "value": 3100, "unit": "m", "status": "fixture", "sourceIds": ["lola-ldem-polar"], "methodId": "relief-p95-p5", "analysisScaleM": 500, "validCoverageFraction": 0.97 }
+      ]
+    },
+    {
+      "id": "mars-jezero",
+      "name": "Cráter Jezero (FIXTURE)",
+      "targetBody": "mars",
+      "crs": "IAU_2015:49900",
+      "center": { "type": "Point", "coordinates": [77.5, 18.4] },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[77.2, 18.1], [77.8, 18.1], [77.8, 18.7], [77.2, 18.7], [77.2, 18.1]]]
+      },
+      "description": "Región marciana de referencia a investigar. No está aprobada como referencia definitiva.",
+      "selectionRationale": "Opción mencionada en el plan del equipo (Jezero/Gale).",
+      "sourceIds": ["mola-megdr"],
+      "evidenceStatus": "fixture",
+      "metrics": [
+        { "key": "slope-median", "value": 2.1, "unit": "deg", "status": "fixture", "sourceIds": ["mola-megdr"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 1 },
+        { "key": "slope-p90", "value": 6.4, "unit": "deg", "status": "fixture", "sourceIds": ["mola-megdr"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 1 },
+        { "key": "relief-p95-p5", "value": 820, "unit": "m", "status": "fixture", "sourceIds": ["mola-megdr"], "methodId": "relief-p95-p5", "analysisScaleM": 500, "validCoverageFraction": 1 }
+      ]
+    }
+  ],
+  "sites": [
+    {
+      "id": "siloli-desert",
+      "name": "Desierto de Siloli (FIXTURE)",
+      "country": "BO",
+      "kind": "candidate",
+      "geometry": { "type": "Point", "coordinates": [-67.7, -22.1] },
+      "studyArea": {
+        "type": "Polygon",
+        "coordinates": [[[-67.95, -22.35], [-67.45, -22.35], [-67.45, -21.85], [-67.95, -21.85], [-67.95, -22.35]]]
+      },
+      "summary": "Candidato poco estudiado del altiplano boliviano; idoneidad y novedad pendientes de investigación.",
+      "evidenceStatus": "fixture",
+      "sourceIds": ["srtmgl1-v003"],
+      "assessments": [
+        {
+          "targetBody": "mars",
+          "referenceRegionId": "mars-jezero",
+          "testUseCase": "Ensayos de navegación de rover en terreno árido de gran altitud.",
+          "interpretation": "Texto de ejemplo: el relieve regional podría ser comparable a escala de 500 m.",
+          "limitations": ["Valores de ejemplo, no calculados.", "No reproduce gravedad, atmósfera ni radiación marciana."],
+          "evidenceStatus": "fixture"
+        },
+        {
+          "targetBody": "moon",
+          "referenceRegionId": "moon-south-pole",
+          "testUseCase": "Reconocimiento de campo para logística de base en terreno irregular.",
+          "interpretation": "Texto de ejemplo: el relieve es mucho menor que el del polo sur lunar.",
+          "limitations": ["Valores de ejemplo, no calculados.", "No reproduce vacío, iluminación rasante ni frío extremo."],
+          "evidenceStatus": "fixture"
+        }
+      ],
+      "metrics": [
+        { "key": "slope-median", "value": 3.2, "unit": "deg", "status": "fixture", "sourceIds": ["srtmgl1-v003"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 0.99 },
+        { "key": "slope-p90", "value": 9.8, "unit": "deg", "status": "fixture", "sourceIds": ["srtmgl1-v003"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 0.99 },
+        { "key": "relief-p95-p5", "value": 640, "unit": "m", "status": "fixture", "sourceIds": ["srtmgl1-v003"], "methodId": "relief-p95-p5", "analysisScaleM": 500, "validCoverageFraction": 0.99 },
+        { "key": "lst-day-night-diff", "value": null, "unit": "K", "status": "missing", "missingReason": "Complemento térmico MODIS (P1) aún no evaluado.", "sourceIds": [], "methodId": null, "analysisScaleM": null, "validCoverageFraction": null }
+      ]
+    },
+    {
+      "id": "tunupa-volcanic-field",
+      "name": "Sector volcánico de Tunupa (FIXTURE)",
+      "country": "BO",
+      "kind": "candidate",
+      "geometry": { "type": "Point", "coordinates": [-67.6, -19.85] },
+      "studyArea": {
+        "type": "Polygon",
+        "coordinates": [[[-67.85, -20.1], [-67.35, -20.1], [-67.35, -19.6], [-67.85, -19.6], [-67.85, -20.1]]]
+      },
+      "summary": "Sector volcánico del altiplano a investigar como análogo de relieve volcánico.",
+      "evidenceStatus": "fixture",
+      "sourceIds": ["srtmgl1-v003"],
+      "assessments": [
+        {
+          "targetBody": "moon",
+          "referenceRegionId": "moon-south-pole",
+          "testUseCase": "Pruebas de movilidad en pendientes pronunciadas.",
+          "interpretation": "Texto de ejemplo: pendientes altas en flancos volcánicos.",
+          "limitations": ["Valores de ejemplo, no calculados."],
+          "evidenceStatus": "fixture"
+        }
+      ],
+      "metrics": [
+        { "key": "slope-median", "value": 7.9, "unit": "deg", "status": "fixture", "sourceIds": ["srtmgl1-v003"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 0.98 },
+        { "key": "slope-p90", "value": 19.5, "unit": "deg", "status": "fixture", "sourceIds": ["srtmgl1-v003"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 0.98 },
+        { "key": "relief-p95-p5", "value": 1450, "unit": "m", "status": "fixture", "sourceIds": ["srtmgl1-v003"], "methodId": "relief-p95-p5", "analysisScaleM": 500, "validCoverageFraction": 0.98 }
+      ]
+    },
+    {
+      "id": "atacama-yungay",
+      "name": "Atacama, Yungay (FIXTURE)",
+      "country": "CL",
+      "kind": "known_reference",
+      "geometry": { "type": "Point", "coordinates": [-70.0, -24.1] },
+      "studyArea": {
+        "type": "Polygon",
+        "coordinates": [[[-70.25, -24.35], [-69.75, -24.35], [-69.75, -23.85], [-70.25, -23.85], [-70.25, -24.35]]]
+      },
+      "summary": "Análogo marciano conocido; se usa como referencia contextual, no como candidato nuevo.",
+      "evidenceStatus": "fixture",
+      "sourceIds": ["srtmgl1-v003"],
+      "assessments": [
+        {
+          "targetBody": "mars",
+          "referenceRegionId": "mars-jezero",
+          "testUseCase": "Contexto: análogo conocido de aridez extrema para instrumentación.",
+          "interpretation": "Texto de ejemplo para comparar con candidatos nuevos.",
+          "limitations": ["Valores de ejemplo, no calculados."],
+          "evidenceStatus": "fixture"
+        }
+      ],
+      "metrics": [
+        { "key": "slope-median", "value": 2.6, "unit": "deg", "status": "fixture", "sourceIds": ["srtmgl1-v003"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 1 },
+        { "key": "slope-p90", "value": 7.1, "unit": "deg", "status": "fixture", "sourceIds": ["srtmgl1-v003"], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 1 },
+        { "key": "relief-p95-p5", "value": 510, "unit": "m", "status": "fixture", "sourceIds": ["srtmgl1-v003"], "methodId": "relief-p95-p5", "analysisScaleM": 500, "validCoverageFraction": 1 }
+      ]
+    },
+    {
+      "id": "haughton-crater",
+      "name": "Cráter Haughton, isla Devon (FIXTURE)",
+      "country": "CA",
+      "kind": "known_reference",
+      "geometry": { "type": "Point", "coordinates": [-89.68, 75.38] },
+      "studyArea": {
+        "type": "Polygon",
+        "coordinates": [[[-90.0, 75.25], [-89.35, 75.25], [-89.35, 75.5], [-90.0, 75.5], [-90.0, 75.25]]]
+      },
+      "summary": "Análogo lunar/marciano conocido. Ejemplo de métricas ausentes: queda fuera de la cobertura de SRTM.",
+      "evidenceStatus": "fixture",
+      "sourceIds": [],
+      "assessments": [
+        {
+          "targetBody": "moon",
+          "referenceRegionId": "moon-south-pole",
+          "testUseCase": "Contexto: análogo de cráter de impacto en ambiente polar.",
+          "interpretation": "Sin métricas topográficas comparables con el método actual.",
+          "limitations": ["SRTMGL1 solo cubre de 60° N a 56° S; haría falta otro DEM (p. ej. ArcticDEM)."],
+          "evidenceStatus": "fixture"
+        }
+      ],
+      "metrics": [
+        { "key": "slope-median", "value": null, "unit": "deg", "status": "missing", "missingReason": "Fuera de la cobertura de SRTMGL1 (60° N–56° S).", "sourceIds": [], "methodId": "slope-horn-harmonized", "analysisScaleM": 500, "validCoverageFraction": 0 },
+        { "key": "relief-p95-p5", "value": null, "unit": "m", "status": "missing", "missingReason": "Fuera de la cobertura de SRTMGL1 (60° N–56° S).", "sourceIds": [], "methodId": "relief-p95-p5", "analysisScaleM": 500, "validCoverageFraction": 0 }
+      ]
+    }
+  ]
+}
