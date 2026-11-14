@@ -1,0 +1,8 @@
+# Local scientific environment and downloaded source rasters
+processing/.venv/
+**/__pycache__/
+.pytest_cache/
+data/raw/
+data/cache/
+
+backend/.venv/

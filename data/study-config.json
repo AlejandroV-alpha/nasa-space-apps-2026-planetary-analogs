@@ -1,0 +1,302 @@
+{
+  "schemaVersion": "0.1",
+  "question": "Comparar relieve regional para preparar reconocimiento geológico y cartografía de campo, sin inferir transitabilidad.",
+  "regions": [
+    {
+      "id": "siloli-sector",
+      "name": "Siloli — sector de estudio",
+      "body": "earth",
+      "center": [
+        -67.88,
+        -22.12
+      ],
+      "country": "Bolivia",
+      "region": "Potosí",
+      "targetBody": "mars",
+      "referenceRegionId": "jezero-sector",
+      "terrain": "Relieve del altiplano; clasificación geológica pendiente",
+      "hypothesis": "Evaluar el relieve regional como candidato para planificar reconocimiento y campañas geológicas.",
+      "geology": "No se atribuye composición mineral ni aridez medida. Falta una fuente geológica específica del polígono.",
+      "contextSourceIds": [],
+      "novelty": "No evaluada mediante revisión bibliográfica exhaustiva.",
+      "limitations": [
+        "Ubicación nominal orientativa; el polígono define exactamente el sector analizado.",
+        "La hipótesis geológica y ambiental del sector permanece sin validar.",
+        "Análisis exploratorio del relieve regional, no validación de un análogo ni certificación de movilidad.",
+        "La Tierra no reproduce gravedad, vacío/atmósfera ni radiación del destino.",
+        "El cuadrado de estudio fue elegido por el equipo y puede incluir terrenos diferentes al accidente que le da nombre.",
+        "Una malla común no elimina diferencias de muestreo, interpolación, precisión y datum entre productos."
+      ],
+      "studySideM": 20000,
+      "analysisScalesM": [
+        1000,
+        2000
+      ],
+      "selectionStatus": "team_selected_before_metrics"
+    },
+    {
+      "id": "coipasa-sector",
+      "name": "Coipasa — sector de estudio",
+      "body": "earth",
+      "center": [
+        -68.12,
+        -19.38
+      ],
+      "country": "Bolivia",
+      "region": "Oruro",
+      "targetBody": "mars",
+      "referenceRegionId": "jezero-sector",
+      "terrain": "Entorno de salar",
+      "hypothesis": "Examinar un sector del entorno de Coipasa como contraste de relieve para reconocimiento de cuencas.",
+      "geology": "NASA documenta el interés de los salares andinos para investigar ambientes marcianos. Esa evidencia regional no demuestra equivalencia química con Jezero ni con este polígono.",
+      "contextSourceIds": [
+        "nasa-coipasa"
+      ],
+      "novelty": "Análogo regional ya discutido en la literatura; no se afirma descubrimiento.",
+      "limitations": [
+        "No se midieron sales, arcillas, salmuera, estacionalidad ni capacidad portante.",
+        "Los DEM de superficies muy planas o agua pueden contener aplanamientos y errores comparables al relieve.",
+        "Análisis exploratorio del relieve regional, no validación de un análogo ni certificación de movilidad.",
+        "La Tierra no reproduce gravedad, vacío/atmósfera ni radiación del destino.",
+        "El cuadrado de estudio fue elegido por el equipo y puede incluir terrenos diferentes al accidente que le da nombre.",
+        "Una malla común no elimina diferencias de muestreo, interpolación, precisión y datum entre productos."
+      ],
+      "studySideM": 20000,
+      "analysisScalesM": [
+        1000,
+        2000
+      ],
+      "selectionStatus": "team_selected_before_metrics"
+    },
+    {
+      "id": "amboy-sector",
+      "name": "Amboy — sector de estudio",
+      "body": "earth",
+      "center": [
+        -115.78,
+        34.55
+      ],
+      "country": "Estados Unidos",
+      "region": "California",
+      "targetBody": "moon",
+      "referenceRegionId": "lunar-south-sector",
+      "terrain": "Campo volcánico y entorno",
+      "hypothesis": "Evaluar el relieve de un campo volcánico y su entorno para preparar cartografía de campo.",
+      "geology": "BLM describe un cono de cenizas/escorias y coladas basálticas en Amboy. El área de análisis es mayor que el cono.",
+      "contextSourceIds": [
+        "blm-amboy"
+      ],
+      "novelty": "Sitio volcánico conocido; candidato de contraste, no descubrimiento.",
+      "limitations": [
+        "El cono volcánico de Amboy no comparte origen de impacto con los cráteres lunares.",
+        "A 1 km, el cono de ~457 m de diámetro descrito por BLM queda por debajo del tamaño de celda.",
+        "Análisis exploratorio del relieve regional, no validación de un análogo ni certificación de movilidad.",
+        "La Tierra no reproduce gravedad, vacío/atmósfera ni radiación del destino.",
+        "El cuadrado de estudio fue elegido por el equipo y puede incluir terrenos diferentes al accidente que le da nombre.",
+        "Una malla común no elimina diferencias de muestreo, interpolación, precisión y datum entre productos."
+      ],
+      "studySideM": 20000,
+      "analysisScalesM": [
+        1000,
+        2000
+      ],
+      "selectionStatus": "team_selected_before_metrics"
+    },
+    {
+      "id": "payun-sector",
+      "name": "Payún Matrú — sector de estudio",
+      "body": "earth",
+      "center": [
+        -69.241,
+        -36.422
+      ],
+      "country": "Argentina",
+      "region": "Mendoza",
+      "targetBody": "moon",
+      "referenceRegionId": "lunar-south-sector",
+      "terrain": "Campo volcánico con caldera",
+      "hypothesis": "Examinar un sector volcánico de mayor relieve para contrastar la preparación de reconocimiento regional.",
+      "geology": "Smithsonian GVP clasifica Payún Matrú como conjunto/campo volcánico con escudo y caldera. La analogía aquí solo evalúa relieve, no igualdad litológica.",
+      "contextSourceIds": [
+        "gvp-payun"
+      ],
+      "novelty": "Novedad como análogo no evaluada; sistema volcánico conocido.",
+      "limitations": [
+        "Una caldera volcánica no equivale a un cráter de impacto.",
+        "La pendiente regional no mide bloques, polvo, cohesión ni obstáculos a escala de rover.",
+        "Análisis exploratorio del relieve regional, no validación de un análogo ni certificación de movilidad.",
+        "La Tierra no reproduce gravedad, vacío/atmósfera ni radiación del destino.",
+        "El cuadrado de estudio fue elegido por el equipo y puede incluir terrenos diferentes al accidente que le da nombre.",
+        "Una malla común no elimina diferencias de muestreo, interpolación, precisión y datum entre productos."
+      ],
+      "studySideM": 20000,
+      "analysisScalesM": [
+        1000,
+        2000
+      ],
+      "selectionStatus": "team_selected_before_metrics"
+    },
+    {
+      "id": "lunar-south-sector",
+      "name": "Polo sur lunar — sector 0° E, 89.5° S",
+      "body": "moon",
+      "center": [
+        0,
+        -89.5
+      ],
+      "terrain": "Sector polar lunar",
+      "selectionReason": "Ventana del equipo en la región polar de interés para exploración; no es un polígono oficial de aterrizaje o base.",
+      "contextSourceIds": [
+        "nasa-lunar-regions"
+      ],
+      "limitations": [
+        "No se evaluaron iluminación, hielo, temperatura ni restricciones de aterrizaje.",
+        "Análisis exploratorio del relieve regional, no validación de un análogo ni certificación de movilidad.",
+        "La Tierra no reproduce gravedad, vacío/atmósfera ni radiación del destino.",
+        "El cuadrado de estudio fue elegido por el equipo y puede incluir terrenos diferentes al accidente que le da nombre.",
+        "Una malla común no elimina diferencias de muestreo, interpolación, precisión y datum entre productos."
+      ],
+      "studySideM": 20000,
+      "analysisScalesM": [
+        1000,
+        2000
+      ],
+      "selectionStatus": "team_selected_before_metrics"
+    },
+    {
+      "id": "jezero-sector",
+      "name": "Jezero — sector 77.58° E, 18.44° N",
+      "body": "mars",
+      "center": [
+        77.58,
+        18.44
+      ],
+      "terrain": "Sector de cuenca de impacto",
+      "selectionReason": "Ventana del equipo dentro del entorno de Jezero para contrastar relieve de una región de exploración. El centro no se declara punto exacto de aterrizaje.",
+      "contextSourceIds": [
+        "nasa-jezero"
+      ],
+      "limitations": [
+        "El relieve por sí solo no demuestra equivalencia sedimentológica ni habitabilidad.",
+        "MOLA incorpora interpolaciones y no resuelve obstáculos pequeños.",
+        "Análisis exploratorio del relieve regional, no validación de un análogo ni certificación de movilidad.",
+        "La Tierra no reproduce gravedad, vacío/atmósfera ni radiación del destino.",
+        "El cuadrado de estudio fue elegido por el equipo y puede incluir terrenos diferentes al accidente que le da nombre.",
+        "Una malla común no elimina diferencias de muestreo, interpolación, precisión y datum entre productos."
+      ],
+      "studySideM": 20000,
+      "analysisScalesM": [
+        1000,
+        2000
+      ],
+      "selectionStatus": "team_selected_before_metrics"
+    }
+  ],
+  "sources": [
+    {
+      "id": "nasadem",
+      "agency": "NASA JPL / LP DAAC",
+      "product": "NASADEM_HGT.001",
+      "doi": "10.5067/MEaSUREs/NASADEM/NASADEM_HGT.001",
+      "url": "https://www.earthdata.nasa.gov/data/catalog/lpcloud-nasadem-hgt-001",
+      "documentationUrl": "https://lpdaac.usgs.gov/documents/2237/NASADEM_User_Guide_V13.pdf",
+      "mirrorCatalogUrl": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/nasadem",
+      "accessDate": "2026-11-14",
+      "observationInterval": [
+        "2000-02-11",
+        "2000-02-21"
+      ],
+      "nativeResolution": "1 arc second (~30 m at equator); not uniform metres",
+      "horizontalReference": "WGS84 geographic (EPSG:4326)",
+      "verticalReference": "Height in metres relative to EGM96 geoid, merged DEM",
+      "attribution": "NASA JPL (2020), NASADEM_HGT.001; COG delivery by Microsoft Planetary Computer",
+      "licenseNotes": "NASA product citation/data policy applies. Mirror STAC declares proprietary without a license link; retain this discrepancy for publication review. Do not infer a new license from the mirror.",
+      "limitations": [
+        "Reprocesamiento SRTM con datos auxiliares y relleno de vacíos; no es SRTMGL1 V003.",
+        "El espejo COG expone elevación, no la capa NUM de procedencia de cada celda.",
+        "El año 2000 no describe cambios recientes."
+      ]
+    },
+    {
+      "id": "lola",
+      "agency": "NASA GSFC / PDS Geosciences",
+      "product": "LDEM_75S_240M, V2.1",
+      "url": "https://pds-geosciences.wustl.edu/missions/lro/lola.htm",
+      "labelUrl": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/float_img/ldem_75s_240m_float.lbl",
+      "assetUrl": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/float_img/ldem_75s_240m_float.img",
+      "accessDate": "2026-11-14",
+      "observationInterval": [
+        "2009-07-13T17:33:17",
+        "2017-02-02T22:18:35"
+      ],
+      "nativeResolution": "240 m/pixel true at pole",
+      "horizontalReference": "Spherical polar stereographic, radius 1,737,400 m; ME/DE421",
+      "verticalReference": "Height in km relative to sphere radius 1737.4 km, converted to m; not areoid elevation",
+      "attribution": "LOLA Science Team / NASA GSFC / PDS",
+      "licenseNotes": "Public NASA PDS archive; cite instrument, product and method.",
+      "limitations": [
+        "Interpolación de trazas mediante GMT blockmedian/surface.",
+        "No mide temperatura, sombra permanente ni hielo."
+      ]
+    },
+    {
+      "id": "mola",
+      "agency": "NASA GSFC / PDS Geosciences",
+      "product": "MGS MOLA MEGDR MEGT44N000HB, product V2.0 / maintained PDS4 bundle",
+      "url": "https://pds-geosciences.wustl.edu/missions/mgs/mola.html",
+      "labelUrl": "https://pds-geosciences.wustl.edu/mgs/urn-nasa-pds-mgs_mola_topography_derived/meg128/megt44n000hb.lbl",
+      "xmlUrl": "https://pds-geosciences.wustl.edu/mgs/urn-nasa-pds-mgs_mola_topography_derived/meg128/megt44n000hb.xml",
+      "assetUrl": "https://pds-geosciences.wustl.edu/mgs/urn-nasa-pds-mgs_mola_topography_derived/meg128/megt44n000hb.img",
+      "accessDate": "2026-11-14",
+      "observationInterval": [
+        "1997-09-15T19:10:00",
+        "2001-06-30T11:10:40"
+      ],
+      "nativeResolution": "128 pixels/degree; 463.0576672 m projected equatorial spacing",
+      "horizontalReference": "IAU2000 planetocentric, east-positive; sphere radius 3,396,000 m",
+      "verticalReference": "Topography in metres relative to GMM3 areoid (degree/order 50)",
+      "attribution": "MOLA Science Team / NASA GSFC / PDS",
+      "licenseNotes": "Public NASA PDS archive; cite instrument, product and method.",
+      "limitations": [
+        "Las celdas sin observaciones están interpoladas; huecos de perfiles de hasta 12 km según la etiqueta.",
+        "No confundir cobertura de celdas finitas con observaciones directas.",
+        "Usar georreferenciación precisa de XML PDS4; MAP_SCALE PDS3 está redondeada."
+      ]
+    },
+    {
+      "id": "nasa-coipasa",
+      "agency": "NASA Earth Observatory",
+      "url": "https://science.nasa.gov/earth/earth-observatory/bolivian-salt-flats-151813/",
+      "title": "Bolivian Salt Flats",
+      "accessDate": "2026-11-14"
+    },
+    {
+      "id": "blm-amboy",
+      "agency": "US Bureau of Land Management",
+      "url": "https://www.blm.gov/visit/amboy-crater-national-natural-landmark",
+      "title": "Amboy Crater National Natural Landmark",
+      "accessDate": "2026-11-14"
+    },
+    {
+      "id": "gvp-payun",
+      "agency": "Smithsonian Global Volcanism Program",
+      "url": "https://volcano.si.edu/volcano.cfm?vn=357066",
+      "title": "Payún Matrú, volcano 357066",
+      "accessDate": "2026-11-14"
+    },
+    {
+      "id": "nasa-lunar-regions",
+      "agency": "NASA",
+      "url": "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/",
+      "title": "Lunar south polar exploration context, historical 2024 release",
+      "accessDate": "2026-11-14"
+    },
+    {
+      "id": "nasa-jezero",
+      "agency": "NASA JPL",
+      "url": "https://marsnext.jpl.nasa.gov/documents/LandingSiteWorksheet_Jezero_final.pdf",
+      "title": "Jezero candidate landing site data sheet (historical context)",
+      "accessDate": "2026-11-14"
+    }
+  ]
+}

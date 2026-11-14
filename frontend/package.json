@@ -13,7 +13,9 @@
     "watch": "ng build --watch --configuration development",
     "pretest": "node scripts/generate-primeui-license.mjs",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "validate:data": "node scripts/validate-data.mjs",
+    "test:data": "node --test scripts/*.test.mjs"
   },
   "private": true,
   "packageManager": "npm@12.2.0",
@@ -47,6 +49,8 @@
     "@playwright/test": "^1.65.1",
     "@tailwindcss/postcss": "^4.1.12",
     "@types/node": "^26.6.6",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
     "angular-eslint": "22.6.0",
     "eslint": "^10.12.0",
     "jsdom": "^30.0.0",
