@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "skills": {
+    "angular-developer": {
+      "source": "angular/skills",
+      "sourceType": "github",
+      "skillPath": "angular-developer/SKILL.md",
+      "computedHash": "50ac5be541125767b4864c31ecf2947558bf4a897b54cedd1d43e04b857f4e42"
+    },
+    "tailwind-css": {
+      "source": "blakee-marcus/tailwindcss-skill",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "6ef6df8d7942ecb4d26da2241c4c4e0784900279001a6fa4db09f996236e7dfd"
+    }
+  }
+}
