@@ -65,6 +65,79 @@ def test_discovered_candidates_preserve_science_export(client):
     assert client.get(url).json() == export
 
 
+SEARCH_URL = '/api/v1/discovered-candidates/search'
+
+
+def test_full_discovery_preserves_both_rankings_and_existing_values(client):
+    base = client.get('/api/v1/discovered-candidates').json()
+    response = client.get(SEARCH_URL, params={'west': -180, 'south': -90, 'east': 180, 'north': 90})
+    assert response.status_code == 200
+    data = response.json()
+    assert data['sourceSearch'] == base['search']
+    assert data['coverage']['status'] == 'measured'
+    assert data['coverage']['windowCount'] == 81
+    coverage_ids = {feature['id'] for feature in data['coverage']['features']}
+    assert len(coverage_ids) == 81
+    assert len(data['results']) == len(base['results']) == 2
+    for full, previous in zip(data['results'], base['results'], strict=True):
+        assert full['reference'] == previous['reference']
+        assert full['comparableWindows'] == len(full['features']) == 81
+        assert {feature['id'] for feature in full['features']} == coverage_ids
+        assert full['features'][:len(previous['features'])] == previous['features']
+    assert client.get('/api/v1/discovered-candidates').json() == base
+
+
+def test_search_filters_then_limits_local_ranking(client):
+    bounds = {'west': -66, 'south': -23, 'east': -65, 'north': -22}
+    params = {**bounds, 'reference_region_id': 'jezero-sector'}
+    response = client.get(SEARCH_URL, params={**params, 'limit': 2})
+    assert response.status_code == 200
+    data = response.json()
+    (group,) = data['results']
+    assert group['reference']['id'] == 'jezero-sector'
+    assert data['coverage']['windowCount'] == group['comparableWindows'] == 9
+    assert len(group['features']) == 2
+    assert all(
+        bounds['west'] <= feature['properties']['center'][0] <= bounds['east']
+        and bounds['south'] <= feature['properties']['center'][1] <= bounds['north']
+        for feature in group['features']
+    )
+    (first, second) = group['features']
+    assert first['properties']['comparison']['distance'] <= second['properties']['comparison']['distance']
+    preview = client.get('/api/v1/discovered-candidates', params={'reference_region_id': 'jezero-sector'}).json()
+    preview_ids = {feature['id'] for feature in preview['results'][0]['features']}
+    (local,) = client.get(SEARCH_URL, params=params).json()['results']
+    assert len(local['features']) == 9
+    assert group['features'] == local['features'][:2]
+    assert {feature['id'] for feature in local['features']} - preview_ids
+
+
+def test_search_distinguishes_partial_overlap_from_absent_coverage(client):
+    measured = client.get(SEARCH_URL, params={'west': -66, 'south': -23, 'east': -65, 'north': -22}).json()
+    feature = measured['coverage']['features'][0]
+    west = min(point[0] for point in feature['geometry']['coordinates'][0])
+    south = min(point[1] for point in feature['geometry']['coordinates'][0])
+    bounds = {'west': west + .04, 'south': south + .02, 'east': west + .05, 'north': south + .03}
+    partial = client.get(SEARCH_URL, params=bounds).json()
+    assert partial['coverage']['status'] == 'measured'
+    assert all(not group['features'] for group in partial['results'])
+
+    empty = client.get(SEARCH_URL, params={'west': 0, 'south': 0, 'east': .1, 'north': .1})
+    assert empty.status_code == 200
+    assert empty.json()['coverage'] == {
+        'type': 'FeatureCollection', 'status': 'no_measured_windows', 'windowCount': 0, 'features': [],
+    }
+    assert all(group['comparableWindows'] == 0 and not group['features'] for group in empty.json()['results'])
+
+
+def test_search_rejects_invalid_area_and_unknown_reference(client):
+    params = {'west': -66, 'south': -23, 'east': -65, 'north': -22}
+    assert client.get(SEARCH_URL, params={**params, 'west': -64}).status_code == 422
+    assert client.get(SEARCH_URL, params={**params, 'north': 91}).status_code == 422
+    assert client.get(SEARCH_URL, params={**params, 'limit': 0}).status_code == 422
+    assert client.get(SEARCH_URL, params={**params, 'reference_region_id': 'unknown'}).status_code == 404
+
+
 def test_site_environment_preserves_nasa_power_export(client):
     path = Repository().root / 'data/processed/terrestrial-environment.v1.json'
     export = json.loads(path.read_text(encoding='utf-8'))
@@ -80,6 +153,7 @@ def test_site_environment_preserves_nasa_power_export(client):
 
 @pytest.mark.parametrize(('route', 'filename'), [
     ('discovered-candidates', 'discovered-candidates.v1.json'),
+    ('discovered-candidates/search?west=-66&south=-23&east=-65&north=-22', 'discovered-candidates.full.v1.json'),
     ('sites/coipasa-sector/environment', 'terrestrial-environment.v1.json'),
 ])
 def test_unavailable_science_export_does_not_break_catalog(tmp_path, route, filename):
@@ -140,4 +214,5 @@ def test_cors_and_openapi(client):
     paths=client.get('/openapi.json').json()['paths']
     assert '/api/v1/compare' in paths
     assert '/api/v1/discovered-candidates' in paths
+    assert SEARCH_URL in paths
     assert '/api/v1/sites/{site_id}/environment' in paths

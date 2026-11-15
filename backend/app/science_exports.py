@@ -1,7 +1,7 @@
 """Contracts for the versioned outputs of the scientific pipeline."""
-from typing import Literal
+from typing import Annotated, Literal, Self
 
-from pydantic import BaseModel, FiniteFloat, NonNegativeInt
+from pydantic import BaseModel, Field, FiniteFloat, NonNegativeInt, model_validator
 
 Position = tuple[FiniteFloat, FiniteFloat]
 Bounds = tuple[FiniteFloat, FiniteFloat, FiniteFloat, FiniteFloat]
@@ -78,7 +78,7 @@ class WindowProperties(BaseModel):
 
 class WindowPolygon(BaseModel):
     type: Literal['Polygon']
-    coordinates: list[list[Position]]
+    coordinates: Annotated[list[Annotated[list[Position], Field(min_length=4)]], Field(min_length=1)]
 
 
 class DiscoveredWindow(BaseModel):
@@ -99,6 +99,50 @@ class CandidateDiscovery(BaseModel):
     schemaVersion: Literal['1.0.0']
     search: SearchCoverage
     method: DiscoveryMethod
+    results: list[DiscoveredWindows]
+
+
+class CompleteCandidateDiscovery(CandidateDiscovery):
+    @model_validator(mode='after')
+    def validate_complete_windows(self) -> Self:
+        window_ids = None
+        for group in self.results:
+            ids = {feature.id for feature in group.features}
+            if len(ids) != len(group.features) or len(ids) != self.search.measuredWindows:
+                raise ValueError('The full export must contain each measured window once per reference.')
+            if window_ids is not None and ids != window_ids:
+                raise ValueError('References must share the same measured windows.')
+            window_ids = ids
+        if window_ids is None and self.search.measuredWindows:
+            raise ValueError('Measured windows require at least one reference.')
+        return self
+
+
+class FootprintProperties(BaseModel):
+    tileId: str
+    centerInArea: bool
+
+
+class MeasuredFootprint(BaseModel):
+    type: Literal['Feature']
+    id: str
+    geometry: WindowPolygon
+    properties: FootprintProperties
+
+
+class MeasuredCoverage(BaseModel):
+    type: Literal['FeatureCollection']
+    status: Literal['measured', 'no_measured_windows']
+    windowCount: NonNegativeInt
+    features: list[MeasuredFootprint]
+
+
+class CandidateSearchResult(BaseModel):
+    schemaVersion: Literal['1.0.0']
+    boundsWgs84: Bounds
+    sourceSearch: SearchCoverage
+    method: DiscoveryMethod
+    coverage: MeasuredCoverage
     results: list[DiscoveredWindows]
 
 

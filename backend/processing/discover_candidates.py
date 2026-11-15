@@ -22,6 +22,7 @@ SIDE_M = 20_000
 SCALES_M = (1_000, 2_000)
 TILE_ID = re.compile(r'NASADEM_HGT_[ns]\d{2}[ew]\d{3}')
 OUTPUT = OUT / 'discovered-candidates.v1.json'
+FULL_OUTPUT = OUT / 'discovered-candidates.full.v1.json'
 
 
 def requested_tiles(bounds):
@@ -117,13 +118,17 @@ def compare_at_scale(candidate, reference, scale):
 
 
 def rank_candidates(candidates, reference, limit):
-    ranked = []
+    comparisons = []
     for candidate in candidates:
         primary = compare_at_scale(candidate, reference, SCALES_M[0])
-        if primary['distance'] is not None:
-            ranked.append((primary['distance'], candidate['id'], candidate, primary))
+        distance = primary['distance']
+        comparisons.append((distance is None, distance or 0, candidate['id'], candidate, primary))
+    ranked = sorted(comparisons)
+    comparable_count = sum(not unavailable for unavailable, *_ in ranked)
+    # The full export also retains measured footprints with incomplete comparisons.
+    selected = ranked if limit is None else ranked[:min(limit, comparable_count)]
     features = []
-    for _, identifier, candidate, primary in sorted(ranked)[:limit]:
+    for _, _, identifier, candidate, primary in selected:
         features.append({
             'type': 'Feature',
             'id': identifier,
@@ -142,7 +147,7 @@ def rank_candidates(candidates, reference, limit):
     return {
         'type': 'FeatureCollection',
         'reference': {key: reference[key] for key in ('id', 'name', 'body')},
-        'comparableWindows': len(ranked),
+        'comparableWindows': comparable_count,
         'features': features,
     }
 
@@ -197,9 +202,12 @@ def main():
     parser.add_argument('--reference', help='ID de referencia planetaria. Por defecto usa todas las disponibles.')
     parser.add_argument('--bounds', nargs=4, type=float, metavar=('WEST', 'SOUTH', 'EAST', 'NORTH'))
     parser.add_argument('--download', action='store_true', help='Descarga teselas faltantes de la extensión indicada.')
-    parser.add_argument('--limit', type=int, default=10, help='Máximo de ventanas devueltas por referencia.')
-    parser.add_argument('--output', type=Path, default=OUTPUT)
+    selection = parser.add_mutually_exclusive_group()
+    selection.add_argument('--limit', type=int, default=10, help='Máximo de ventanas devueltas por referencia.')
+    selection.add_argument('--all', action='store_true', help='Conserva todas las ventanas medidas por referencia.')
+    parser.add_argument('--output', type=Path)
     args = parser.parse_args()
+    output = args.output or (FULL_OUTPUT if args.all else OUTPUT)
     if args.limit < 1:
         parser.error('--limit debe ser positivo.')
     if args.bounds:
@@ -217,13 +225,13 @@ def main():
     if not references:
         parser.error(f'Referencia desconocida: {args.reference}')
     try:
-        results = discover(references, args.bounds, args.download, args.limit)
+        results = discover(references, args.bounds, args.download, None if args.all else args.limit)
     except requests.RequestException as error:
         status = error.response.status_code if error.response is not None else 'sin respuesta'
         raise SystemExit(f'No se pudo consultar NASADEM ({status}).') from None
 
-    save_json(args.output, results)
-    print(f"Ventanas medidas: {results['search']['measuredWindows']}. Resultados: {args.output}")
+    save_json(output, results)
+    print(f"Ventanas medidas: {results['search']['measuredWindows']}. Resultados: {output}")
 
 
 if __name__ == '__main__':

@@ -10,7 +10,7 @@ from jsonschema import Draft202012Validator, FormatChecker
 from jsonschema.exceptions import ValidationError
 from pydantic import BaseModel
 
-from .science_exports import CandidateDiscovery, EnvironmentExport
+from .science_exports import CandidateDiscovery, CompleteCandidateDiscovery, EnvironmentExport
 
 ROOT = Path(__file__).resolve().parents[2]
 Export = TypeVar('Export', bound=BaseModel)
@@ -23,6 +23,7 @@ class Repository:
         self._dataset = None
         self._provenance = None
         self._discovery = None
+        self._full_discovery = None
         self._environment = None
 
     def load(self):
@@ -60,6 +61,12 @@ class Repository:
             if self._discovery is None:
                 self._discovery = self._read_export('discovered-candidates.v1.json', CandidateDiscovery)
             return self._discovery
+
+    def full_discovery(self) -> CompleteCandidateDiscovery:
+        with self._lock:
+            if self._full_discovery is None:
+                self._full_discovery = self._read_export('discovered-candidates.full.v1.json', CompleteCandidateDiscovery)
+            return self._full_discovery
 
     def environment(self) -> EnvironmentExport:
         with self._lock:

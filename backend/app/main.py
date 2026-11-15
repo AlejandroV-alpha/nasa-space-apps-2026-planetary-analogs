@@ -4,8 +4,9 @@ from typing import Annotated
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field
+from .candidate_search import search_candidates
 from .repository import Repository, get_repository
-from .science_exports import Body, CandidateDiscovery, SiteEnvironmentResponse
+from .science_exports import Body, CandidateDiscovery, CandidateSearchResult, SiteEnvironmentResponse
 
 Repo = Annotated[Repository, Depends(get_repository)]
 
@@ -50,6 +51,28 @@ def create_app() -> FastAPI:
             return discovery
         results = [result for result in discovery.results if result.reference.id == reference_region_id]
         return discovery.model_copy(update={'results': results})
+
+    @api.get(
+        '/api/v1/discovered-candidates/search', tags=['Ciencia'],
+        summary='Ordenar candidatos medidos por similitud topográfica dentro de un área',
+        responses={404: {'description': 'Referencia planetaria desconocida'},
+                   503: {'description': 'Exportación científica completa ausente o inválida'}},
+    )
+    def search_discovered_candidates(
+        repo: Repo,
+        west: Annotated[float, Query(ge=-180, le=180)],
+        south: Annotated[float, Query(ge=-90, le=90)],
+        east: Annotated[float, Query(ge=-180, le=180)],
+        north: Annotated[float, Query(ge=-90, le=90)],
+        reference_region_id: str | None = None,
+        limit: Annotated[int | None, Query(ge=1)] = None,
+    ) -> CandidateSearchResult:
+        if west >= east or south >= north:
+            raise HTTPException(422, 'Usa oeste < este y sur < norte dentro de WGS84, sin cruzar el antimeridiano.')
+        if reference_region_id is not None:
+            repo.find('referenceRegions', reference_region_id)
+        discovery = repo.full_discovery()
+        return search_candidates(discovery, (west, south, east, north), reference_region_id, limit)
 
     @api.get('/api/v1/sites', tags=['Sitios'], summary='Listar y filtrar candidatos terrestres')
     def sites(repo: Repo, target_body: Body | None = None,
