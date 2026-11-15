@@ -1,0 +1,60 @@
+<section
+  aria-label="Mapa terrestre de candidatos"
+  class="relative overflow-hidden rounded-xl border border-surface-200 bg-surface-100 dark:border-surface-700 dark:bg-surface-900"
+>
+  @if (!available()) {
+    <div class="grid min-h-80 place-content-center gap-4 px-6 text-center">
+      <p class="text-sm">
+        El mapa necesita WebGL 2. Puedes consultar todos los candidatos desde la lista.
+      </p>
+      <button pButton type="button" class="justify-self-center" (click)="retry()">
+        Reintentar mapa
+      </button>
+    </div>
+  } @else {
+    <mgl-map
+      class="block h-[28rem] w-full xl:h-[37rem]"
+      [mapStyle]="style"
+      [scrollZoom]="false"
+      [cooperativeGestures]="true"
+      (mapLoad)="onLoad($event)"
+      (mapError)="failed.set(true)"
+      (webGlContextLost)="failed.set(true)"
+    >
+      <mgl-control mglNavigation position="top-right" />
+      <mgl-geojson-source id="candidate-sites" [data]="points()" />
+      @for (point of points().features; track point.properties.id) {
+        <mgl-marker [lngLat]="[point.geometry.coordinates[0], point.geometry.coordinates[1]]">
+          <button
+            type="button"
+            [attr.aria-label]="'Seleccionar en el mapa: ' + point.properties.name"
+            [attr.aria-pressed]="point.properties.id === selectedId()"
+            class="grid size-10 place-items-center rounded-full border-2 border-surface-0 bg-primary text-primary-contrast shadow-md focus-visible:outline-2 focus-visible:outline-primary aria-pressed:ring-4 aria-pressed:ring-primary-300"
+            (click)="siteSelected.emit(point.properties.id)"
+          >
+            <i class="pi pi-map-marker" aria-hidden="true"></i>
+          </button>
+        </mgl-marker>
+      }
+    </mgl-map>
+    @if (!ready() && !failed()) {
+      <p
+        role="status"
+        class="pointer-events-none absolute top-4 left-4 rounded-md bg-surface-0 px-3 py-2 text-xs text-surface-900"
+      >
+        Cargando mapa…
+      </p>
+    }
+    @if (failed()) {
+      <div
+        role="status"
+        class="flex flex-wrap items-center gap-2 border-t border-surface-200 bg-surface-0 p-3 text-xs dark:border-surface-700 dark:bg-surface-900"
+      >
+        El mapa base tiene problemas de carga. La lista sigue disponible.
+        <button type="button" class="font-semibold underline" (click)="retry()">
+          Reintentar mapa
+        </button>
+      </div>
+    }
+  }
+</section>

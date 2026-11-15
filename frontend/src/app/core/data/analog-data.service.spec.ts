@@ -155,7 +155,7 @@ describe('AnalogDataService', () => {
     await TestBed.inject(ApplicationRef).whenStable();
   }
 
-  it('carga el dataset estático y expone sitios y regiones', async () => {
+  it('carga el catálogo API y expone sitios y regiones', async () => {
     expect(service.isLoading()).toBe(true);
     await respond(DATASET);
     expect(service.isLoading()).toBe(false);

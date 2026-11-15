@@ -4,13 +4,24 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 
 ## Development server
 
-To start a local development server, run:
+Start FastAPI from the repository root. On Windows, enable UTF-8 for Python
+so the backend reads the scientific JSON exports correctly.
+
+```powershell
+$env:PYTHONUTF8 = '1'
+uv run --with-requirements backend/requirements.txt python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
+```
+
+From `frontend/`, install the locked dependencies and start Angular:
 
 ```bash
+npm ci
 npm start
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Open `http://localhost:4200/`. Angular proxies `/api/**` to FastAPI. The app
+uses the live catalog, comparison and provenance endpoints. Failed requests
+show a retry action.
 
 ## Code scaffolding
 
@@ -58,23 +69,51 @@ The npm scripts generate `src/app/core/config/primeui-license.ts`, which Git
 ignores. Angular embeds the value in the compiled JavaScript. Deploy the usual
 static build output and treat its license value as visible to browsers.
 
+### Connect a deployed frontend to FastAPI
+
+For same-origin deployment, forward `/api/v1/**` to FastAPI and serve
+`index.html` for Angular routes. With a separate HTTPS API, including when
+using GitHub Pages, pass the complete API prefix at build time. On PowerShell:
+
+```powershell
+$definition = "PLANETARY_API_BASE_URL='https://api.example.org/api/v1'"
+npm run build -- --define $definition
+```
+
+Add the deployed frontend origin to FastAPI's `CORS_ORIGINS`.
+The GitHub Pages workflow reads the repository variable
+`PLANETARY_API_BASE_URL`, with the full HTTPS prefix ending in `/api/v1`.
+MapLibre worker assets are included in the Angular build. The browser loads
+the attributed OpenStreetMap basemap and the candidate list remains
+available when the map cannot load.
+
+On Windows, `GET /api/v1/catalog` returned HTTP 200 with
+`Siloli â€” sector de estudio` before enabling Python UTF-8. The same request
+returned `Siloli — sector de estudio` after restarting with `PYTHONUTF8=1`.
+This affects names and descriptions shown by Angular. The backend reads the
+JSON using Python's default text encoding.
+
 ## Running unit tests
 
 To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
 
 ```bash
-npm test
+npm test -- --watch=false
 ```
 
 ## Running end-to-end tests
 
-For end-to-end (e2e) testing, run:
+Playwright starts Angular and uses controlled responses based on the
+versioned export by default. Set `PLAYWRIGHT_LIVE_API=1` with FastAPI running
+to exercise the real API. The retry scenario still simulates HTTP 503 and
+the marker test intercepts basemap tiles to avoid network dependence.
 
 ```bash
-ng e2e
+npx playwright install chromium
+npx playwright test
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+With an installed Chrome, `PLAYWRIGHT_CHROMIUM_PATH` can point to its executable.
 
 ## Additional Resources
 

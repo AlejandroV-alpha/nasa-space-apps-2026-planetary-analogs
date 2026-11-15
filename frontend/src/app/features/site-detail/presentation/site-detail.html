@@ -1,0 +1,135 @@
+<section class="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
+  <a
+    routerLink="/explorar"
+    [queryParams]="backQuery()"
+    class="mb-7 inline-flex items-center gap-2 text-sm font-medium text-primary underline underline-offset-4"
+  >
+    <i class="pi pi-arrow-left" aria-hidden="true"></i> Volver al explorador
+  </a>
+  <app-data-state
+    [loading]="catalog.isLoading()"
+    [failed]="!!catalog.error()"
+    (retry)="catalog.reload()"
+  >
+    @if (site(); as candidate) {
+      <header class="border-b border-surface-200 pb-8 dark:border-surface-700">
+        <p class="mb-3 text-sm font-semibold text-primary">
+          Ficha científica · {{ candidate.country }}
+        </p>
+        <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">{{ candidate.name }}</h1>
+        <p class="mt-4 max-w-3xl leading-7 text-muted-color">{{ candidate.summary }}</p>
+        @if (catalog.dataset(); as data) {
+          <div class="mt-4">
+            <p-tag severity="secondary" [value]="catalogStatus(data.status)" />
+          </div>
+        }
+        <dl class="mt-6 grid gap-4 text-sm sm:grid-cols-3">
+          <div>
+            <dt class="text-muted-color">Identificador</dt>
+            <dd class="font-medium">{{ candidate.id }}</dd>
+          </div>
+          <div>
+            <dt class="text-muted-color">Longitud, latitud (WGS84)</dt>
+            @if (validEarthPosition(candidate.geometry?.coordinates)) {
+              <dd class="font-medium">
+                {{ candidate.geometry.coordinates[0] }}°, {{ candidate.geometry.coordinates[1] }}°
+              </dd>
+            } @else {
+              <dd>Sin dato</dd>
+            }
+          </div>
+          @if (candidate.studyArea) {
+            <div>
+              <dt class="text-muted-color">Geometría de estudio</dt>
+              <dd class="font-medium">
+                Polígono · {{ candidate.studyArea.coordinates[0]?.length ?? 0 }} vértices de
+                contorno, incluido el cierre
+              </dd>
+            </div>
+          }
+        </dl>
+      </header>
+
+      <section class="py-8" aria-labelledby="metrics">
+        <h2 id="metrics" class="text-2xl font-semibold tracking-tight">Indicadores topográficos</h2>
+        <div class="mt-4 grid gap-4 sm:grid-cols-3">
+          @for (metric of candidate.metrics; track metric.key) {
+            <article
+              class="rounded-xl border border-surface-200 bg-surface-0 p-4 dark:border-surface-700 dark:bg-surface-900"
+            >
+              <h3 class="text-sm font-medium text-muted-color">{{ labels[metric.key] }}</h3>
+              <p class="mt-2 text-2xl font-semibold tabular-nums">{{ formatMetric(metric) }}</p>
+              @if (metric.status === 'computed') {
+                <p class="mt-2 text-xs text-muted-color">
+                  Calculado a {{ metric.analysisScaleM }} m · Cobertura
+                  {{ metric.validCoverageFraction * 100 }} %
+                </p>
+              }
+              @if (metric.status === 'missing' || metric.status === 'not_applicable') {
+                <p class="mt-2 text-xs text-muted-color">{{ metric.missingReason }}</p>
+              }
+              @if (catalog.methodById(metric.methodId); as method) {
+                <a
+                  routerLink="/metodologia"
+                  [fragment]="method.id"
+                  class="mt-2 inline-block text-xs font-medium text-primary underline"
+                  >{{ method.name }}</a
+                >
+              }
+            </article>
+          } @empty {
+            <p class="text-muted-color">Sin indicadores disponibles.</p>
+          }
+        </div>
+      </section>
+
+      <section
+        class="border-t border-surface-200 py-8 dark:border-surface-700"
+        aria-labelledby="assessment"
+      >
+        <h2 id="assessment" class="text-2xl font-semibold tracking-tight">
+          Interpretación y límites
+        </h2>
+        @for (assessment of candidate.assessments; track assessment.referenceRegionId) {
+          <article class="mt-5 space-y-3">
+            <h3 class="font-semibold">
+              {{
+                catalog.regionById(assessment.referenceRegionId)?.name ??
+                  assessment.referenceRegionId
+              }}
+            </h3>
+            <p><strong>Ensayo propuesto</strong> {{ assessment.testUseCase }}</p>
+            <p>{{ assessment.interpretation }}</p>
+            <ul class="list-disc space-y-2 pl-5 text-sm leading-6 text-muted-color">
+              @for (limitation of assessment.limitations; track limitation) {
+                <li>{{ limitation }}</li>
+              }
+            </ul>
+            <a
+              routerLink="/comparar"
+              [queryParams]="comparisonQuery(assessment.referenceRegionId, candidate.id)"
+              class="inline-block font-semibold text-primary underline underline-offset-4"
+              >Comparar este candidato</a
+            >
+          </article>
+        } @empty {
+          <p class="mt-3 text-muted-color">Sin evaluaciones disponibles.</p>
+        }
+      </section>
+
+      <section
+        class="border-t border-surface-200 py-8 dark:border-surface-700"
+        aria-labelledby="sources-heading"
+      >
+        <h2 id="sources-heading" class="text-2xl font-semibold tracking-tight">Fuentes</h2>
+        <app-science-sources [sources]="sources()" />
+      </section>
+    } @else if (catalog.dataset()) {
+      <h1 class="text-3xl font-semibold">Candidato no encontrado</h1>
+      <p class="mt-3 text-muted-color">
+        El catálogo actual no incluye este identificador. Vuelve al explorador para elegir un
+        candidato disponible.
+      </p>
+    }
+  </app-data-state>
+</section>

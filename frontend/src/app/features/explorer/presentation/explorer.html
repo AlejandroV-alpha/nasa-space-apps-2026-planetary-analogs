@@ -1,0 +1,228 @@
+<section class="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14">
+  <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="mb-2 text-sm font-semibold text-primary">Tierra · Luna · Marte</p>
+      <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">Explorar candidatos</h1>
+      <p class="mt-3 max-w-2xl leading-7 text-muted-color">
+        Elige un destino y consulta los sectores terrestres estudiados frente a su región de
+        referencia.
+      </p>
+    </div>
+    @if (catalog.dataset(); as data) {
+      <p-tag severity="secondary" [value]="catalogStatus(data.status)" />
+    }
+  </div>
+
+  <app-data-state
+    [loading]="catalog.isLoading()"
+    [failed]="!!catalog.error()"
+    (retry)="catalog.reload()"
+  >
+    @if (catalog.dataset()) {
+      <div
+        class="mb-6 grid items-end gap-4 rounded-xl border border-surface-200 bg-surface-0 p-4 dark:border-surface-700 dark:bg-surface-900 sm:grid-cols-[auto_minmax(0,1fr)] sm:p-5"
+      >
+        <fieldset>
+          <legend class="mb-2 text-sm font-medium">Destino planetario</legend>
+          <div class="flex gap-2">
+            <button
+              pButton
+              type="button"
+              [outlined]="state().body !== 'moon'"
+              [attr.aria-pressed]="state().body === 'moon'"
+              (click)="chooseBody('moon')"
+            >
+              Luna
+            </button>
+            <button
+              pButton
+              type="button"
+              [outlined]="state().body !== 'mars'"
+              [attr.aria-pressed]="state().body === 'mars'"
+              (click)="chooseBody('mars')"
+            >
+              Marte
+            </button>
+          </div>
+        </fieldset>
+        <div>
+          <label
+            id="explorer-region-label"
+            for="explorer-region"
+            class="mb-2 block text-sm font-medium"
+            >Región de referencia</label
+          >
+          <p-select
+            inputId="explorer-region"
+            ariaLabelledBy="explorer-region-label"
+            [options]="state().regions"
+            optionLabel="name"
+            optionValue="id"
+            [ngModel]="state().region?.id"
+            (ngModelChange)="chooseRegion($event)"
+            placeholder="Sin regiones disponibles"
+            class="w-full"
+          />
+        </div>
+      </div>
+
+      @if (state().invalid) {
+        <p-message severity="warn" styleClass="mb-4"
+          >Parte de la selección del enlace ya no está disponible. Puedes ajustarla con los
+          controles.</p-message
+        >
+      }
+
+      @if (state().region; as region) {
+        <details
+          class="mb-5 rounded-lg border border-surface-200 px-4 py-3 text-sm dark:border-surface-700"
+        >
+          <summary class="cursor-pointer font-medium">Sobre {{ region.name }}</summary>
+          <p class="mt-2 leading-6">{{ region.description }}</p>
+          <p class="mt-2 text-muted-color">Marco planetario: {{ region.crs }}</p>
+        </details>
+      }
+
+      <div class="mb-4 flex gap-2 lg:hidden" aria-label="Vista del explorador">
+        <button
+          pButton
+          type="button"
+          [outlined]="mapView()"
+          [attr.aria-pressed]="!mapView()"
+          (click)="mapView.set(false)"
+        >
+          Lista
+        </button>
+        <button
+          pButton
+          type="button"
+          [outlined]="!mapView()"
+          [attr.aria-pressed]="mapView()"
+          (click)="mapView.set(true)"
+        >
+          Mapa
+        </button>
+      </div>
+
+      <div class="grid gap-6 lg:grid-cols-[minmax(17rem,0.7fr)_minmax(0,1.3fr)]">
+        <section
+          [class.hidden]="mapView()"
+          class="min-w-0 lg:block"
+          aria-labelledby="candidate-heading"
+        >
+          <h2 id="candidate-heading" class="mb-3 text-xl font-semibold">
+            Candidatos ({{ state().candidates.length }})
+          </h2>
+          <div class="space-y-3">
+            @for (site of state().candidates; track site.id) {
+              <article
+                class="rounded-xl border border-surface-200 bg-surface-0 p-4 motion-safe:transition-colors dark:border-surface-700 dark:bg-surface-900"
+                [class.ring-2]="state().selected?.id === site.id"
+                [class.ring-primary]="state().selected?.id === site.id"
+              >
+                <h3>
+                  <button
+                    type="button"
+                    class="text-left font-semibold hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
+                    [attr.aria-pressed]="state().selected?.id === site.id"
+                    (click)="selectSite(site.id)"
+                  >
+                    {{ site.name }}
+                  </button>
+                </h3>
+                <p class="mt-1 text-sm text-muted-color">{{ site.country }}</p>
+                @if (state().selected?.id === site.id) {
+                  <p class="mt-2 text-sm leading-6">{{ site.summary }}</p>
+                }
+                @if (!validEarthPosition(site.geometry?.coordinates)) {
+                  <p class="mt-2 text-sm text-muted-color">Ubicación no disponible en el mapa.</p>
+                }
+                <div class="mt-3 flex flex-wrap items-center gap-3">
+                  <a
+                    [routerLink]="['/sitios', site.id]"
+                    [queryParams]="query()"
+                    class="text-sm font-medium text-primary underline underline-offset-4"
+                    >Ver ficha<span class="sr-only"> de {{ site.name }}</span></a
+                  >
+                  <button
+                    pButton
+                    type="button"
+                    size="small"
+                    [outlined]="true"
+                    [attr.aria-pressed]="state().siteIds.includes(site.id)"
+                    [disabled]="state().siteIds.length >= 3 && !state().siteIds.includes(site.id)"
+                    [attr.aria-label]="'Comparación: ' + site.name"
+                    (click)="toggleSite(site.id)"
+                  >
+                    {{ state().siteIds.includes(site.id) ? 'Quitar' : 'Añadir' }}
+                  </button>
+                </div>
+              </article>
+            } @empty {
+              <p
+                class="rounded-lg border border-surface-200 p-4 text-sm text-muted-color dark:border-surface-700"
+              >
+                No hay candidatos para esta referencia. Elige otro destino o región.
+              </p>
+            }
+          </div>
+        </section>
+        <div [class.hidden]="!mapView()" class="min-w-0 lg:block">
+          @defer (on viewport) {
+            <app-candidate-map
+              [sites]="state().candidates"
+              [selectedId]="state().selected?.id"
+              (siteSelected)="selectSite($event)"
+            />
+          } @placeholder {
+            <div
+              class="grid h-[28rem] place-items-center rounded-xl border border-surface-200 bg-surface-100 text-sm text-muted-color dark:bg-surface-900"
+            >
+              Mapa terrestre
+            </div>
+          }
+          @if (mapView() && state().selected; as selected) {
+            <div class="mt-3 rounded-lg border border-surface-200 p-4 lg:hidden">
+              <p class="font-semibold">{{ selected.name }}</p>
+              <p class="mt-1 text-sm leading-6">{{ selected.summary }}</p>
+              <div class="mt-3 flex flex-wrap items-center gap-3">
+                <a
+                  [routerLink]="['/sitios', selected.id]"
+                  [queryParams]="query()"
+                  class="text-sm font-medium text-primary underline"
+                  >Ver ficha</a
+                >
+                <button
+                  pButton
+                  type="button"
+                  size="small"
+                  [outlined]="true"
+                  [attr.aria-pressed]="state().siteIds.includes(selected.id)"
+                  [disabled]="state().siteIds.length >= 3 && !state().siteIds.includes(selected.id)"
+                  (click)="toggleSite(selected.id)"
+                >
+                  {{ state().siteIds.includes(selected.id) ? 'Quitar' : 'Añadir a comparación' }}
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <section
+        class="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-surface-200 bg-surface-0 p-4 dark:border-surface-700 dark:bg-surface-900"
+        aria-label="Selección para comparar"
+      >
+        <p aria-live="polite" class="text-sm">
+          <strong>{{ state().siteIds.length }} seleccionados.</strong> Elige entre dos y tres
+          candidatos de la misma referencia.
+        </p>
+        @if (state().siteIds.length >= 2) {
+          <a pButton routerLink="/comparar" [queryParams]="query()"
+            >Abrir comparación <i class="pi pi-arrow-right" aria-hidden="true"></i
+          ></a>
+        }
+      </section>
+    }
+  </app-data-state>
+</section>

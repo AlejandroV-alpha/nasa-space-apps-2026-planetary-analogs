@@ -1,9 +1,10 @@
 import { provideHttpClient } from '@angular/common/http';
 import { type ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { TitleStrategy, provideRouter } from '@angular/router';
+import { TitleStrategy, provideRouter, withInMemoryScrolling } from '@angular/router';
 import { providePrimeNG } from 'primeng/config';
 import { routes } from './app.routes';
 import { PRIMEUI_LICENSE } from './core/config/primeui-license';
+import { AnalogDataService } from './core/data/analog-data.service';
 import { AppTitleStrategy } from './core/router/app-title.strategy';
 import { PLANETARY_THEME_PRESET } from './core/theme/planetary-theme.preset';
 
@@ -11,7 +12,14 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(),
-    provideRouter(routes),
+    provideRouter(
+      routes,
+      withInMemoryScrolling({
+        scrollPositionRestoration: 'enabled',
+        anchorScrolling: 'enabled',
+      }),
+    ),
+    AnalogDataService,
     { provide: TitleStrategy, useClass: AppTitleStrategy },
     providePrimeNG({
       license: PRIMEUI_LICENSE,

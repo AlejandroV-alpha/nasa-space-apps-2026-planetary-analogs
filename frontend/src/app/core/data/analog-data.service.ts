@@ -1,5 +1,6 @@
 import { httpResource } from '@angular/common/http';
-import { Service, computed } from '@angular/core';
+import { Service, computed, inject } from '@angular/core';
+import { API_BASE_URL, DEFAULT_API_BASE_URL } from '../config/api-url';
 import {
   type AnalogDataset,
   type ComparisonRow,
@@ -12,11 +13,7 @@ import {
   type TargetBody,
 } from './analog-dataset.model';
 
-/**
- * Ruta relativa al <base href>, para que funcione también si la app se publica en un subdirectorio.
- * El archivo se genera/valida fuera del navegador (npm run validate:data); la app nunca procesa rásteres.
- */
-export const ANALOG_DATASET_URL = 'data/analogs.v1.json';
+export const ANALOG_DATASET_URL = DEFAULT_API_BASE_URL + '/catalog';
 
 /** Comprobación mínima en tiempo de ejecución. La validación completa corre en CI. */
 export function parseAnalogDataset(raw: unknown): AnalogDataset {
@@ -40,9 +37,16 @@ export function parseAnalogDataset(raw: unknown): AnalogDataset {
 
 @Service()
 export class AnalogDataService {
-  private readonly resource = httpResource<AnalogDataset>(() => ANALOG_DATASET_URL, {
-    parse: parseAnalogDataset,
-  });
+  private readonly apiBase = inject(API_BASE_URL);
+  private readonly resource = httpResource<AnalogDataset>(
+    () => ({
+      url: this.apiBase + '/catalog',
+      timeout: 12000,
+    }),
+    {
+      parse: parseAnalogDataset,
+    },
+  );
 
   readonly isLoading = this.resource.isLoading;
   readonly error = this.resource.error;
@@ -129,11 +133,22 @@ export class AnalogDataService {
       const scales = new Set(all.map((m) => m?.analysisScaleM));
       const methods = new Set(all.map((m) => m?.methodId));
       const statuses = new Set(all.map((m) => m?.status));
-      const comparable = sites.length >= 1 && sites.length <= 3 &&
+      const comparable =
+        sites.length >= 1 &&
+        sites.length <= 3 &&
         sites.every((site) => site?.assessments.some((a) => a.referenceRegionId === regionId)) &&
-        all.every((m) => m !== null && m.value !== null && Number.isFinite(m.value) &&
-          m.unit === unit && m.methodId !== null && m.analysisScaleM !== null) &&
-        scales.size === 1 && methods.size === 1 && statuses.size === 1;
+        all.every(
+          (m) =>
+            m !== null &&
+            m.value !== null &&
+            Number.isFinite(m.value) &&
+            m.unit === unit &&
+            m.methodId !== null &&
+            m.analysisScaleM !== null,
+        ) &&
+        scales.size === 1 &&
+        methods.size === 1 &&
+        statuses.size === 1;
       return { key, unit, reference, sites: siteMetrics, comparable };
     });
   }
