@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal, viewChild } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -9,9 +9,14 @@ import { BackendHealth } from '../../../core/data/backend-health';
 import type { TargetBody } from '../../../core/data/analog-dataset.model';
 import { DataState } from '../../../shared/components/data-state';
 import { catalogStatus, metricValue } from '../../../shared/utils/science-format';
-import { filterGroups, WINDOW_METRICS, type Destination } from '../domain/discovery';
+import {
+  rankWindows,
+  WINDOW_METRICS,
+  type Destination,
+  type DiscoveryQuery,
+} from '../domain/discovery';
 import { areaFrom, type Area } from '../domain/geographic-area';
-import { DiscoveryData } from '../infrastructure/discovery-data';
+import { DiscoveryData, searchErrorText } from '../infrastructure/discovery-data';
 import { CandidateMap } from './candidate-map';
 import { WindowEvidence } from './window-evidence';
 
@@ -34,7 +39,8 @@ export class DiscoveryExplorer {
   private readonly router = inject(Router);
   private readonly params = toSignal(this.route.queryParamMap, { requireSync: true });
   protected readonly catalog = inject(AnalogDataService);
-  protected readonly discovery = inject(DiscoveryData).resource;
+  private readonly discoveryData = inject(DiscoveryData);
+  protected readonly searchErrorText = searchErrorText;
   protected readonly health = inject(BackendHealth).status;
   protected readonly catalogStatus = catalogStatus;
   protected readonly labels = WINDOW_METRICS;
@@ -63,8 +69,9 @@ export class DiscoveryExplorer {
       return { body, options, selected, invalid: requested !== null && requested !== selected?.id };
     });
   });
-  protected readonly savedArea = computed(() =>
-    areaFrom((this.params().get('area') ?? '').split(',')),
+  protected readonly savedArea = computed(
+    () => areaFrom((this.params().get('area') ?? '').split(',')),
+    { equal: (previous, next) => previous?.join(',') === next?.join(',') },
   );
   protected readonly pendingCoordinates = signal<string[] | undefined>(undefined);
   protected readonly coordinates = computed(
@@ -73,28 +80,71 @@ export class DiscoveryExplorer {
   protected readonly draftArea = computed(() => areaFrom(this.coordinates()));
   protected readonly badArea = signal(false);
   protected readonly hasChanges = computed(() => this.pendingCoordinates() !== undefined);
+  private readonly query = computed<DiscoveryQuery | undefined>(
+    () => {
+      const area = this.savedArea();
+      const references = this.references();
+      if (!area || !references.some((entry) => entry.selected)) {
+        return undefined;
+      }
+
+      return this.destination() === 'both'
+        ? {
+            area,
+            referenceIds: references.flatMap(({ selected }) => (selected ? [selected.id] : [])),
+          }
+        : { area, referenceId: references[0].selected?.id };
+    },
+    {
+      equal: (previous, next) =>
+        previous?.area === next?.area &&
+        previous?.referenceId === next?.referenceId &&
+        previous?.referenceIds?.join(',') === next?.referenceIds?.join(','),
+    },
+  );
+
+  protected readonly discovery = rxResource({
+    params: this.query,
+    stream: ({ params }) => this.discoveryData.search(params),
+  });
+  protected readonly result = computed(() => {
+    if (!this.hasChanges() && this.discovery.hasValue()) {
+      return this.discovery.value();
+    }
+    return undefined;
+  });
+  protected readonly coverage = computed(() => this.result()?.coverage);
+  protected readonly hasMeasuredCenters = computed(() =>
+    this.coverage()?.features.some((feature) => feature.properties.centerInArea),
+  );
   protected readonly groups = computed(() => {
-    const results = this.discovery.hasValue() ? this.discovery.value().results : [];
-    const area = this.hasChanges() ? undefined : this.savedArea();
-    const ids = this.references().flatMap(({ selected }) => (selected ? [selected.id] : []));
-    return filterGroups(results, ids, area);
+    const result = this.result();
+    if (!result) return [];
+
+    return this.references().flatMap(({ selected }) => {
+      if (!selected) return [];
+
+      const group = result.results.find((item) => item.reference.id === selected.id);
+      return [
+        {
+          regionId: selected.id,
+          comparableWindows: group?.comparableWindows ?? 0,
+          rows: group ? rankWindows(group) : [],
+        },
+      ];
+    });
   });
   protected readonly windows = computed(() => this.groups().flatMap((group) => group.rows));
-  protected readonly invalidWindows = computed(() => {
-    if (!this.discovery.hasValue()) {
-      return 0;
-    }
-    const selectedIds = new Set(this.references().map(({ selected }) => selected?.id));
-    return this.discovery
-      .value()
-      .results.reduce(
-        (total, group) => total + (selectedIds.has(group.reference.id) ? group.invalidWindows : 0),
-        0,
-      );
+  protected readonly selected = computed(() => {
+    const key = this.params().get('ventana');
+    if (!key) return undefined;
+
+    const id = key.slice(key.indexOf('/') + 1);
+    return (
+      this.windows().find((row) => row.key === key) ??
+      this.windows().find((row) => row.window.id === id)
+    );
   });
-  protected readonly selected = computed(() =>
-    this.windows().find((row) => row.key === this.params().get('ventana')),
-  );
   protected readonly unavailableWindow = computed(
     () => this.params().has('ventana') && !this.selected(),
   );
@@ -103,11 +153,12 @@ export class DiscoveryExplorer {
   );
   protected readonly related = computed(() => {
     const selected = this.selected();
-    if (!selected || !this.discovery.hasValue()) {
+    const result = this.result();
+    if (!selected || !result) {
       return [];
     }
 
-    const results = this.discovery.value().results;
+    const results = result.results;
     return this.references().flatMap(({ selected: region }) => {
       const window = results
         .find((group) => group.reference.id === region?.id)
@@ -123,11 +174,11 @@ export class DiscoveryExplorer {
   }));
 
   protected chooseDestination(destination: Destination): void {
-    this.update({ cuerpo: destination, region: null, ventana: null });
+    void this.update({ cuerpo: destination, region: null });
   }
 
   protected chooseReference(body: TargetBody, id: string): void {
-    this.update({ [body]: id, region: null, ventana: null });
+    void this.update({ [body]: id, region: null });
   }
 
   protected coordinateChanged(index: number, value: string): void {
@@ -150,11 +201,15 @@ export class DiscoveryExplorer {
       return;
     }
     const bounds = area.join(',');
-    if (
-      (this.params().get('area') === bounds && !this.params().has('ventana')) ||
-      (await this.update({ area: bounds, ventana: null }))
-    ) {
+    if (this.params().get('area') === bounds) {
       this.pendingCoordinates.set(undefined);
+      this.discovery.reload();
+      return;
+    }
+
+    const submitted = this.pendingCoordinates();
+    if (await this.update({ area: bounds, ventana: null })) {
+      if (this.pendingCoordinates() === submitted) this.pendingCoordinates.set(undefined);
     }
   }
 

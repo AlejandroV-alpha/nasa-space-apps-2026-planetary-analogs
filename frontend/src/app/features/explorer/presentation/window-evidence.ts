@@ -7,7 +7,7 @@ import { metricValue } from '../../../shared/utils/science-format';
 import {
   WINDOW_METRICS,
   type DiscoveredWindow,
-  type Discovery,
+  type DiscoverySearch,
   type WindowMetric,
 } from '../domain/discovery';
 
@@ -20,14 +20,16 @@ export class WindowEvidence {
   private readonly catalog = inject(AnalogDataService);
   readonly window = input.required<DiscoveredWindow>();
   readonly reference = input.required<ReferenceRegion>();
-  readonly discovery = input.required<Discovery>();
+  readonly discovery = input.required<Pick<DiscoverySearch, 'sourceSearch' | 'method'>>();
   protected readonly labels = WINDOW_METRICS;
   protected readonly metricValue = metricValue;
   protected readonly sources = computed(() =>
     this.catalog.sourcesFor(Array.from(new Set(['nasadem', ...this.reference().sourceIds]))),
   );
   protected readonly tile = computed(() =>
-    this.discovery().search.tiles.find((tile) => tile.tileId === this.window().properties.tileId),
+    this.discovery().sourceSearch.tiles.find(
+      (tile) => tile.tileId === this.window().properties.tileId,
+    ),
   );
   protected barWidth(value: number | null, other: number | null): number {
     if (value === null || other === null) {

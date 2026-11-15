@@ -29,7 +29,8 @@
       }
       @if (drawError()) {
         <p role="alert" class="text-sm">
-          Rectángulo inválido. Evita cruzar el antimeridiano y selecciona dos esquinas diferentes.
+          Rectángulo inválido. Marca dos esquinas diferentes. Para cruzar el antimeridiano,
+          introduce los límites manualmente.
         </p>
       }
     </div>
@@ -48,7 +49,7 @@
       class="block h-[clamp(21rem,57svh,29rem)] w-full lg:h-[clamp(29rem,62vh,40rem)]"
       [mapStyle]="style"
       [scrollZoom]="false"
-      [renderWorldCopies]="!discovery()"
+      [renderWorldCopies]="!discovery() || crossesAntimeridian()"
       [cooperativeGestures]="true"
       (mapLoad)="onLoad($event)"
       (mapError)="failed.set(true)"
@@ -69,6 +70,19 @@
           type="line"
           source="discovery-area"
           [paint]="{ 'line-color': colors().land, 'line-width': 2, 'line-dasharray': [3, 2] }"
+        />
+        <mgl-geojson-source id="discovery-coverage" [data]="coverageShape()" />
+        <mgl-layer
+          id="discovery-coverage-fill"
+          type="fill"
+          source="discovery-coverage"
+          [paint]="{ 'fill-color': colors().coverage, 'fill-opacity': 0.16 }"
+        />
+        <mgl-layer
+          id="discovery-coverage-outline"
+          type="line"
+          source="discovery-coverage"
+          [paint]="{ 'line-color': colors().coverage, 'line-width': 1.5 }"
         />
         <mgl-geojson-source id="discovery-windows" [data]="polygons()" />
         <mgl-layer

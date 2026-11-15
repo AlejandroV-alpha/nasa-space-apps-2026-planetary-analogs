@@ -8,16 +8,17 @@ export function areaFrom(values: readonly (number | string)[]): Area | undefined
   }
 
   const [west, south, east, north] = values.map(Number);
-  // Keep rectangles inside the terrestrial Mercator map and reject ambiguous dateline spans.
+  const width = east >= west ? east - west : 360 + east - west;
+  // A west bound greater than east explicitly selects the arc across the antimeridian.
   if (
     [west, south, east, north].every(Number.isFinite) &&
-    west >= -180 &&
-    east <= 180 &&
+    Math.abs(west) <= 180 &&
+    Math.abs(east) <= 180 &&
     south >= -85 &&
     north <= 85 &&
-    west < east &&
     south < north &&
-    east - west <= 180
+    width > 0 &&
+    width <= 180
   ) {
     return [west, south, east, north];
   }
@@ -66,9 +67,18 @@ export function areaPolygon([west, south, east, north]: Area): Polygon {
   };
 }
 
-export function containsCenter(
-  [west, south, east, north]: Area,
-  [longitude, latitude]: readonly [number, number],
-): boolean {
-  return longitude >= west && longitude <= east && latitude >= south && latitude <= north;
+export function areaSegments(area: Area): Area[] {
+  const [west, south, east, north] = area;
+  if (west < east) {
+    return [area];
+  }
+
+  const segments: Area[] = [];
+  if (west < 180) {
+    segments.push([west, south, 180, north]);
+  }
+  if (east > -180) {
+    segments.push([-180, south, east, north]);
+  }
+  return segments;
 }

@@ -19,15 +19,15 @@ import {
 } from '@maplibre/ngx-maplibre-gl';
 import { provideMaplibreWorker } from '@maplibre/ngx-maplibre-gl/config';
 import type { FeatureCollection, Point, Polygon } from 'geojson';
-import { LngLatBounds, type Map, type MapGeoJSONFeature } from 'maplibre-gl';
+import { LngLatBounds, type Map as MapLibreMap, type MapGeoJSONFeature } from 'maplibre-gl';
 import { ButtonModule } from 'primeng/button';
 import { TerraDraw, TerraDrawRectangleMode } from 'terra-draw';
 import { TerraDrawMapLibreGLAdapter } from 'terra-draw-maplibre-gl-adapter';
 import type { Site } from '../../../core/data/analog-dataset.model';
 import { validEarthPosition } from '../../../shared/utils/science-format';
 import { EARTH_MAP_STYLE } from '../infrastructure/earth-map-style';
-import { areaFromPolygon, areaPolygon, type Area } from '../domain/geographic-area';
-import type { RankedWindow } from '../domain/discovery';
+import { areaFromPolygon, areaPolygon, areaSegments, type Area } from '../domain/geographic-area';
+import type { MeasuredCoverage, RankedWindow } from '../domain/discovery';
 
 @Component({
   selector: 'app-candidate-map',
@@ -45,13 +45,18 @@ import type { RankedWindow } from '../domain/discovery';
 })
 export class CandidateMap {
   private readonly document = inject(DOCUMENT);
-  private readonly map = signal<Map | undefined>(undefined);
+  private readonly map = signal<MapLibreMap | undefined>(undefined);
   readonly sites = input.required<readonly Site[]>();
   readonly selectedId = input<string>();
   readonly siteSelected = output<string>();
   readonly discovery = input(false);
   readonly windows = input<readonly RankedWindow[]>([]);
   readonly area = input<Area>();
+  readonly coverage = input<MeasuredCoverage>();
+  protected readonly crossesAntimeridian = computed(() => {
+    const area = this.area();
+    return !!area && area[0] > area[2];
+  });
   readonly selectedWindow = input<string>();
   readonly windowSelected = output<string>();
   readonly areaChanged = output<Area | undefined>();
@@ -62,10 +67,23 @@ export class CandidateMap {
   protected readonly hoveredWindow = computed(() =>
     this.windows().find(({ key }) => key === this.hoveredKey()),
   );
-  protected readonly colors = signal({ land: '#1473D2', window: '#E87932' });
+  protected readonly colors = signal({ land: '#1473D2', window: '#E87932', coverage: '#536581' });
+  protected readonly coverageShape = computed<FeatureCollection<Polygon>>(
+    () => this.coverage() ?? { type: 'FeatureCollection', features: [] },
+  );
+  private readonly mapWindows = computed(() => {
+    const windows = new Map<string, RankedWindow>();
+    for (const row of this.windows()) {
+      if (!windows.has(row.window.id) || row.key === this.selectedWindow()) {
+        windows.set(row.window.id, row);
+      }
+    }
+
+    return Array.from(windows.values());
+  });
   protected readonly polygons = computed<FeatureCollection<Polygon>>(() => ({
     type: 'FeatureCollection',
-    features: this.windows().map(({ window, key }) => ({
+    features: this.mapWindows().map(({ window, key }) => ({
       type: 'Feature',
       geometry: window.geometry,
       properties: { key, selected: key === this.selectedWindow() },
@@ -73,7 +91,7 @@ export class CandidateMap {
   }));
   protected readonly centers = computed<FeatureCollection<Point>>(() => ({
     type: 'FeatureCollection',
-    features: this.windows().map(({ window, key }) => ({
+    features: this.mapWindows().map(({ window, key }) => ({
       type: 'Feature',
       geometry: { type: 'Point', coordinates: Array.from(window.properties.center) },
       properties: { key, selected: key === this.selectedWindow() },
@@ -83,7 +101,13 @@ export class CandidateMap {
     const area = this.area();
     return {
       type: 'FeatureCollection',
-      features: area ? [{ type: 'Feature', geometry: areaPolygon(area), properties: {} }] : [],
+      features: area
+        ? areaSegments(area).map((part) => ({
+            type: 'Feature',
+            geometry: areaPolygon(part),
+            properties: {},
+          }))
+        : [],
     };
   });
 
@@ -119,7 +143,7 @@ export class CandidateMap {
         map.fitBounds(
           [
             [area[0], area[1]],
-            [area[2], area[3]],
+            [this.crossesAntimeridian() ? area[2] + 360 : area[2], area[3]],
           ],
           { padding: 32, maxZoom: 11, duration: 0 },
         );
@@ -156,7 +180,7 @@ export class CandidateMap {
     });
   }
 
-  protected onLoad(map: Map): void {
+  protected onLoad(map: MapLibreMap): void {
     this.map.set(map);
     if (!this.discovery()) {
       return;
@@ -166,6 +190,7 @@ export class CandidateMap {
     this.colors.set({
       land: tokens.getPropertyValue('--p-primary-600').trim(),
       window: tokens.getPropertyValue('--p-mars-orange-600').trim(),
+      coverage: tokens.getPropertyValue('--p-surface-600').trim(),
     });
     this.draw = new TerraDraw({
       adapter: new TerraDrawMapLibreGLAdapter({ map, coordinatePrecision: 6 }),
