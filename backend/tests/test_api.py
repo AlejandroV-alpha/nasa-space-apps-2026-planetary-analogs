@@ -2,6 +2,7 @@ from copy import deepcopy
 import json
 
 import pytest
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from backend.app.main import create_app
 from backend.app.repository import Repository, get_repository
@@ -70,7 +71,7 @@ SEARCH_URL = '/api/v1/discovered-candidates/search'
 
 def test_full_discovery_preserves_both_rankings_and_existing_values(client):
     base = client.get('/api/v1/discovered-candidates').json()
-    response = client.get(SEARCH_URL, params={'west': -180, 'south': -90, 'east': 180, 'north': 90})
+    response = client.get(SEARCH_URL, params={'west': -180, 'south': -90, 'east': 180, 'north': 90, 'limit': 81})
     assert response.status_code == 200
     data = response.json()
     assert data['sourceSearch'] == base['search']
@@ -106,7 +107,11 @@ def test_search_filters_then_limits_local_ranking(client):
     assert first['properties']['comparison']['distance'] <= second['properties']['comparison']['distance']
     preview = client.get('/api/v1/discovered-candidates', params={'reference_region_id': 'jezero-sector'}).json()
     preview_ids = {feature['id'] for feature in preview['results'][0]['features']}
-    (local,) = client.get(SEARCH_URL, params=params).json()['results']
+    (top_five,) = client.get(SEARCH_URL, params=params).json()['results']
+    assert top_five['comparableWindows'] == 9
+    assert len(top_five['features']) == 5
+    (local,) = client.get(SEARCH_URL, params={**params, 'limit': 9}).json()['results']
+    assert top_five['features'] == local['features'][:5]
     assert len(local['features']) == 9
     assert group['features'] == local['features'][:2]
     assert {feature['id'] for feature in local['features']} - preview_ids
@@ -136,6 +141,54 @@ def test_search_rejects_invalid_area_and_unknown_reference(client):
     assert client.get(SEARCH_URL, params={**params, 'north': 91}).status_code == 422
     assert client.get(SEARCH_URL, params={**params, 'limit': 0}).status_code == 422
     assert client.get(SEARCH_URL, params={**params, 'reference_region_id': 'unknown'}).status_code == 404
+
+
+def test_coverage_and_detail_match_the_science_export(client):
+    export = Repository().full_discovery()
+    coverage = client.get('/api/v1/discovery-coverage')
+    assert coverage.status_code == 200
+    body = coverage.json()
+    assert body['type'] == 'FeatureCollection'
+    assert body['status'] == 'measured'
+    assert body['windowCount'] == len(body['features']) == 81
+    original_windows = {feature.id: feature for feature in export.results[0].features}
+    assert {feature['id'] for feature in body['features']} == set(original_windows)
+    for feature in body['features']:
+        assert feature['geometry'] == original_windows[feature['id']].geometry.model_dump(mode='json')
+
+    window_id = export.results[0].features[-1].id
+    detail = client.get(f'/api/v1/discovered-candidates/{window_id}')
+    assert detail.status_code == 200
+    data = detail.json()
+    assert data['id'] == window_id
+    assert data['geometry'] == original_windows[window_id].geometry.model_dump(mode='json')
+    for comparison, group in zip(data['comparisons'], export.results, strict=True):
+        window = next(feature for feature in group.features if feature.id == window_id)
+        assert comparison['reference'] == group.reference.model_dump(mode='json')
+        assert comparison['comparison'] == window.properties.comparison.model_dump(mode='json')
+        assert comparison['sensitivity'] == window.properties.sensitivity.model_dump(mode='json')
+    assert client.get('/api/v1/discovered-candidates/unknown').status_code == 404
+
+
+def test_science_status_reports_each_dataset(client, monkeypatch):
+    response = client.get('/api/v1/science-status')
+    assert response.status_code == 200
+    assert response.json() == {
+        name: {'status': 'available', 'detail': None}
+        for name in ('catalog', 'discovery', 'environment')
+    }
+
+    def unavailable_full_discovery(self):
+        raise HTTPException(503, 'Exportación completa no disponible.')
+
+    monkeypatch.setattr(Repository, 'full_discovery', unavailable_full_discovery)
+    response = client.get('/api/v1/science-status')
+    assert response.status_code == 200
+    assert response.json() == {
+        'catalog': {'status': 'available', 'detail': None},
+        'discovery': {'status': 'unavailable', 'detail': 'Exportación completa no disponible.'},
+        'environment': {'status': 'available', 'detail': None},
+    }
 
 
 def test_site_environment_preserves_nasa_power_export(client):
@@ -215,4 +268,7 @@ def test_cors_and_openapi(client):
     assert '/api/v1/compare' in paths
     assert '/api/v1/discovered-candidates' in paths
     assert SEARCH_URL in paths
+    assert '/api/v1/discovered-candidates/{window_id}' in paths
+    assert '/api/v1/discovery-coverage' in paths
+    assert '/api/v1/science-status' in paths
     assert '/api/v1/sites/{site_id}/environment' in paths

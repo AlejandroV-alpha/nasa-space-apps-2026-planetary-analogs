@@ -1,12 +1,16 @@
 """HTTP access to computed planetary analog data; see /docs for the API contract."""
+from collections.abc import Callable
 import os
 from typing import Annotated
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field
-from .candidate_search import search_candidates
+from .candidate_search import measured_coverage, search_candidates, window_detail
 from .repository import Repository, get_repository
-from .science_exports import Body, CandidateDiscovery, CandidateSearchResult, SiteEnvironmentResponse
+from .science_exports import (
+    Body, CandidateDiscovery, CandidateSearchResult, DatasetAvailability, DiscoveredWindowDetail,
+    MeasuredCoverage, ScienceStatus, SiteEnvironmentResponse,
+)
 
 Repo = Annotated[Repository, Depends(get_repository)]
 
@@ -15,6 +19,17 @@ class ComparisonRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     reference_region_id: str = Field(min_length=1, examples=['jezero-sector'])
     site_ids: list[str] = Field(min_length=2, max_length=3, examples=[['siloli-sector', 'coipasa-sector']])
+
+
+def availability(*loaders: Callable[[], object]) -> DatasetAvailability:
+    try:
+        for load in loaders:
+            load()
+    except HTTPException as error:
+        if error.status_code != 503:
+            raise
+        return DatasetAvailability(status='unavailable', detail=str(error.detail))
+    return DatasetAvailability(status='available')
 
 
 def create_app() -> FastAPI:
@@ -65,7 +80,7 @@ def create_app() -> FastAPI:
         east: Annotated[float, Query(ge=-180, le=180)],
         north: Annotated[float, Query(ge=-90, le=90)],
         reference_region_id: str | None = None,
-        limit: Annotated[int | None, Query(ge=1)] = None,
+        limit: Annotated[int, Query(ge=1)] = 5,
     ) -> CandidateSearchResult:
         if west >= east or south >= north:
             raise HTTPException(422, 'Usa oeste < este y sur < norte dentro de WGS84, sin cruzar el antimeridiano.')
@@ -73,6 +88,34 @@ def create_app() -> FastAPI:
             repo.find('referenceRegions', reference_region_id)
         discovery = repo.full_discovery()
         return search_candidates(discovery, (west, south, east, north), reference_region_id, limit)
+
+    @api.get(
+        '/api/v1/discovered-candidates/{window_id}', tags=['Ciencia'],
+        summary='Consultar la ventana medida y sus comparaciones con Luna y Marte',
+        responses={404: {'description': 'Ventana desconocida'},
+                   503: {'description': 'Exportación científica completa ausente o inválida'}},
+    )
+    def discovered_candidate(window_id: str, repo: Repo) -> DiscoveredWindowDetail:
+        detail = window_detail(repo.full_discovery(), window_id)
+        if detail is None:
+            raise HTTPException(404, f'No existe la ventana {window_id}.')
+        return detail
+
+    @api.get(
+        '/api/v1/discovery-coverage', tags=['Ciencia'],
+        summary='Obtener las huellas de todas las ventanas terrestres medidas',
+        responses={503: {'description': 'Exportación científica completa ausente o inválida'}},
+    )
+    def discovery_coverage(repo: Repo) -> MeasuredCoverage:
+        return measured_coverage(repo.full_discovery())
+
+    @api.get('/api/v1/science-status', tags=['Ciencia'], summary='Consultar disponibilidad de los datos científicos')
+    def science_status(repo: Repo) -> ScienceStatus:
+        return ScienceStatus(
+            catalog=availability(repo.load),
+            discovery=availability(repo.discovery, repo.full_discovery),
+            environment=availability(repo.environment),
+        )
 
     @api.get('/api/v1/sites', tags=['Sitios'], summary='Listar y filtrar candidatos terrestres')
     def sites(repo: Repo, target_body: Body | None = None,

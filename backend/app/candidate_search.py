@@ -1,6 +1,7 @@
 """Query and rank measured footprints within a WGS84 rectangle."""
 from .science_exports import (
-    Bounds, CandidateDiscovery, CandidateSearchResult, MeasuredCoverage, MeasuredFootprint, Position,
+    Bounds, CandidateDiscovery, CandidateSearchResult, DiscoveredWindowDetail,
+    MeasuredCoverage, MeasuredFootprint, Position, WindowReferenceComparison,
 )
 
 
@@ -43,10 +44,61 @@ def overlaps_area(ring: list[Position], bounds: Bounds) -> bool:
     return sum(x * next_y - y * next_x for (x, y), (next_x, next_y) in zip(vectors, vectors[1:])) != 0
 
 
-def search_candidates(
-    discovery: CandidateDiscovery, bounds: Bounds, reference_id: str | None, limit: int | None,
-) -> CandidateSearchResult:
+def measured_coverage(discovery: CandidateDiscovery, bounds: Bounds | None = None) -> MeasuredCoverage:
     measured = {}
+    for group in discovery.results:
+        for feature in group.features:
+            measured.setdefault(feature.id, feature)
+
+    footprints = [
+        MeasuredFootprint(
+            type='Feature', id=feature.id, geometry=feature.geometry,
+            properties={
+                'tileId': feature.properties.tileId,
+                'centerInArea': bounds is None or inside(feature.properties.center, bounds),
+            },
+        )
+        for feature in measured.values()
+        if bounds is None or overlaps_area(feature.geometry.coordinates[0], bounds)
+    ]
+    return MeasuredCoverage(
+        type='FeatureCollection',
+        status='measured' if footprints else 'no_measured_windows',
+        windowCount=len(footprints),
+        features=footprints,
+    )
+
+
+def window_detail(discovery: CandidateDiscovery, window_id: str) -> DiscoveredWindowDetail | None:
+    matches = [
+        (group.reference, feature)
+        for group in discovery.results
+        for feature in group.features
+        if feature.id == window_id
+    ]
+    if not matches:
+        return None
+    window = matches[0][1]
+    return DiscoveredWindowDetail(
+        id=window.id,
+        geometry=window.geometry,
+        center=window.properties.center,
+        tileId=window.properties.tileId,
+        quality=window.properties.quality,
+        comparisons=[
+            WindowReferenceComparison(
+                reference=reference,
+                comparison=feature.properties.comparison,
+                sensitivity=feature.properties.sensitivity,
+            )
+            for reference, feature in matches
+        ],
+    )
+
+
+def search_candidates(
+    discovery: CandidateDiscovery, bounds: Bounds, reference_id: str | None, limit: int,
+) -> CandidateSearchResult:
     results = []
     for group in discovery.results:
         if reference_id is None or group.reference.id == reference_id:
@@ -56,28 +108,9 @@ def search_candidates(
                     eligible.append(feature)
             eligible.sort(key=lambda feature: (feature.properties.comparison.distance, feature.id))
             results.append(group.model_copy(update={'comparableWindows': len(eligible), 'features': eligible[:limit]}))
-        for feature in group.features:
-            measured.setdefault(feature.id, feature)
-
-    footprints = [
-        MeasuredFootprint(
-            type='Feature', id=feature.id, geometry=feature.geometry,
-            properties={
-                'tileId': feature.properties.tileId,
-                'centerInArea': inside(feature.properties.center, bounds),
-            },
-        )
-        for feature in measured.values()
-        if overlaps_area(feature.geometry.coordinates[0], bounds)
-    ]
     return CandidateSearchResult(
         schemaVersion=discovery.schemaVersion, boundsWgs84=bounds,
         sourceSearch=discovery.search, method=discovery.method,
-        coverage=MeasuredCoverage(
-            type='FeatureCollection',
-            status='measured' if footprints else 'no_measured_windows',
-            windowCount=len(footprints),
-            features=footprints,
-        ),
+        coverage=measured_coverage(discovery, bounds),
         results=results,
     )

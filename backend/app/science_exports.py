@@ -146,6 +146,32 @@ class CandidateSearchResult(BaseModel):
     results: list[DiscoveredWindows]
 
 
+class WindowReferenceComparison(BaseModel):
+    reference: Reference
+    comparison: WindowComparison
+    sensitivity: WindowSensitivity
+
+
+class DiscoveredWindowDetail(BaseModel):
+    id: str
+    geometry: WindowPolygon
+    center: Position
+    tileId: str
+    quality: WindowQuality
+    comparisons: list[WindowReferenceComparison]
+
+
+class DatasetAvailability(BaseModel):
+    status: Literal['available', 'unavailable']
+    detail: str | None = None
+
+
+class ScienceStatus(BaseModel):
+    catalog: DatasetAvailability
+    discovery: DatasetAvailability
+    environment: DatasetAvailability
+
+
 class EnvironmentPeriod(BaseModel):
     start: str
     end: str
