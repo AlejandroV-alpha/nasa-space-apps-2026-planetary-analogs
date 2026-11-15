@@ -18,6 +18,8 @@ function recommendations(page: Page) {
 
 test('muestra el contexto NASA POWER del sitio del catálogo', async ({ page }) => {
   if (!live) {
+    const site = catalog.sites.find((item: { id: string }) => item.id === 'siloli-sector');
+    await page.route('**/api/v1/sites/siloli-sector', (route) => route.fulfill({ json: site }));
     await page.route('**/api/v1/catalog', (route) => route.fulfill({ json: catalog }));
     await page.route('**/api/v1/sites/siloli-sector/environment', (route) => {
       const { sites, ...metadata } = environment;
@@ -64,7 +66,7 @@ test.describe('búsqueda contra FastAPI real', () => {
     });
     page.on('pageerror', (error) => errors.push(error.message));
     await page.goto('/');
-    await page.getByRole('link', { name: 'Explorar el planeta' }).click();
+    await page.getByRole('link', { name: 'Explorar análogos terrestres' }).click();
     const list = recommendations(page);
     await expect(
       list.getByText('Selecciona un rectángulo y pulsa Buscar candidatos.'),
@@ -120,19 +122,47 @@ test.describe('búsqueda contra FastAPI real', () => {
   });
 
   test('abre la caracterización y el estudio respaldados por FastAPI', async ({ page }) => {
+    const errors: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'error' && message.text().includes('TypeError'))
+        errors.push(message.text());
+    });
     await page.goto('/explorar?cuerpo=mars&area=' + area);
-    await recommendations(page).getByRole('button', { name: new RegExp(marsFirst) }).click();
+    await recommendations(page)
+      .getByRole('button', { name: new RegExp(marsFirst) })
+      .click();
     await page.getByText('Aplicaciones y evidencia científica', { exact: true }).click();
+    for (const title of [
+      'Aplicaciones para misiones',
+      'Geología y materiales',
+      'Condiciones térmicas',
+      'Evidencia y calidad',
+    ]) {
+      await page.getByText(title, { exact: true }).and(page.locator('summary')).press('Enter');
+    }
     await expect(page.getByRole('heading', { name: 'Usos potenciales' })).toBeVisible();
-    await expect(page.getByText(/Comparación cualitativa por familia/)).toBeVisible();
+    await expect(
+      page.getByText('Comparación cualitativa por familia', { exact: true }),
+    ).toBeVisible();
     await expect(page.getByText(/117 píxeles dentro de la ventana planetaria/)).toBeVisible();
     await expect(page.getByText(/294.96 K/)).toBeVisible();
     await expect(page.getByText(/24 registros en NASA Earthdata/)).toBeVisible();
     await expect(page.getByText(/365 días válidos entre 2025-01-01 y 2025-12-31/)).toBeVisible();
     await expect(page.getByText(/temperatura radiométrica equivalente/)).toBeVisible();
     await expect(page.getByText('Revisión científica independiente pendiente.')).toBeVisible();
-    await page.getByRole('button', { name: /Relieve regional de una ventana andina/ }).click();
+    await page.getByRole('link', { name: /Relieve regional de una ventana andina/ }).press('Enter');
     await expect(page.getByText(/Qué ensayos preliminares de planificación/)).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Resultados de la investigación' }),
+    ).toBeVisible();
+    await page.reload();
+    await expect(
+      page.getByRole('heading', { name: /Relieve regional de una ventana andina/ }),
+    ).toBeVisible();
+    await page.getByRole('link', { name: 'Volver a la ventana' }).click();
+    await expect(page.getByRole('heading', { name: marsFirst })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Polo sur lunar/ })).toBeVisible();
+    expect(errors).toEqual([]);
   });
 
   test('sincroniza el polígono con la lista, dibuja y consulta solo al confirmar', async ({
@@ -239,8 +269,9 @@ test.describe('búsqueda contra FastAPI real', () => {
           status: 503,
           json: { detail: 'Exportación científica no disponible o inválida.' },
         }),
-      { times: 1 },
+      { times: 2 },
     );
+    // The enriched request and its topographic fallback both fail in this scenario.
     // Playwright applies the last registered route first.
     await page.goto('/explorar?cuerpo=mars&area=' + area);
     const list = recommendations(page);

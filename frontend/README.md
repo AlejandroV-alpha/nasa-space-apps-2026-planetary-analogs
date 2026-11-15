@@ -17,18 +17,24 @@ npm ci
 npm start
 ```
 
-Open `http://localhost:4200/`. Angular proxies `/api/**` to FastAPI. The app
-uses the live catalog, comparison and provenance endpoints. Failed requests
-show a retry action.
+Open `http://localhost:4200/`. Angular proxies `/api/**` and `/health` to FastAPI.
+Set `PRIMEUI_LICENSE` in the environment before starting Angular to validate the
+Community license for the installed version.
 
 ## Geographic discovery
 
-`/explorar` loads the published windows once. Draw a rectangle on the map or
-enter west, south, east and north. **Buscar candidatos** includes window
-centers on the rectangle's boundaries and keeps the published order per
-reference. Search areas crossing the antimeridian must be split into two
-searches. The current export publishes ten windows per reference, and an
-empty selection only means there are no published windows in the area.
+`/explorar` searches the inventory of 81 processed windows through FastAPI.
+Draw a rectangle or enter west, south, east and north, then choose **Buscar
+candidatos**. The ranking includes comparable window centers on the boundary.
+The coverage layer shows measured footprints intersecting the area. Searches
+crossing the antimeridian are split automatically. **Ambos** keeps each
+reference's ranking and links results for the same window by ID.
+
+Use **Abrir ficha de ventana** for a shareable view. The geology, thermal,
+mission uses and evidence panels load on demand, with separate recovery
+actions. **Cobertura global** loads the entire footprint layer on request.
+The Home page links to the published exploratory case study and the
+separate, summarized rankings.
 
 Open **Sitios del catálogo** for the original site explorer and comparison.
 Site detail loads the NASA POWER export separately. To forward the backend
@@ -109,10 +115,11 @@ npm test -- --watch=false
 
 ## Running end-to-end tests
 
-Playwright starts Angular and uses controlled responses based on the
-versioned export by default. Set `PLAYWRIGHT_LIVE_API=1` with FastAPI running
-to exercise the real API. The retry scenario still simulates HTTP 503 and
-the marker test intercepts basemap tiles to avoid network dependence.
+Playwright starts Angular if the development server is not already running.
+By default, the navigation tests use controlled responses based on the
+versioned export. Set `PLAYWRIGHT_LIVE_API=1` with FastAPI running to enable
+the live discovery and scientific tests and query the real API. The recovery
+tests simulate failures, and the marker test intercepts basemap tiles.
 
 ```bash
 npx playwright install chromium

@@ -7,9 +7,10 @@
     <i class="pi pi-arrow-left" aria-hidden="true"></i> Volver al explorador
   </a>
   <app-data-state
-    [loading]="catalog.isLoading()"
-    [failed]="!!catalog.error()"
-    (retry)="catalog.reload()"
+    [loading]="catalog.isLoading() || siteData.isLoading()"
+    [failed]="!!(siteData.error() || catalog.error())"
+    [errorText]="scienceError(siteData.error() || catalog.error())"
+    (retry)="siteData.error() ? siteData.reload() : catalog.reload()"
   >
     @if (site(); as candidate) {
       <header

@@ -5,6 +5,9 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { AnalogDataService } from '../../../core/data/analog-data.service';
+import { CatalogApi } from '../../../core/data/catalog-api';
+import { scienceError } from '../../../core/data/api-read';
+import { WindowCharacterizationData } from '../infrastructure/window-characterization-data';
 import { BackendHealth } from '../../../core/data/backend-health';
 import type { TargetBody } from '../../../core/data/analog-dataset.model';
 import { DataState } from '../../../shared/components/data-state';
@@ -39,6 +42,21 @@ export class DiscoveryExplorer {
   private readonly router = inject(Router);
   private readonly params = toSignal(this.route.queryParamMap, { requireSync: true });
   protected readonly catalog = inject(AnalogDataService);
+  private readonly catalogApi = inject(CatalogApi);
+  private readonly science = inject(WindowCharacterizationData);
+  protected readonly scienceError = scienceError;
+  protected readonly showGlobal = signal(false);
+  protected readonly globalCoverage = rxResource({
+    params: () => (this.showGlobal() ? true : undefined),
+    stream: () => this.science.coverage(),
+  });
+  protected readonly regions = rxResource({ stream: () => this.catalogApi.regions() });
+  protected readonly evidenceLabels = {
+    qualitative: 'Evidencia cualitativa',
+    context_only: 'Solo contexto',
+    catalogued: 'En catálogo',
+    not_evaluated: 'Sin evaluar',
+  };
   private readonly discoveryData = inject(DiscoveryData);
   protected readonly searchErrorText = searchErrorText;
   protected readonly health = inject(BackendHealth).status;
@@ -62,7 +80,10 @@ export class DiscoveryExplorer {
     const destination = this.destination();
     const bodies: TargetBody[] = destination === 'both' ? ['mars', 'moon'] : [destination];
     return bodies.map((body) => {
-      const options = this.catalog.regionsFor(body);
+      const options =
+        (this.regions.hasValue() ? this.regions.value().items : []).filter(
+          (region) => region.targetBody === body,
+        ) ?? [];
       const requested = this.params().get(body);
       const legacy = this.params().get('region');
       const selected = options.find((option) => option.id === (requested ?? legacy)) ?? options[0];
@@ -91,9 +112,10 @@ export class DiscoveryExplorer {
       return this.destination() === 'both'
         ? {
             area,
+            includeEvidence: true,
             referenceIds: references.flatMap(({ selected }) => (selected ? [selected.id] : [])),
           }
-        : { area, referenceId: references[0].selected?.id };
+        : { area, referenceId: references[0].selected?.id, includeEvidence: true };
     },
     {
       equal: (previous, next) =>
@@ -114,6 +136,10 @@ export class DiscoveryExplorer {
     return undefined;
   });
   protected readonly coverage = computed(() => this.result()?.coverage);
+  protected readonly mapCoverage = computed(() => {
+    if (this.showGlobal() && this.globalCoverage.hasValue()) return this.globalCoverage.value();
+    return this.coverage();
+  });
   protected readonly hasMeasuredCenters = computed(() =>
     this.coverage()?.features.some((feature) => feature.properties.centerInArea),
   );

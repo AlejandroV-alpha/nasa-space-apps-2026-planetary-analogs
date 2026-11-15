@@ -10,6 +10,7 @@ import { RouterLink } from '@angular/router';
       <a routerLink="/explorar" class="mt-5 inline-block text-primary underline"
         >Volver al explorador</a
       >
+      <a routerLink="/" class="ml-4 mt-5 inline-block text-primary underline">Ir al inicio</a>
     </section>
   `,
 })

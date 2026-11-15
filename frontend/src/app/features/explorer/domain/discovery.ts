@@ -17,6 +17,9 @@ export interface WindowComparison {
   metrics: WindowMetric[];
 }
 export interface WindowQuality {
+  totalCells?: number;
+  finiteHeightCells?: number;
+  finiteSlopeCells?: number;
   validHeightCellFraction: number;
   validSlopeCellFraction: number;
   coverageMeaning: string;
@@ -59,6 +62,18 @@ export interface MeasuredCoverage extends FeatureCollection<Polygon, FootprintPr
   features: MeasuredFootprint[];
 }
 
+type SupplementState = 'qualitative' | 'context_only' | 'catalogued' | 'not_evaluated';
+export type EvidenceAvailability = Record<
+  string,
+  Record<
+    string,
+    {
+      geology: SupplementState;
+      thermal: SupplementState;
+    }
+  >
+>;
+
 export interface DiscoverySearch {
   schemaVersion: '1.0.0';
   boundsWgs84: Area;
@@ -66,6 +81,8 @@ export interface DiscoverySearch {
   method: { distance: string; ordering: string; limitations: string[] };
   coverage: MeasuredCoverage;
   results: DiscoveryGroup[];
+  evidenceAvailability?: EvidenceAvailability;
+  evidenceUnavailable?: boolean;
 }
 
 export interface DiscoveryQuery {
@@ -73,6 +90,7 @@ export interface DiscoveryQuery {
   referenceId?: string;
   referenceIds?: readonly string[];
   limit?: number;
+  includeEvidence?: boolean;
 }
 
 export interface RankedWindow {
@@ -117,6 +135,15 @@ export function mergeSearches(
   return {
     ...first,
     boundsWgs84: area,
+    evidenceUnavailable: parts.some((part) => part.evidenceUnavailable),
+    evidenceAvailability: parts.some((part) => part.evidenceAvailability)
+      ? Object.fromEntries(
+          Array.from(groups.keys(), (id) => [
+            id,
+            Object.assign({}, ...parts.map((part) => part.evidenceAvailability?.[id])),
+          ]),
+        )
+      : undefined,
     coverage: {
       type: 'FeatureCollection',
       status: footprints.size ? 'measured' : 'no_measured_windows',

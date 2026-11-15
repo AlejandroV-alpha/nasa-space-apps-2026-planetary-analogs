@@ -1,9 +1,10 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { forkJoin, map, of, tap, type Observable } from 'rxjs';
+import { catchError, forkJoin, map, of, tap, throwError, type Observable } from 'rxjs';
 import { API_BASE_URL } from '../../../core/config/api-url';
 import {
   mergeSearches,
+  type EvidenceAvailability,
   type DiscoveryGroup,
   type DiscoveryQuery,
   type DiscoverySearch,
@@ -14,6 +15,7 @@ import {
   type WindowComparison,
   type WindowQuality,
 } from '../domain/discovery';
+import type { DiscoveredWindowDetail } from '../domain/window-science';
 import { areaSegments, type Area } from '../domain/geographic-area';
 
 function record(value: unknown): value is Record<string, unknown> {
@@ -124,7 +126,7 @@ function isBounds(value: unknown): value is Area {
   );
 }
 
-function isSource(value: unknown): value is DiscoverySource {
+export function isSource(value: unknown): value is DiscoverySource {
   return (
     record(value) &&
     (value['boundsWgs84'] === null || isBounds(value['boundsWgs84'])) &&
@@ -161,7 +163,7 @@ function isFootprint(value: unknown): value is MeasuredFootprint {
   );
 }
 
-function isCoverage(value: unknown): value is MeasuredCoverage {
+export function isCoverage(value: unknown): value is MeasuredCoverage {
   return (
     record(value) &&
     value['type'] === 'FeatureCollection' &&
@@ -173,7 +175,7 @@ function isCoverage(value: unknown): value is MeasuredCoverage {
   );
 }
 
-function isGroup(value: unknown): value is DiscoveryGroup {
+export function isGroup(value: unknown): value is DiscoveryGroup {
   if (
     !record(value) ||
     value['type'] !== 'FeatureCollection' ||
@@ -193,6 +195,50 @@ function isGroup(value: unknown): value is DiscoveryGroup {
     (body === 'moon' || body === 'mars') &&
     new Set(value['features'].map((feature) => feature.id)).size === value['features'].length
   );
+}
+
+function isEvidenceAvailability(value: unknown): value is EvidenceAvailability {
+  const states = ['qualitative', 'context_only', 'catalogued', 'not_evaluated'];
+  return (
+    record(value) &&
+    Object.values(value).every(
+      (group) =>
+        record(group) &&
+        Object.values(group).every(
+          (item) =>
+            record(item) &&
+            states.some((state) => state === item['geology']) &&
+            states.some((state) => state === item['thermal']),
+        ),
+    )
+  );
+}
+
+export function parseWindowDetail(
+  value: DiscoveredWindowDetail,
+  id: string,
+): DiscoveredWindowDetail {
+  if (
+    value?.id !== id ||
+    !position(value.center) ||
+    !polygon(value.geometry) ||
+    typeof value.tileId !== 'string' ||
+    !quality(value.quality) ||
+    !Array.isArray(value.comparisons) ||
+    !value.comparisons.every(
+      (item) =>
+        item &&
+        typeof item.reference?.id === 'string' &&
+        typeof item.reference.name === 'string' &&
+        (item.reference.body === 'mars' || item.reference.body === 'moon') &&
+        comparison(item.comparison) &&
+        comparison(item.sensitivity) &&
+        quality((item.sensitivity as { quality?: unknown }).quality),
+    )
+  ) {
+    throw new Error('Ficha de ventana inválida.');
+  }
+  return value;
 }
 
 export function parseSearch(raw: unknown): DiscoverySearch {
@@ -225,6 +271,9 @@ export function parseSearch(raw: unknown): DiscoverySearch {
     boundsWgs84: raw['boundsWgs84'],
     sourceSearch: raw['sourceSearch'],
     coverage: raw['coverage'],
+    evidenceAvailability: isEvidenceAvailability(raw['evidenceAvailability'])
+      ? raw['evidenceAvailability']
+      : undefined,
     results: raw['results'],
     method: {
       distance: method['distance'],
@@ -291,14 +340,17 @@ export class DiscoveryData {
     referenceId,
     referenceIds,
     limit,
+    includeEvidence,
   }: DiscoveryQuery): Observable<DiscoverySearch> {
-    const key = JSON.stringify([area, referenceId, limit]);
+    const key = JSON.stringify([area, referenceId, limit, includeEvidence || undefined]);
     const cached = this.cached(key);
     if (cached) {
       return of(cached);
     }
 
-    const allReferences = referenceId && this.cached(JSON.stringify([area, undefined, limit]));
+    const allReferences =
+      referenceId &&
+      this.cached(JSON.stringify([area, undefined, limit, includeEvidence || undefined]));
     if (
       allReferences &&
       allReferences.results.some((group) => group.reference.id === referenceId)
@@ -311,7 +363,7 @@ export class DiscoveryData {
 
     if (referenceIds && referenceIds.length > 1) {
       const cachedReferences = referenceIds.map((id) =>
-        this.cached(JSON.stringify([area, id, limit])),
+        this.cached(JSON.stringify([area, id, limit, includeEvidence || undefined])),
       );
       if (cachedReferences.every((data) => data !== undefined)) {
         const [first] = cachedReferences;
@@ -327,6 +379,7 @@ export class DiscoveryData {
 
     const [west, south, east, north] = area;
     const params: Record<string, string | number> = { west, south, east, north };
+    if (includeEvidence) params['include_evidence'] = 'true';
     if (referenceId) params['reference_region_id'] = referenceId;
     if (limit !== undefined) {
       params['limit'] = limit;
@@ -354,6 +407,14 @@ export class DiscoveryData {
             if (!oldest.done) this.cache.delete(oldest.value);
           }
           this.cache.set(key, { data, expires: Date.now() + 5 * 60_000 });
+        }),
+        catchError((error: unknown) => {
+          if (!includeEvidence || !(error instanceof HttpErrorResponse) || error.status !== 503) {
+            return throwError(() => error);
+          }
+          return this.fetch({ area, referenceId, referenceIds, limit }).pipe(
+            map((data) => ({ ...data, evidenceUnavailable: true })),
+          );
         }),
       );
   }

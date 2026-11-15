@@ -41,6 +41,30 @@ export const routes: Routes = [
       import('./features/methodology/presentation/methodology').then((page) => page.Methodology),
   },
   {
+    path: 'ventanas/:windowId',
+    title: 'Ventana terrestre',
+    loadComponent: () =>
+      import('./features/explorer/presentation/scientific-detail').then(
+        (page) => page.ScientificDetail,
+      ),
+  },
+  {
+    path: 'estudios/:studyId',
+    title: 'Caso de estudio',
+    loadComponent: () =>
+      import('./features/explorer/presentation/scientific-detail').then(
+        (page) => page.ScientificDetail,
+      ),
+  },
+  {
+    path: 'referencias/:regionId',
+    title: 'Referencia planetaria',
+    loadComponent: () =>
+      import('./features/methodology/presentation/reference-detail').then(
+        (page) => page.ReferenceDetail,
+      ),
+  },
+  {
     path: '**',
     title: 'Página no encontrada',
     loadComponent: () => import('./shared/layout/not-found').then((page) => page.NotFound),

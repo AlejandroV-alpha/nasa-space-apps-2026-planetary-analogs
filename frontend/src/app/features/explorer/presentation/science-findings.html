@@ -1,0 +1,252 @@
+@if (applications(); as items) {
+  @let data = { applications: items };
+  <section class="space-y-3">
+    <h4 class="font-semibold">Usos potenciales</h4>
+    <ul class="space-y-3">
+      @for (item of data.applications; track item.type) {
+        <li>
+          <strong>{{ applicationNames[item.type] }}</strong>
+          @if (item.status === 'insufficient_evidence') {
+            <span class="ml-2 text-muted-color">Evidencia insuficiente</span>
+          }
+          <p>{{ item.description }}</p>
+          <p class="text-xs text-muted-color">No validado operacionalmente.</p>
+          @if (item.supportingMetrics.length) {
+            <p class="text-xs">
+              Indicadores:
+              @for (key of item.supportingMetrics; track key; let last = $last) {
+                {{ labels[key] ?? key }}{{ last ? '.' : ', ' }}
+              }
+            </p>
+          }
+          <p class="text-xs text-muted-color">
+            Por verificar:
+            @for (condition of item.missingEvidence; track condition; let last = $last) {
+              {{ conditionNames[condition] ?? condition }}{{ last ? '.' : ', ' }}
+            }
+          </p>
+        </li>
+      }
+    </ul>
+  </section>
+}
+@if (geology(); as data) {
+  <section class="space-y-2">
+    <h4 class="font-semibold">Geología y materiales</h4>
+    @if (data.earth.catalogCheck; as emit) {
+      <p>
+        <a [href]="emit.queryUrl" class="break-words text-primary underline">
+          {{ emit.catalogHits }} registros en NASA Earthdata
+        </a>
+        para el área terrestre consultada.
+      </p>
+    }
+    @if (emit(); as scene) {
+      <p>
+        <strong>EMIT · ventana terrestre</strong> · {{ scene.validPixels | number }} píxeles con
+        coincidencias espectrales de {{ scene.windowPixels | number }}. Cobertura válida:
+        {{ scene.coveragePercent | number: '1.0-2' }} %.
+      </p>
+      @if (scene.displayMatches.length) {
+        <p class="text-xs text-muted-color">Principales coincidencias por grupo espectral</p>
+        <ul class="list-disc pl-5">
+          @for (match of scene.displayMatches; track match.group + '/' + match.libraryId) {
+            <li>{{ match.label }} · {{ match.pixels | number }} píxeles</li>
+          }
+        </ul>
+      }
+    }
+    @if (data.planetary.mappedGeology; as mapped) {
+      <p>
+        <a [href]="mapped.source.url" class="break-words text-primary underline">{{
+          mapped.source.title
+        }}</a>
+        cubre {{ mapped.coveragePercent | number: '1.0-2' }} % de la referencia.
+      </p>
+      <ul class="list-disc pl-5">
+        @for (unit of mapped.units; track unit.code) {
+          <li>{{ unit.name }} · {{ unit.percentOfWindow | number: '1.0-2' }} %</li>
+        }
+      </ul>
+    }
+    @if (data.planetary.regionalContext; as context) {
+      <p>{{ context.observation }}</p>
+    }
+    @if (data.planetary.localizedSpectra; as spectra) {
+      <p>
+        <a [href]="spectra.source.url" class="break-words text-primary underline">Muestra CRISM</a>
+        · {{ spectra.localizedSamples }} píxeles dentro de la ventana planetaria.
+      </p>
+    }
+    @if (data.status === 'unavailable') {
+      @if (emit()?.validPixels) {
+        <p class="text-muted-color">
+          Observaciones terrestres disponibles. Comparación geológica pendiente.
+        </p>
+      } @else {
+        <p class="text-muted-color">Sin contraste mineralógico publicado para este par.</p>
+      }
+    } @else {
+      <p class="rounded-lg bg-primary-50 p-3 font-medium dark:bg-surface-800">
+        Comparación cualitativa por familia · {{ data.comparison.interpretation }}
+      </p>
+    }
+    <details>
+      <summary class="cursor-pointer font-medium">Límites de la evidencia geológica</summary>
+      <ul class="list-disc pl-5">
+        @for (item of data.comparison.limitations; track item) {
+          <li>{{ item }}</li>
+        }
+      </ul>
+    </details>
+  </section>
+}
+@if (thermal(); as data) {
+  <section class="space-y-2">
+    <h4 class="font-semibold">Contexto térmico</h4>
+    <div class="grid grid-cols-1 gap-3 lg:grid-cols-3">
+      <article
+        class="min-w-0 space-y-2 rounded-xl border border-surface-200 p-4 dark:border-surface-700"
+      >
+        @if (data.earth.surfaceTemperature; as earth) {
+          <p>
+            <strong>NASA POWER / MERRA‑2 · piel superficial</strong> · Media regional
+            {{ earth.mean | number: '1.0-2' }} {{ earth.units }}. {{ earth.validDays }} días válidos
+            entre {{ earth.period.start }} y {{ earth.period.end }}.
+          </p>
+          <p class="text-xs text-muted-color">{{ earth.limitations[0] }}</p>
+          <a [href]="earth.sourceUrl" class="break-words text-primary underline"
+            >Serie histórica NASA POWER</a
+          >
+        } @else {
+          <p>Estimación terrestre pendiente para esta ventana.</p>
+        }
+      </article>
+      @if (data.earth.modisObservations; as modis) {
+        <article
+          class="min-w-0 space-y-2 rounded-xl border border-surface-200 p-4 dark:border-surface-700"
+        >
+          <p>
+            <strong>MODIS · superficie terrestre · 1 km nominal</strong> · {{ modis.start }} a
+            {{ modis.end }}
+          </p>
+          <ul class="list-disc pl-5">
+            @if (modis.daytime.mean !== null) {
+              <li>
+                Día · {{ modis.daytime.mean | number: '1.0-2' }} {{ modis.units }} ·
+                {{ modis.daytime.coveragePercent | number: '1.0-2' }} % de cobertura ·
+                {{ modis.daytime.validPixels }} píxeles válidos.
+              </li>
+            }
+            @if (modis.nighttime.mean !== null) {
+              <li>
+                Noche · {{ modis.nighttime.mean | number: '1.0-2' }} {{ modis.units }} ·
+                {{ modis.nighttime.coveragePercent | number: '1.0-2' }} % de cobertura.
+              </li>
+            }
+          </ul>
+          <a
+            class="break-words text-primary underline"
+            href="https://doi.org/10.5067/MODIS/MOD11A2.061"
+            >Producto MODIS Terra</a
+          >
+        </article>
+      }
+      @if (data.planetary.surfaceTemperature; as planetary) {
+        <article
+          class="min-w-0 space-y-2 rounded-xl border border-surface-200 p-4 dark:border-surface-700"
+        >
+          <p>
+            <strong class="break-words">{{
+              planetary.quantity === 'modeled_annual_maximum_surface_temperature'
+                ? 'Diviner · máximo anual modelado'
+                : 'MEDA/TIRS · observación radiométrica'
+            }}</strong>
+            · {{ planetary.median | number: '1.0-2' }} {{ planetary.units }} en
+            {{ planetary.samples }} muestras.
+          </p>
+          <p class="text-xs text-muted-color">
+            {{ planetary.summary }} · {{ planetary.selection }}
+          </p>
+          <p class="text-xs text-muted-color">
+            Rango publicado {{ planetary.minimum | number }}–{{ planetary.maximum | number }} K.
+          </p>
+          <details>
+            <summary class="cursor-pointer font-medium">
+              Limitaciones del producto planetario
+            </summary>
+            <ul class="list-disc pl-5">
+              @for (item of planetary.limitations; track item) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+          </details>
+          <a [href]="planetary.sourceUrl" class="break-words text-primary underline"
+            >Producto planetario</a
+          >
+        </article>
+      }
+    </div>
+    @if (data.comparison.comparable && data.comparison.differenceK !== null) {
+      <p>Diferencia térmica · {{ data.comparison.differenceK | number: '1.0-2' }} K</p>
+    } @else {
+      <p class="text-muted-color">{{ data.comparison.reason }}</p>
+    }
+  </section>
+}
+@if (evidence(); as data) {
+  <section class="space-y-3" aria-label="Disponibilidad y calidad">
+    <h4 class="font-semibold">Calidad, fuentes y revisión</h4>
+    <p>Revisión científica independiente pendiente.</p>
+    <dl class="grid gap-2 sm:grid-cols-3">
+      @for (dimension of dimensions; track dimension.id) {
+        <div class="rounded-lg border border-surface-200 p-3 dark:border-surface-700">
+          <dt class="font-semibold">{{ dimension.label }}</dt>
+          <dd>{{ availability[data.dimensions[dimension.id].status] }}</dd>
+        </div>
+      }
+    </dl>
+    @if (data.dimensions.topography.quality; as quality) {
+      @for (scale of ['1000', '2000']; track scale) {
+        @if (quality[scale]; as grid) {
+          <p>
+            {{ scale === '1000' ? '1 km' : '2 km' }} · Altura {{ grid.finiteHeightCells }}/{{
+              grid.totalCells
+            }}
+            ({{ grid.validHeightCellFraction * 100 | number: '1.0-2' }} %) · Pendiente
+            {{ grid.finiteSlopeCells }}/{{ grid.totalCells }} ({{
+              grid.validSlopeCellFraction * 100 | number: '1.0-2'
+            }}
+            %)
+          </p>
+        }
+      }
+      <p class="text-xs text-muted-color">Fracción de celdas finitas de la cuadrícula de salida.</p>
+    }
+    <ul class="list-disc pl-5">
+      @for (source of data.sources; track source.id) {
+        <li>
+          <a [href]="source.url" class="break-words text-primary underline">{{ source.title }}</a>
+        </li>
+      }
+    </ul>
+    <details>
+      <summary class="cursor-pointer font-medium">Limitaciones de la evidencia</summary>
+      <ul class="list-disc pl-5">
+        @for (item of data.limitations; track item) {
+          <li>{{ item }}</li>
+        }
+      </ul>
+    </details>
+    @for (study of data.relatedStudies; track study.id) {
+      <a
+        class="block font-semibold text-primary underline"
+        [routerLink]="['/estudios', study.id]"
+        queryParamsHandling="preserve"
+        >{{ study.title }}</a
+      >
+    } @empty {
+      <p class="text-muted-color">La respuesta actual no incluye un estudio relacionado.</p>
+    }
+  </section>
+}

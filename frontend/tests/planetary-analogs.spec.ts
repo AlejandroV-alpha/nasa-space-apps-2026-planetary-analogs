@@ -13,6 +13,57 @@ test.beforeEach(async ({ page }) => {
   }
 
   await page.route('**/api/v1/catalog', (route) => route.fulfill({ json: catalog }));
+
+  await page.route('**/api/v1/reference-regions', (route) =>
+    route.fulfill({
+      json: {
+        total: catalog.referenceRegions.length,
+        items: catalog.referenceRegions,
+      },
+    }),
+  );
+  await page.route(/\/api\/v1\/sites\?/, (route) => {
+    const { searchParams } = new URL(route.request().url());
+    const items = catalog.sites.filter(
+      (site: {
+        assessments: { targetBody: string; referenceRegionId: string }[];
+        country: string;
+      }) =>
+        (!searchParams.has('country') || searchParams.get('country') === site.country) &&
+        site.assessments.some(
+          (a) =>
+            a.targetBody === searchParams.get('target_body') &&
+            (!searchParams.has('reference_region_id') ||
+              a.referenceRegionId === searchParams.get('reference_region_id')),
+        ),
+    );
+    return route.fulfill({ json: { total: items.length, items } });
+  });
+  await page.route(/\/api\/v1\/sites\/[^/?]+$/, (route) => {
+    const site = catalog.sites.find((item: { id: string }) =>
+      new URL(route.request().url()).pathname.endsWith('/' + item.id),
+    );
+    return route.fulfill(site ? { json: site } : { status: 404 });
+  });
+  await page.route(/\/api\/v1\/geojson\/sites\?/, (route) =>
+    route.fulfill({
+      json: {
+        type: 'FeatureCollection',
+        features: catalog.sites.map((site: { id: string; name: string; geometry: unknown }) => ({
+          type: 'Feature',
+          id: site.id,
+          geometry: site.geometry,
+          properties: { id: site.id, name: site.name },
+        })),
+      },
+    }),
+  );
+  await page.route('**/api/v1/sources', (route) =>
+    route.fulfill({ json: { items: catalog.sources, total: catalog.sources.length } }),
+  );
+  await page.route('**/api/v1/methods', (route) =>
+    route.fulfill({ json: { items: catalog.methods, total: catalog.methods.length } }),
+  );
   await page.route('**/api/v1/provenance', (route) => route.fulfill({ json: provenance }));
   await page.route('**/api/v1/compare', async (route) => {
     const request = route.request().postDataJSON();
@@ -54,7 +105,7 @@ test('explora, abre una ficha, compara y conserva la selección después de reca
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
   await expect(page).toHaveTitle('Planetary Analogs | Inicio');
-  await page.getByRole('link', { name: 'Explorar el planeta' }).click();
+  await page.getByRole('link', { name: 'Explorar análogos terrestres' }).click();
   await expect(page.getByRole('heading', { name: 'Explorar candidatos' })).toBeVisible();
   await page.getByRole('link', { name: 'Sitios del catálogo' }).click();
   await page.getByRole('button', { name: 'Luna', exact: true }).click();
@@ -152,7 +203,9 @@ test('ofrece recuperación cuando FastAPI no está disponible', async ({ page })
     return route.fulfill({ json: catalog });
   });
   await page.goto('/explorar/catalogo');
-  await expect(page.getByText('No pudimos cargar los datos de FastAPI.')).toBeVisible();
+  await expect(
+    page.getByText('La exportación científica está temporalmente inaccesible.'),
+  ).toBeVisible();
   await page.getByRole('button', { name: 'Reintentar', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Candidatos (2)' })).toBeVisible();
 });

@@ -1,8 +1,10 @@
 import { Component, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TagModule } from 'primeng/tag';
 import { AnalogDataService } from '../../../core/data/analog-data.service';
+import { CatalogApi } from '../../../core/data/catalog-api';
+import { scienceError } from '../../../core/data/api-read';
 import { DataState } from '../../../shared/components/data-state';
 import { ScienceSources } from '../../../shared/components/science-sources';
 import { EnvironmentPanel } from './environment-panel';
@@ -28,8 +30,14 @@ export class SiteDetail {
   private readonly params = toSignal(this.route.paramMap, { requireSync: true });
   private readonly query = toSignal(this.route.queryParamMap, { requireSync: true });
   protected readonly catalog = inject(AnalogDataService);
+  private readonly api = inject(CatalogApi);
+  protected readonly scienceError = scienceError;
+  protected readonly siteData = rxResource({
+    params: () => this.params().get('siteId') ?? undefined,
+    stream: ({ params }) => this.api.site(params),
+  });
   protected readonly site = computed(() =>
-    this.catalog.siteById(this.params().get('siteId') ?? ''),
+    this.siteData.hasValue() ? this.siteData.value() : undefined,
   );
   protected readonly sources = computed(() => {
     const site = this.site();

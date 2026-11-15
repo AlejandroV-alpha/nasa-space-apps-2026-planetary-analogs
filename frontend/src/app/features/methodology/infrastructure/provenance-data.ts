@@ -16,6 +16,10 @@ interface Sensitivity {
 }
 
 interface Provenance {
+  readonly characterizationExports?: Record<
+    string,
+    { path: string; version: string; sha256: string }
+  >;
   readonly scientificCatalogSha256: string;
   readonly coordinateFrames: Readonly<Record<string, string>>;
   readonly entities: readonly {
@@ -60,6 +64,7 @@ export class ProvenanceData {
 
         return {
           entities: value.entities,
+          characterizationExports: value.characterizationExports,
           coordinateFrames: value.coordinateFrames,
           scientificCatalogSha256: value.scientificCatalogSha256,
         };

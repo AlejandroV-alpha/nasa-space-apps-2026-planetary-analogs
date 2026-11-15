@@ -18,9 +18,10 @@
   </div>
 
   <app-data-state
-    [loading]="catalog.isLoading()"
-    [failed]="!!catalog.error()"
-    (retry)="catalog.reload()"
+    [loading]="catalog.isLoading() || regions.isLoading()"
+    [failed]="!!(catalog.error() || regions.error())"
+    [errorText]="scienceError(catalog.error() || regions.error())"
+    (retry)="catalog.error() ? catalog.reload() : regions.reload()"
   >
     @if (catalog.dataset()) {
       <div
@@ -70,7 +71,27 @@
         </div>
       </div>
 
-      @if (state().invalid) {
+      <div class="mb-4 flex flex-wrap items-center gap-2">
+        <label for="known-country" class="text-sm font-medium">País</label>
+        <select
+          id="known-country"
+          class="min-h-10 rounded-lg border border-surface-300 bg-surface-0 px-3 dark:bg-surface-900"
+          [ngModel]="country()"
+          (ngModelChange)="chooseCountry($event)"
+        >
+          <option value="">Todos</option>
+          @for (item of countries(); track item) {
+            <option [value]="item">{{ item }}</option>
+          }
+        </select>
+      </div>
+      <app-data-state
+        [loading]="sites.isLoading()"
+        [failed]="!!sites.error()"
+        [errorText]="scienceError(sites.error())"
+        (retry)="sites.reload()"
+      />
+      @if (!sites.isLoading() && !sites.error() && state().invalid) {
         <p-message severity="warn" styleClass="mb-4"
           >Parte de la selección del enlace ya no está disponible. Puedes ajustarla con los
           controles.</p-message
@@ -84,6 +105,12 @@
           <summary class="cursor-pointer font-medium">Sobre {{ region.name }}</summary>
           <p class="mt-2 leading-6">{{ region.description }}</p>
           <p class="mt-2 text-muted-color">Marco planetario: {{ region.crs }}</p>
+          <a
+            class="mt-2 block text-primary underline"
+            [routerLink]="['/referencias', region.id]"
+            queryParamsHandling="preserve"
+            >Abrir ficha de referencia</a
+          >
         </details>
       }
 
@@ -173,8 +200,15 @@
         </section>
         <div [class.hidden]="!mapView()" class="min-w-0 lg:block">
           @defer (on viewport) {
+            <app-data-state
+              [loading]="points.isLoading()"
+              [failed]="!!points.error()"
+              [errorText]="scienceError(points.error())"
+              (retry)="points.reload()"
+            />
             <app-candidate-map
               [sites]="state().candidates"
+              [sitePoints]="points.hasValue() ? points.value() : undefined"
               [selectedId]="state().selected?.id"
               (siteSelected)="selectSite($event)"
             />

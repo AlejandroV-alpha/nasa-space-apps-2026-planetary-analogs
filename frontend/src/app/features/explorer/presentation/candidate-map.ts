@@ -29,6 +29,8 @@ import { EARTH_MAP_STYLE } from '../infrastructure/earth-map-style';
 import { areaFromPolygon, areaPolygon, areaSegments, type Area } from '../domain/geographic-area';
 import type { MeasuredCoverage, RankedWindow } from '../domain/discovery';
 
+const DRAW_SOURCE_PREFIX = 'planetary-selection';
+
 @Component({
   selector: 'app-candidate-map',
   imports: [
@@ -50,9 +52,12 @@ export class CandidateMap {
   readonly selectedId = input<string>();
   readonly siteSelected = output<string>();
   readonly discovery = input(false);
+  readonly readOnly = input(false);
+  readonly sitePoints = input<import('../../../core/data/catalog-api').SitePoints>();
   readonly windows = input<readonly RankedWindow[]>([]);
   readonly area = input<Area>();
   readonly coverage = input<MeasuredCoverage>();
+  readonly showGlobal = input(false);
   protected readonly crossesAntimeridian = computed(() => {
     const area = this.area();
     return !!area && area[0] > area[2];
@@ -118,6 +123,21 @@ export class CandidateMap {
   protected readonly points = computed<FeatureCollection<Point, { id: string; name: string }>>(
     () => {
       const features: FeatureCollection<Point, { id: string; name: string }>['features'] = [];
+      const published = this.sitePoints();
+      if (published) {
+        const ids = new Set(this.sites().map((site) => site.id));
+        return {
+          type: 'FeatureCollection',
+          features: published.features.filter(
+            (feature) =>
+              ids.has(feature.properties.id) &&
+              validEarthPosition([
+                feature.geometry.coordinates[0],
+                feature.geometry.coordinates[1],
+              ]),
+          ),
+        };
+      }
       for (const site of this.sites()) {
         const coordinates = site.geometry?.coordinates;
         if (validEarthPosition(coordinates)) {
@@ -139,6 +159,14 @@ export class CandidateMap {
     effect(() => {
       const map = this.map();
       const area = this.area();
+      if (map && this.showGlobal() && this.coverage() && !this.drawing()) {
+        const bounds = new LngLatBounds();
+        for (const feature of this.coverage()?.features ?? []) {
+          for (const point of feature.geometry.coordinates[0]) bounds.extend([point[0], point[1]]);
+        }
+        if (!bounds.isEmpty()) map.fitBounds(bounds, { padding: 34, duration: 0 });
+        return;
+      }
       if (map && area && !this.drawing()) {
         map.fitBounds(
           [
@@ -192,8 +220,14 @@ export class CandidateMap {
       window: tokens.getPropertyValue('--p-mars-orange-600').trim(),
       coverage: tokens.getPropertyValue('--p-surface-600').trim(),
     });
+    if (this.readOnly()) return;
+
     this.draw = new TerraDraw({
-      adapter: new TerraDrawMapLibreGLAdapter({ map, coordinatePrecision: 6 }),
+      adapter: new TerraDrawMapLibreGLAdapter({
+        map,
+        coordinatePrecision: 6,
+        prefixId: DRAW_SOURCE_PREFIX,
+      }),
       modes: [
         new TerraDrawRectangleMode({
           styles: { fillColor: this.colors().land as `#${string}`, fillOpacity: 0.18 },
@@ -256,8 +290,12 @@ export class CandidateMap {
   }
 
   private stopDraw(): void {
-    this.draw?.stop();
+    const draw = this.draw;
     this.draw = undefined;
+    // The Angular MapLibre child removes its style before this host's destroy hook.
+    if (draw && this.map()?.getSource(DRAW_SOURCE_PREFIX + '-point')) {
+      draw.stop();
+    }
   }
 
   protected retry(): void {

@@ -1,85 +1,74 @@
-import { DecimalPipe } from '@angular/common';
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import type { Application } from '../domain/window-science';
+import { SelectModule } from 'primeng/select';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { DataState } from '../../../shared/components/data-state';
+import { scienceError } from '../../../core/data/api-read';
 import { WindowCharacterizationData } from '../infrastructure/window-characterization-data';
+import { ScienceFindings } from './science-findings';
+
+type Panel = 'geology' | 'thermal' | 'applications' | 'evidence';
 
 @Component({
   selector: 'app-window-characterization',
-  imports: [DataState, DecimalPipe],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [DataState, ScienceFindings, FormsModule, SelectModule],
   templateUrl: './window-characterization.html',
 })
 export class WindowCharacterization {
   private readonly data = inject(WindowCharacterizationData);
   readonly windowId = input.required<string>();
   readonly referenceId = input.required<string>();
+  protected readonly mission = signal<Application['type'] | null>(null);
+  protected readonly missions = [
+    { label: 'Todos los usos', value: null },
+    { label: 'Movilidad de rovers', value: 'rover_mobility' },
+    { label: 'Muestreo geológico', value: 'geological_sampling' },
+    { label: 'Operaciones de campo', value: 'field_operations' },
+  ];
   private readonly expanded = signal(false);
-  protected readonly selectedStudy = signal<string | undefined>(undefined);
+  private readonly openPanels = signal<ReadonlySet<Panel>>(new Set());
   private readonly selection = computed(() => ({
     windowId: this.windowId(),
     referenceRegionId: this.referenceId(),
   }));
-  protected readonly characterization = rxResource({
-    params: () => (this.expanded() ? this.selection() : undefined),
-    stream: ({ params }) => this.data.forWindow(params),
+  protected readonly scienceError = scienceError;
+  protected readonly geology = rxResource({
+    params: () =>
+      this.expanded() && this.openPanels().has('geology') ? this.selection() : undefined,
+    stream: ({ params }) => this.data.geology(params),
   });
-  protected readonly emit = computed(() => {
-    if (!this.characterization.hasValue()) return undefined;
-    const observations = this.characterization.value().geology.earth.emitObservations;
-    const selected = observations?.scenes.find(
-      (scene) => scene.granule === observations.selectedGranule,
-    );
-    if (!selected) return undefined;
-    return {
-      ...selected,
-      displayMatches: [1, 2].flatMap((group) =>
-        selected.matches.filter((match) => match.group === group).slice(0, 3),
-      ),
-    };
+  protected readonly thermal = rxResource({
+    params: () =>
+      this.expanded() && this.openPanels().has('thermal') ? this.selection() : undefined,
+    stream: ({ params }) => this.data.thermal(params),
   });
-  protected readonly study = rxResource({
-    params: () => {
-      const id = this.selectedStudy();
-      const selection = this.selection();
-      if (
-        this.expanded() &&
-        id &&
-        this.characterization.hasValue() &&
-        this.characterization.value().evidence.relatedStudies.some((item) => item.id === id)
-      ) {
-        return { id, selection };
-      }
-      return undefined;
-    },
-    stream: ({ params }) => this.data.study(params.id, params.selection),
+  protected readonly applications = rxResource({
+    params: () =>
+      this.expanded() && this.openPanels().has('applications')
+        ? { selection: this.selection(), mission: this.mission() }
+        : undefined,
+    stream: ({ params }) => this.data.applications(params.selection, params.mission ?? undefined),
   });
-  protected readonly availability = {
-    available: 'Indicadores calculados',
-    qualitative: 'Comparación cualitativa por familia',
-    catalogued: 'Productos identificados en catálogo',
-    context_only: 'Contexto disponible',
-    not_evaluated: 'Pendiente de evaluación',
-  };
-  protected readonly applicationNames = {
-    rover_mobility: 'Movilidad y navegación de rovers',
-    geological_sampling: 'Muestreo geológico',
-    field_operations: 'Operaciones de campo',
-  };
-  protected readonly conditionNames: Record<string, string> = {
-    surface_bearing_strength: 'resistencia del suelo',
-    obstacle_distribution: 'distribución y tamaño de obstáculos',
-    rover_specific_limits: 'límites del rover',
-    verified_surface_materials: 'materiales superficiales verificados',
-    sampling_access: 'acceso para el muestreo',
-    site_access: 'acceso al sitio',
-    permits: 'permisos',
-    local_hazards: 'riesgos locales',
-    comparable_regional_topography: 'mediciones topográficas comparables',
-  };
+  protected readonly evidence = rxResource({
+    params: () =>
+      this.expanded() && this.openPanels().has('evidence') ? this.selection() : undefined,
+    stream: ({ params }) => this.data.evidence(params),
+  });
 
-  protected onToggle(event: Event): void {
-    if (event.target instanceof HTMLDetailsElement) {
-      this.expanded.set(event.target.open);
+  protected toggle(event: Event, panel?: Panel): void {
+    if (!(event.target instanceof HTMLDetailsElement)) return;
+    const open = event.target.open;
+    if (!panel) {
+      this.expanded.set(open);
+      return;
     }
+    this.openPanels.update((current) => {
+      const next = new Set(current);
+      if (open) next.add(panel);
+      else next.delete(panel);
+      return next;
+    });
   }
 }

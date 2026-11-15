@@ -21,15 +21,21 @@ import { WindowCharacterization } from './window-characterization';
 export class WindowEvidence {
   private readonly catalog = inject(AnalogDataService);
   readonly window = input.required<DiscoveredWindow>();
-  readonly reference = input.required<ReferenceRegion>();
-  readonly discovery = input.required<Pick<DiscoverySearch, 'sourceSearch' | 'method'>>();
+  readonly reference = input.required<Pick<ReferenceRegion, 'id' | 'name' | 'sourceIds'>>();
+  readonly showCharacterization = input(true);
+  readonly discovery = input<Pick<DiscoverySearch, 'sourceSearch' | 'method'>>();
   protected readonly labels = WINDOW_METRICS;
+  protected readonly explanations: Readonly<Record<string, string>> = {
+    slope_median_deg: 'Pendiente habitual',
+    slope_p90_deg: 'Pendientes más pronunciadas',
+    relief_p95_p5_m: 'Variación de altura',
+  };
   protected readonly metricValue = metricValue;
   protected readonly sources = computed(() =>
     this.catalog.sourcesFor(Array.from(new Set(['nasadem', ...this.reference().sourceIds]))),
   );
   protected readonly tile = computed(() =>
-    this.discovery().sourceSearch.tiles.find(
+    this.discovery()?.sourceSearch.tiles.find(
       (tile) => tile.tileId === this.window().properties.tileId,
     ),
   );
