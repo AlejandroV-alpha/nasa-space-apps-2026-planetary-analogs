@@ -102,7 +102,7 @@ La API completa se consume con `GET http://localhost:8000/api/v1/catalog`, cuya 
 
 Para consumir filtros del servidor, tratar `/sites` como `{ total, items }`, no como una lista directa. El comparador HTTP utiliza claves `reference_region_id` y `site_ids`; el helper local Angular sigue recibiendo argumentos TypeScript. Son dos maneras de consultar los mismos datos, no dos formatos intercambiables de llamada.
 
-La opción estática del frontend permanece disponible. La nueva API no se conectó automáticamente al servicio Angular.
+Angular consume los endpoints de catálogo, comparación y procedencia por HTTP. En desarrollo, el proxy de Angular reenvía las peticiones a FastAPI.
 
 ## Referencias técnicas
 

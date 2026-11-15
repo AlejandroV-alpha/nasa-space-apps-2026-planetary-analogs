@@ -4,11 +4,9 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 
 ## Development server
 
-Start FastAPI from the repository root. On Windows, enable UTF-8 for Python
-so the backend reads the scientific JSON exports correctly.
+Start FastAPI from the repository root.
 
 ```powershell
-$env:PYTHONUTF8 = '1'
 uv run --with-requirements backend/requirements.txt python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
 ```
 
@@ -86,12 +84,6 @@ The GitHub Pages workflow reads the repository variable
 MapLibre worker assets are included in the Angular build. The browser loads
 the attributed OpenStreetMap basemap and the candidate list remains
 available when the map cannot load.
-
-On Windows, `GET /api/v1/catalog` returned HTTP 200 with
-`Siloli â€” sector de estudio` before enabling Python UTF-8. The same request
-returned `Siloli — sector de estudio` after restarting with `PYTHONUTF8=1`.
-This affects names and descriptions shown by Angular. The backend reads the
-JSON using Python's default text encoding.
 
 ## Running unit tests
 

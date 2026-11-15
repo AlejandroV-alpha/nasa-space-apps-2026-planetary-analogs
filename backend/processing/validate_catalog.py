@@ -9,7 +9,7 @@ else:
 
 
 def validate():
-    catalog=json.loads((OUT/'catalog.json').read_text())
+    catalog=json.loads((OUT/'catalog.json').read_text(encoding='utf-8'))
     sources={s['id'] for s in catalog['sources']}
     refs={r['id']:r for r in catalog['references']}
     assert len(catalog['sites'])==4 and len(refs)==2
@@ -45,7 +45,7 @@ def validate():
                 if delta['signedDifference'] is not None:
                     assert abs(delta['signedDifference']-(delta['candidateValue']-delta['referenceValue']))<.00011
     for filename in ['candidates.geojson','study-areas-earth.geojson']:
-        features=json.loads((OUT/filename).read_text())['features']
+        features=json.loads((OUT/filename).read_text(encoding='utf-8'))['features']
         assert len(features)==4
         for feature in features:
             geometry=feature['geometry']

@@ -13,7 +13,7 @@ else:
 
 
 def main():
-    catalog=json.loads((OUT/'catalog.json').read_text())
+    catalog=json.loads((OUT/'catalog.json').read_text(encoding='utf-8'))
     regions=catalog['sites']+catalog['references']
     fig,axes=plt.subplots(2,6,figsize=(19,7),layout='constrained')
     arrays=[]

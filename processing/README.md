@@ -2,7 +2,7 @@
 > Los comandos de esta guía siguen funcionando mediante entradas de compatibilidad.
 > Para ejecutar el flujo completo y servir datos HTTP, ver [backend/README.md](../backend/README.md).
 
-# Ciencia y datos GIS — Persona 2
+# Ciencia y datos GIS — Persona 3
 
 Este directorio prepara un análisis exploratorio de relieve regional. No selecciona sitios aptos para instalar bases, no calcula probabilidades de similitud y no certifica movilidad.
 
@@ -87,3 +87,57 @@ npm --prefix frontend run validate:data
 La exportación usa solo la biblioteca estándar. Conserva valores y fuentes, traduce claves/estados al contrato y mantiene `draft`: `analysis_computed` no significa validación científica independiente. Genera además `analogs.v1.provenance.json` para conservar sensibilidad y trazabilidad estructuradas. CI comprueba que ambas salidas estén actualizadas. No editar los números exportados manualmente.
 
 Los marcos planetarios nativos y el método de diferencias centrales se preservan explícitamente. Ver [guía de entrega](../docs/entrega-persona-1.md).
+
+## Entrega de Persona 3
+
+El caso inicial propuesto es **Payún Matrú frente al sector del polo sur lunar**. Las ventanas, coordenadas y productos están en [study-config.json](../data/study-config.json). A 1 km, el candidato tiene pendiente mediana de 7,06° frente a 6,64°, pendiente P90 de 12,24° frente a 12,56° y relieve P95–P5 de 1.174,35 m frente a 1.663,01 m. Es un candidato preliminar para estudiar recorridos en terreno inclinado. Los valores describen relieve regional. La verificación de la ruta, obstáculos, condiciones del suelo y acceso requiere evaluación de campo. Véanse las [fichas científicas](../docs/fichas-cientificas.md).
+
+### Verificar la entrega
+
+Ejecutar desde la raíz, con las dependencias de procesamiento y pruebas instaladas.
+
+```powershell
+python processing/validate_catalog.py
+python processing/export_frontend.py --check
+python -m pytest processing/tests backend/tests -q
+```
+
+La procedencia de la exportación calcula el SHA-256 del catálogo con finales de línea LF, incluso si Git lo materializa como CRLF. Los hashes de los archivos ráster y de los metadatos originales se verifican sobre sus bytes.
+
+### Contexto ambiental terrestre
+
+El archivo [terrestrial-environment.v1.json](../data/processed/terrestrial-environment.v1.json) contiene las series diarias de NASA POWER de los cuatro sitios, del 1 de enero al 31 de diciembre de 2025 en hora solar local. Cada sitio contiene el ID compartido con el catálogo, coordenadas solicitadas, coordenadas devueltas, URL de consulta, versión de la API y productos citados por el proveedor. Cada variable incluye unidad, serie, días válidos y media del período. Los faltantes se representan como `null`.
+
+```powershell
+python -m backend.processing.export_environment --start 2025-01-01 --end 2025-12-31
+```
+
+Para integrar con FastAPI, Persona 2 puede leer el JSON por `sites[].siteId`. El JSON topográfico se entrega en [analogs.v1.json](../frontend/public/data/analogs.v1.json) con su [procedencia](../frontend/public/data/analogs.v1.provenance.json). Mantener el contexto ambiental aparte de las diferencias Tierra–Luna y Tierra–Marte. El período elegido sirve como ejemplo histórico para la ficha del ensayo.
+
+### Prueba de OpenTopography
+
+El proveedor principal del pipeline es Microsoft Planetary Computer. Para verificar el acceso alternativo a NASADEM con OpenTopography, configura una clave personal en la variable de entorno `OPENTOPOGRAPHY_API_KEY` y ejecuta lo siguiente.
+
+```powershell
+python -m backend.processing.check_opentopography --site payun-sector
+```
+
+La prueba solicita el rectángulo envolvente de la ventana de estudio y guarda el GeoTIFF y su procedencia en `data/raw/opentopography/`. El producto [NASADEM_HGT.001](https://www.earthdata.nasa.gov/data/catalog/lpcloud-nasadem-hgt-001) tiene resolución nominal de 1 segundo de arco. Para cobertura y condiciones de uso, consultar la ficha del producto y la [documentación de OpenTopography](https://opentopography.org/developers).
+
+La descarga real para Payún Matrú se completó. El recorte devuelto está en EPSG:4326, con un paso de 1 segundo de arco y extensión aproximada de 69,353° O a 69,129° O y de 36,512° S a 36,332° S. El JSON local registra el DOI, los límites y el SHA-256 del GeoTIFF. El catálogo científico conserva los resultados del pipeline principal.
+
+### Buscar candidatos automáticamente
+
+El módulo `backend.processing.discover_candidates` genera ventanas terrestres de 20 km de lado a partir de las teselas NASADEM. Calcula pendiente mediana, pendiente P90 y relieve P95–P5 a 1 km y 2 km con las funciones del pipeline. Usa las referencias planetarias disponibles en el catálogo y calcula las diferencias de cada ventana con ellas.
+
+```powershell
+# Buscar en todas las teselas NASADEM ya descargadas
+uv run --with-requirements backend/processing/requirements.txt python -m backend.processing.discover_candidates
+
+# Buscar y descargar datos de otra área, con límites oeste sur este norte en grados
+uv run --with-requirements backend/processing/requirements.txt python -m backend.processing.discover_candidates --bounds -66 -23 -65 -22 --download --limit 3
+```
+
+El resultado se guarda en `data/processed/discovered-candidates.v1.json`. Usa `--output` para guardar otra búsqueda en un archivo separado y `--reference` para limitarla a una referencia planetaria. Cada entrada de `results` contiene una colección GeoJSON de ventanas para esa referencia. Las ventanas incluyen geometría, centro, tesela, comparaciones y cobertura a ambas escalas. Las teselas sin datos se reportan en `search.skippedTiles`.
+
+La búsqueda ordena por la media de las tres diferencias relativas absolutas a 1 km, con igual peso por indicador. Cada diferencia se divide por el mayor valor absoluto del par y el caso cero contra cero aporta cero. Las ventanas con mediciones incompletas quedan fuera del orden. El orden describe cercanía topográfica en el área muestreada. La búsqueda evalúa ventanas contenidas en una tesela con margen para calcular pendientes, por lo que puede omitir zonas entre teselas. Revisar las mediciones a 2 km, el contexto del terreno y las condiciones de campo antes de interpretar la utilidad de una ventana.

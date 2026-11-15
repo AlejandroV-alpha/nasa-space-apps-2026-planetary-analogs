@@ -7,7 +7,7 @@ else:
 
 
 def main():
-    catalog=json.loads((OUT/'catalog.json').read_text())
+    catalog=json.loads((OUT/'catalog.json').read_text(encoding='utf-8'))
     source_map={s['id']:s for s in catalog['sources']}
     refs={r['id']:r for r in catalog['references']}
     lines=['# Fichas científicas del análisis exploratorio','',
@@ -67,7 +67,7 @@ def main():
               '- D6: complemento ambiental evaluado y pospuesto por falta de compatibilidad validada; sin variables inventadas.', '',
               '![Control visual del relieve y las pendientes](../data/processed/terrain-quality.png)', '',
               'La figura usa la misma escala de color entre ventanas. Alturas relativas a la mediana de cada ventana: no implica un datum vertical compartido. Véase [la metodología](metodologia-cientifica.md) para los límites.', '']
-    (ROOT/'docs/fichas-cientificas.md').write_text('\n'.join(lines))
+    (ROOT/'docs/fichas-cientificas.md').write_text('\n'.join(lines), encoding='utf-8', newline='\n')
 
 
 if __name__=='__main__':main()

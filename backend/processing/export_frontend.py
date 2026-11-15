@@ -93,7 +93,8 @@ def build(catalog, generated_at):
 
 
 def outputs(generated_at):
-    original=INPUT.read_bytes()
+    # Hash the UTF-8 catalog with canonical LF line endings across Git checkouts.
+    original = INPUT.read_bytes().replace(b'\r\n', b'\n')
     catalog=json.loads(original)
     dataset=build(catalog, generated_at)
     provenance=dict(schemaVersion='1.0-export-provenance',scientificCatalogPath='data/processed/catalog.json',
@@ -109,12 +110,12 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--check',action='store_true',help='Fail if exported files differ; does not write files.')
     args=parser.parse_args()
-    generated_at = json.loads(OUTPUT.read_text())['generatedAt'] if args.check and OUTPUT.exists() else datetime.now(timezone.utc).isoformat()
+    generated_at = json.loads(OUTPUT.read_text(encoding='utf-8'))['generatedAt'] if args.check and OUTPUT.exists() else datetime.now(timezone.utc).isoformat()
     for path,text in outputs(generated_at).items():
         if args.check:
-            if not path.exists() or path.read_text()!=text:raise SystemExit(f'Outdated export: {path.relative_to(ROOT)}')
+            if not path.exists() or path.read_text(encoding='utf-8')!=text:raise SystemExit(f'Outdated export: {path.relative_to(ROOT)}')
         else:
-            path.parent.mkdir(parents=True,exist_ok=True);path.write_text(text)
+            path.parent.mkdir(parents=True,exist_ok=True);path.write_text(text, encoding='utf-8', newline='\n')
     print('Science export is current.' if args.check else 'Exported four real candidates and two references, draft contract 1.1.0.')
 
 

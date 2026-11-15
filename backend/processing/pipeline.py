@@ -42,7 +42,7 @@ SESSION.headers['User-Agent'] = 'PlanetaryAnalogsTeam3/0.1 (regional research pr
 
 def save_json(path: Path, value) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False) + '\n')
+    path.write_text(json.dumps(value, ensure_ascii=False, indent=2, allow_nan=False) + '\n', encoding='utf-8', newline='\n')
 
 
 def sha256(path: Path) -> str:
@@ -115,7 +115,7 @@ def cache_record(path: Path, url: str, **extra) -> None:
     if urlsplit(url).query:
         raise ValueError('Only stable unsigned URLs may enter provenance records')
     save_json(path.with_suffix(path.suffix+'.provenance.json'), dict(
-        url=url, localPath=str(path.relative_to(ROOT)), sha256=sha256(path),
+        url=url, localPath=path.relative_to(ROOT).as_posix(), sha256=sha256(path),
         downloadedAt=datetime.now(timezone.utc).isoformat(), bytes=path.stat().st_size, **extra))
 
 
@@ -131,7 +131,7 @@ def metadata(url: str, name: str, offline: bool) -> Path:
 def nasadem_tile(item_id: str, offline: bool):
     item_url = f'https://planetarycomputer.microsoft.com/api/stac/v1/collections/nasadem/items/{item_id}'
     item_path = metadata(item_url, item_id+'.stac.json', offline)
-    item = json.loads(item_path.read_text())
+    item = json.loads(item_path.read_text(encoding='utf-8'))
     stable_url = item['assets']['elevation']['href']
     path = RAW/(item_id+'.tif')
     if not path.exists():
@@ -152,7 +152,7 @@ def nasadem_tile(item_id: str, offline: bool):
             partial.unlink(missing_ok=True)
         cache_record(path, stable_url, stacItemUrl=item_url, product='NASADEM_HGT.001')
     provenance_path=path.with_suffix(path.suffix+'.provenance.json')
-    provenance=json.loads(provenance_path.read_text())
+    provenance=json.loads(provenance_path.read_text(encoding='utf-8'))
     if sha256(path)!=provenance['sha256']:
         raise ValueError('NASADEM tile failed SHA256 validation')
     return path,item_path,provenance
@@ -180,11 +180,11 @@ def nasa_dem(region: dict, offline: bool):
         save_json(manifest,payload)
         cache_record(manifest,'https://planetarycomputer.microsoft.com/api/stac/v1/collections/nasadem',
                      kind='derived_input_manifest',inputs=payload['inputs'])
-    elif json.loads(manifest.read_text())!=payload:
+    elif json.loads(manifest.read_text(encoding='utf-8'))!=payload:
         raise ValueError('Study inputs changed; remove this region input manifest before reprocessing')
     info=dict(sourceId='nasadem',productFiles=[path.name for path,_,_ in inputs],originalUnits='m',appliedScale=1,
               nativePixelSize=resolution,nativePixelSizeUnit='degree',nativeNoData=-32768,
-              originalMetadata=[str(path.relative_to(ROOT)) for _,path,_ in inputs],
+              originalMetadata=[path.relative_to(ROOT).as_posix() for _,path,_ in inputs],
               mergeBounds=[left,bottom,right,top],mergeMethod='first; native grid; no gap filling')
     return values,transform,crs,info,manifest
 
@@ -195,7 +195,7 @@ def pds_strip(region: dict, offline: bool):
     name = base.rsplit('/',1)[1]
     label_path = metadata(base+'.lbl',name+'.lbl',offline)
     xml_path = metadata(base+'.xml',name+'.xml',offline)
-    label = label_path.read_text()
+    label = label_path.read_text(encoding='utf-8')
     rows = int(label_number(label,'LINES'))
     columns = int(label_number(label,'LINE_SAMPLES'))
     if moon:
@@ -253,7 +253,7 @@ def pds_strip(region: dict, offline: bool):
                 appliedScale=unit_scale,appliedVerticalOffset=0,
                 offsetNote='LOLA OFFSET=1737.4 km is not added: these values are heights, not planetary radii.' if moon else 'MOLA product contains topography, not radius.',
                 nativePixelSize=[scale,scale if moon else scale_y],nativePixelSizeUnit='projected metre',
-                originalMetadata=[str(label_path.relative_to(ROOT)),str(xml_path.relative_to(ROOT))],
+                originalMetadata=[label_path.relative_to(ROOT).as_posix(),xml_path.relative_to(ROOT).as_posix()],
                 sourceRange=dict(rowStart=first,rowStopExclusive=last,columns=columns),
                 georeferencing='PDS3 polar offsets, checked against GDAL' if moon else 'Precise PDS4 XML pixel resolutions and upper-left corner; avoids rounded PDS3 MAP_SCALE')
     return values,strip_transform,crs,info,path
@@ -350,7 +350,7 @@ def process(region,offline):
         path=OUT/'rasters'/f'{region["id"]}-{scale}m.tif'
         write_grid(path,grid,grid_transform,local.to_wkt())
         all_scales.append(dict(analysisScaleM=scale,metrics=export_metrics(measures,quality,scale,source_id),quality=quality,
-                               raster=str(path.relative_to(ROOT)),rasterSha256=sha256(path)))
+                               raster=path.relative_to(ROOT).as_posix(),rasterSha256=sha256(path)))
     geographic,local=coordinate_systems(region)
     result={k:v for k,v in region.items() if k not in ['tile','analysisScalesM','studySideM']}
     result.update(evidenceStatus='computed_unreviewed',analogyStatus='hypothesis_not_validated',
@@ -360,7 +360,7 @@ def process(region,offline):
                     coordinateBody=region['body'],geometry=polygon,analysisCrs=local.to_wkt()),
                   sourceIds=[source_id],sourceDetails=source_info,metrics=all_scales[0]['metrics'],sensitivity=all_scales[1:],quality=all_scales[0]['quality'],
                   analysisRaster=all_scales[0]['raster'],analysisRasterSha256=all_scales[0]['rasterSha256'])
-    provenance=json.loads(source_path.with_suffix(source_path.suffix+'.provenance.json').read_text())
+    provenance=json.loads(source_path.with_suffix(source_path.suffix+'.provenance.json').read_text(encoding='utf-8'))
     if sha256(source_path)!=provenance['sha256']:
         raise ValueError('Cached source failed SHA256 validation')
     result['provenance']=provenance
@@ -372,7 +372,7 @@ def main():
     parser.add_argument('--offline',action='store_true',help='Use only cached metadata and raw sources; never access network.')
     args=parser.parse_args()
     for path in [RAW,META,OUT]:path.mkdir(parents=True,exist_ok=True)
-    config=json.loads((DATA/'study-config.json').read_text())
+    config=json.loads((DATA/'study-config.json').read_text(encoding='utf-8'))
     # Save provider metadata without signed delivery credentials.
     metadata('https://planetarycomputer.microsoft.com/api/stac/v1/collections/nasadem','nasadem-collection.stac.json',args.offline)
     results=[]
@@ -408,7 +408,7 @@ def main():
     for r in results:
         cells=[m['value'] for m in r['metrics']]
         rows.append(f'| {r["name"]} | {r["body"]} | '+ ' | '.join(str(v) for v in cells)+f' | {r["quality"]["finiteHeightCells"]}/{r["quality"]["totalCells"]} |')
-    (OUT/'results-table.md').write_text('# Regional screening results at 1000 m\n\nComputed by the team; scientific review pending. No similarity score.\n\n'+'\n'.join(rows)+'\n')
+    (OUT/'results-table.md').write_text('# Regional screening results at 1000 m\n\nComputed by the team; scientific review pending. No similarity score.\n\n'+'\n'.join(rows)+'\n', encoding='utf-8', newline='\n')
     print(f'Wrote {len(sites)} candidates and {len(references)} planetary references to {OUT}',flush=True)
 
 

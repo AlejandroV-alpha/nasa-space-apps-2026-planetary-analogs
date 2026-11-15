@@ -54,13 +54,7 @@ Este último comando también necesita Node y las dependencias de validación de
 
 ## API y Angular
 
-El backend escucha en el puerto 8000 y Angular en el 4200. Para usar la API, Persona 1 puede cambiar `ANALOG_DATASET_URL` en `analog-data.service.ts` a:
-
-```typescript
-export const ANALOG_DATASET_URL = 'http://localhost:8000/api/v1/catalog';
-```
-
-La respuesta conserva el contrato 1.1.0. La URL de API debe configurarse por entorno al desplegar. No se cambió automáticamente el servicio: `data/analogs.v1.json` sigue funcionando como opción estática existente. Los filtros/compare del backend son opcionales: el servicio Angular actual también puede hacerlos en memoria sobre el catálogo completo.
+Angular utiliza FastAPI para el catálogo, las comparaciones y la procedencia. En desarrollo, el proxy de Angular reenvía `/api/**` al puerto 8000. Para publicar la web, consulta [la configuración de la URL HTTPS](../frontend/README.md#connect-a-deployed-frontend-to-fastapi).
 
 CORS permite por defecto `http://localhost:4200` y `http://127.0.0.1:4200`. Para otro origen, configurar `CORS_ORIGINS` como lista separada por comas antes de arrancar.
 

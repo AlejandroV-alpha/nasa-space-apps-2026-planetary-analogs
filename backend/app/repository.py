@@ -19,11 +19,11 @@ class Repository:
         if self._dataset is not None:
             return self._dataset
         try:
-            data = json.loads((self.root / 'frontend/public/data/analogs.v1.json').read_text())
-            schema = json.loads((self.root / 'schema/planetary-analogs.schema.json').read_text())
+            data = json.loads((self.root / 'frontend/public/data/analogs.v1.json').read_text(encoding='utf-8'))
+            schema = json.loads((self.root / 'schema/planetary-analogs.schema.json').read_text(encoding='utf-8'))
             Draft202012Validator(schema, format_checker=FormatChecker()).validate(data)
-            provenance = json.loads((self.root / 'frontend/public/data/analogs.v1.provenance.json').read_text())
-        except (OSError, json.JSONDecodeError, ValidationError) as error:
+            provenance = json.loads((self.root / 'frontend/public/data/analogs.v1.provenance.json').read_text(encoding='utf-8'))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValidationError) as error:
             raise HTTPException(503, 'Catálogo no disponible o inválido. Ejecutar el procesamiento y reiniciar la API.') from error
         self._dataset, self._provenance = data, provenance
         return data
