@@ -9,7 +9,16 @@ export const routes: Routes = [
   },
   {
     path: 'explorar',
+    pathMatch: 'full',
     title: 'Explorar',
+    loadComponent: () =>
+      import('./features/explorer/presentation/discovery-explorer').then(
+        (page) => page.DiscoveryExplorer,
+      ),
+  },
+  {
+    path: 'explorar/catalogo',
+    title: 'Sitios del catálogo',
     loadComponent: () =>
       import('./features/explorer/presentation/explorer').then((page) => page.Explorer),
   },

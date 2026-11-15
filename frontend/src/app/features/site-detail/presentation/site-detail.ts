@@ -5,6 +5,7 @@ import { TagModule } from 'primeng/tag';
 import { AnalogDataService } from '../../../core/data/analog-data.service';
 import { DataState } from '../../../shared/components/data-state';
 import { ScienceSources } from '../../../shared/components/science-sources';
+import { EnvironmentPanel } from './environment-panel';
 import {
   explorationQuery,
   resolveExploration,
@@ -19,7 +20,7 @@ import {
 
 @Component({
   selector: 'app-site-detail',
-  imports: [RouterLink, TagModule, DataState, ScienceSources],
+  imports: [RouterLink, TagModule, DataState, ScienceSources, EnvironmentPanel],
   templateUrl: './site-detail.html',
 })
 export class SiteDetail {
@@ -49,7 +50,13 @@ export class SiteDetail {
   protected readonly labels = METRIC_LABELS;
   protected readonly formatMetric = formatMetric;
   protected readonly validEarthPosition = validEarthPosition;
+  protected readonly fromDiscovery = computed(() => this.query().get('desde') === 'descubrimiento');
   protected readonly backQuery = computed(() => {
+    if (this.fromDiscovery()) {
+      const query = { ...this.route.snapshot.queryParams };
+      delete query['desde'];
+      return query;
+    }
     const site = this.site();
     const state = resolveExploration(this.query(), this.catalog.dataset());
     const assessment =

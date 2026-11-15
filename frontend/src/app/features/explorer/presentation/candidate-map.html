@@ -2,6 +2,27 @@
   aria-label="Mapa terrestre de candidatos"
   class="relative overflow-hidden rounded-xl border border-surface-200 bg-surface-100 dark:border-surface-700 dark:bg-surface-900"
 >
+  @if (discovery() && available()) {
+    <div
+      class="flex flex-wrap items-center gap-3 border-b border-surface-200 bg-surface-0 p-3 dark:border-surface-700 dark:bg-surface-900"
+    >
+      @if (drawing()) {
+        <button pButton type="button" size="small" [outlined]="true" (click)="cancelDraw()">
+          Cancelar dibujo
+        </button>
+        <span role="status" class="text-sm">Marca dos esquinas opuestas en el mapa.</span>
+      } @else {
+        <button pButton type="button" size="small" [disabled]="!ready()" (click)="beginDraw()">
+          <i class="pi pi-pencil" aria-hidden="true"></i> Dibujar rectángulo
+        </button>
+      }
+      @if (drawError()) {
+        <p role="alert" class="text-sm">
+          Rectángulo inválido. Evita cruzar el antimeridiano y selecciona dos esquinas diferentes.
+        </p>
+      }
+    </div>
+  }
   @if (!available()) {
     <div class="grid min-h-80 place-content-center gap-4 px-6 text-center">
       <p class="text-sm">
@@ -16,6 +37,7 @@
       class="block h-[28rem] w-full xl:h-[37rem]"
       [mapStyle]="style"
       [scrollZoom]="false"
+      [renderWorldCopies]="!discovery()"
       [cooperativeGestures]="true"
       (mapLoad)="onLoad($event)"
       (mapError)="failed.set(true)"
@@ -23,6 +45,54 @@
     >
       <mgl-control mglNavigation position="top-right" />
       <mgl-geojson-source id="candidate-sites" [data]="points()" />
+      @if (discovery()) {
+        <mgl-geojson-source id="discovery-area" [data]="areaShape()" />
+        <mgl-layer
+          id="discovery-area-fill"
+          type="fill"
+          source="discovery-area"
+          [paint]="{ 'fill-color': colors().land, 'fill-opacity': 0.12 }"
+        />
+        <mgl-layer
+          id="discovery-area-outline"
+          type="line"
+          source="discovery-area"
+          [paint]="{ 'line-color': colors().land, 'line-width': 2, 'line-dasharray': [3, 2] }"
+        />
+        <mgl-geojson-source id="discovery-windows" [data]="polygons()" />
+        <mgl-layer
+          id="discovery-window-fill"
+          type="fill"
+          source="discovery-windows"
+          [paint]="{
+            'fill-color': colors().window,
+            'fill-opacity': ['case', ['get', 'selected'], 0.55, 0.22],
+          }"
+          (layerClick)="chooseWindow($event.features)"
+        />
+        <mgl-layer
+          id="discovery-window-outline"
+          type="line"
+          source="discovery-windows"
+          [paint]="{
+            'line-color': colors().window,
+            'line-width': ['case', ['get', 'selected'], 4, 1],
+          }"
+        />
+        <mgl-geojson-source id="discovery-centers" [data]="centers()" />
+        <mgl-layer
+          id="discovery-center"
+          type="circle"
+          source="discovery-centers"
+          [paint]="{
+            'circle-color': colors().window,
+            'circle-radius': ['case', ['get', 'selected'], 8, 5],
+            'circle-stroke-color': 'white',
+            'circle-stroke-width': 1,
+          }"
+          (layerClick)="chooseWindow($event.features)"
+        />
+      }
       @for (point of points().features; track point.properties.id) {
         <mgl-marker [lngLat]="[point.geometry.coordinates[0], point.geometry.coordinates[1]]">
           <button
@@ -38,10 +108,7 @@
       }
     </mgl-map>
     @if (!ready() && !failed()) {
-      <p
-        role="status"
-        class="pointer-events-none absolute top-4 left-4 rounded-md bg-surface-0 px-3 py-2 text-xs text-surface-900"
-      >
+      <p role="status" class="rounded-md bg-surface-0 px-3 py-2 text-xs text-surface-900">
         Cargando mapa…
       </p>
     }

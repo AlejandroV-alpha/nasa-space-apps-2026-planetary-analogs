@@ -1,6 +1,6 @@
 <section class="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
   <a
-    routerLink="/explorar"
+    [routerLink]="fromDiscovery() ? '/explorar' : '/explorar/catalogo'"
     [queryParams]="backQuery()"
     class="mb-7 inline-flex items-center gap-2 text-sm font-medium text-primary underline underline-offset-4"
   >
@@ -117,6 +117,7 @@
         }
       </section>
 
+      <app-environment-panel [siteId]="candidate.id" />
       <section
         class="border-t border-surface-200 py-8 dark:border-surface-700"
         aria-labelledby="sources-heading"

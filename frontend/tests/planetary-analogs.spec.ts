@@ -56,6 +56,7 @@ test('explora, abre una ficha, compara y conserva la selección después de reca
   await expect(page).toHaveTitle('Planetary Analogs | Inicio');
   await page.getByRole('link', { name: 'Explorar candidatos' }).click();
   await expect(page.getByRole('heading', { name: 'Explorar candidatos' })).toBeVisible();
+  await page.getByRole('link', { name: 'Sitios del catálogo' }).click();
   await page.getByRole('button', { name: 'Luna', exact: true }).click();
   await expect(page.getByRole('button', { name: /^Amboy/ })).toBeVisible();
   await page.getByRole('button', { name: 'Marte', exact: true }).click();
@@ -109,7 +110,7 @@ test('sincroniza la selección de un marcador con la lista', async ({ page, isMo
   const worker = page.waitForResponse((response) =>
     response.url().includes('maplibre-gl-worker.mjs'),
   );
-  await page.goto('/explorar?cuerpo=mars&region=jezero-sector');
+  await page.goto('/explorar/catalogo?cuerpo=mars&region=jezero-sector');
   if (isMobile) {
     await page.getByRole('button', { name: 'Mapa', exact: true }).click();
   }
@@ -145,7 +146,7 @@ test('ofrece recuperación cuando FastAPI no está disponible', async ({ page })
     }
     return route.fulfill({ json: catalog });
   });
-  await page.goto('/explorar');
+  await page.goto('/explorar/catalogo');
   await expect(page.getByText('No pudimos cargar los datos de FastAPI.')).toBeVisible();
   await page.getByRole('button', { name: 'Reintentar', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Candidatos (2)' })).toBeVisible();

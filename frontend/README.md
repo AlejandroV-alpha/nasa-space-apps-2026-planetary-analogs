@@ -21,6 +21,20 @@ Open `http://localhost:4200/`. Angular proxies `/api/**` to FastAPI. The app
 uses the live catalog, comparison and provenance endpoints. Failed requests
 show a retry action.
 
+## Geographic discovery
+
+`/explorar` loads the published windows once. Draw a rectangle on the map or
+enter west, south, east and north. **Buscar candidatos** includes window
+centers on the rectangle's boundaries and keeps the published order per
+reference. Search areas crossing the antimeridian must be split into two
+searches. The current export publishes ten windows per reference, and an
+empty selection only means there are no published windows in the area.
+
+Open **Sitios del catálogo** for the original site explorer and comparison.
+Site detail loads the NASA POWER export separately. To forward the backend
+status check in a same-origin deployment, route `/health` to FastAPI as well
+as `/api/v1/**`.
+
 ## Code scaffolding
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
