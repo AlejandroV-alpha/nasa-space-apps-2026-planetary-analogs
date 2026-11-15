@@ -43,11 +43,12 @@ test('dibuja, filtra y muestra la comparación publicada para Luna y Marte', asy
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
-  await page.getByRole('link', { name: 'Explorar candidatos' }).click();
+  await page.getByRole('link', { name: 'Explorar el planeta' }).click();
   await page.getByRole('button', { name: 'Marte', exact: true }).click();
   const mars = page.getByRole('combobox', { name: 'Referencia de Marte' });
   await mars.click();
   await page.getByRole('option', { name: /Jezero/ }).click();
+  await page.getByText('Coordenadas de la zona').click();
   const coordinates = [
     ['Oeste', '-70'],
     ['Sur', '-24'],
@@ -57,9 +58,11 @@ test('dibuja, filtra y muestra la comparación publicada para Luna y Marte', asy
   for (const [label, value] of coordinates) {
     await page.getByRole('textbox', { name: label, exact: true }).fill(value);
   }
-  await page.getByRole('button', { name: 'Buscar candidatos' }).click();
+  await page.getByRole('textbox', { name: 'Norte', exact: true }).press('Enter');
+  await expect(page).toHaveURL(/area=/);
   const draw = page.getByRole('button', { name: 'Dibujar rectángulo' });
   await draw.click();
+  await expect(page.getByRole('button', { name: 'Buscar candidatos' })).toBeDisabled();
   const canvas = page.locator('.maplibregl-canvas');
   await canvas.click({ position: { x: 20, y: 30 } });
   const bounds = await canvas.boundingBox();
@@ -75,6 +78,8 @@ test('dibuja, filtra y muestra la comparación publicada para Luna y Marte', asy
   await expect(first).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByRole('heading', { name: 'Comparación topográfica' })).toBeVisible();
   await expect(page.getByRole('table')).toContainText('Pendiente mediana');
+  await page.getByText('Sensibilidad a 2 km', { exact: true }).click();
+  await expect(page.getByText('Escala 2 km', { exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
     await page.evaluate(() => innerWidth),
   );
@@ -89,6 +94,7 @@ test('dibuja, filtra y muestra la comparación publicada para Luna y Marte', asy
 
   await page.getByRole('button', { name: 'Limpiar zona' }).click();
   await expect(list.getByText('Selecciona un rectángulo y pulsa Buscar candidatos.')).toBeVisible();
+  await page.getByText('Coordenadas de la zona').click();
   for (const [index, [label]] of coordinates.entries()) {
     await page.getByRole('textbox', { name: label, exact: true }).fill(index < 2 ? '0' : '1');
   }

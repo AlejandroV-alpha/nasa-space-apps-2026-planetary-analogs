@@ -1,8 +1,8 @@
-<section class="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
+<section class="mx-auto max-w-5xl px-5 py-6 sm:px-8 sm:py-10">
   <a
     [routerLink]="fromDiscovery() ? '/explorar' : '/explorar/catalogo'"
     [queryParams]="backQuery()"
-    class="mb-7 inline-flex items-center gap-2 text-sm font-medium text-primary underline underline-offset-4"
+    class="mb-4 inline-flex min-h-10 items-center gap-2 text-sm font-medium text-primary underline underline-offset-4"
   >
     <i class="pi pi-arrow-left" aria-hidden="true"></i> Volver al explorador
   </a>
@@ -12,21 +12,27 @@
     (retry)="catalog.reload()"
   >
     @if (site(); as candidate) {
-      <header class="border-b border-surface-200 pb-8 dark:border-surface-700">
-        <p class="mb-3 text-sm font-semibold text-primary">
+      <header
+        class="rounded-2xl border border-surface-200 bg-surface-0 p-5 sm:p-8 dark:border-surface-700 dark:bg-surface-900"
+      >
+        <p class="mb-2 text-xs font-semibold tracking-wide text-primary uppercase">
           Ficha científica · {{ candidate.country }}
         </p>
-        <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">{{ candidate.name }}</h1>
-        <p class="mt-4 max-w-3xl leading-7 text-muted-color">{{ candidate.summary }}</p>
+        <h1 class="text-3xl font-semibold tracking-tight sm:text-5xl">{{ candidate.name }}</h1>
+        <p class="mt-3 max-w-3xl text-sm leading-7 text-muted-color sm:text-base">
+          {{ candidate.summary }}
+        </p>
         @if (catalog.dataset(); as data) {
           <div class="mt-4">
             <p-tag severity="secondary" [value]="catalogStatus(data.status)" />
           </div>
         }
-        <dl class="mt-6 grid gap-4 text-sm sm:grid-cols-3">
+        <dl
+          class="mt-5 grid gap-3 border-t border-surface-200 pt-4 text-sm sm:grid-cols-3 dark:border-surface-700"
+        >
           <div>
             <dt class="text-muted-color">Identificador</dt>
-            <dd class="font-medium">{{ candidate.id }}</dd>
+            <dd class="font-mono font-medium">{{ candidate.id }}</dd>
           </div>
           <div>
             <dt class="text-muted-color">Longitud, latitud (WGS84)</dt>
@@ -50,12 +56,46 @@
         </dl>
       </header>
 
-      <section class="py-8" aria-labelledby="metrics">
+      <nav
+        aria-label="En esta ficha"
+        class="mt-4 flex flex-wrap gap-x-5 gap-y-1 border-b border-surface-200 pb-3 text-sm font-semibold text-primary dark:border-surface-700"
+      >
+        <a
+          routerLink="."
+          queryParamsHandling="preserve"
+          fragment="metrics"
+          class="py-2 underline underline-offset-4"
+          >Topografía</a
+        >
+        <a
+          routerLink="."
+          queryParamsHandling="preserve"
+          fragment="assessment"
+          class="py-2 underline underline-offset-4"
+          >Interpretación</a
+        >
+        <a
+          routerLink="."
+          queryParamsHandling="preserve"
+          fragment="terrestrial-environment"
+          class="py-2 underline underline-offset-4"
+          >NASA POWER</a
+        >
+        <a
+          routerLink="."
+          queryParamsHandling="preserve"
+          fragment="sources-heading"
+          class="py-2 underline underline-offset-4"
+          >Fuentes</a
+        >
+      </nav>
+
+      <section class="py-6 sm:py-8" aria-labelledby="metrics">
         <h2 id="metrics" class="text-2xl font-semibold tracking-tight">Indicadores topográficos</h2>
         <div class="mt-4 grid gap-4 sm:grid-cols-3">
           @for (metric of candidate.metrics; track metric.key) {
             <article
-              class="rounded-xl border border-surface-200 bg-surface-0 p-4 dark:border-surface-700 dark:bg-surface-900"
+              class="rounded-xl border border-surface-200 border-t-2 border-t-primary bg-surface-0 p-4 dark:border-surface-700 dark:bg-surface-900"
             >
               <h3 class="text-sm font-medium text-muted-color">{{ labels[metric.key] }}</h3>
               <p class="mt-2 text-2xl font-semibold tabular-nums">{{ formatMetric(metric) }}</p>
@@ -91,7 +131,9 @@
           Interpretación y límites
         </h2>
         @for (assessment of candidate.assessments; track assessment.referenceRegionId) {
-          <article class="mt-5 space-y-3">
+          <article
+            class="mt-5 space-y-3 rounded-xl border border-surface-200 bg-surface-0 p-4 sm:p-6 dark:border-surface-700 dark:bg-surface-900"
+          >
             <h3 class="font-semibold">
               {{
                 catalog.regionById(assessment.referenceRegionId)?.name ??

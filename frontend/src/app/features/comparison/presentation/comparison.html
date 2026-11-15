@@ -1,15 +1,17 @@
-<section class="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14">
-  <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">Comparar candidatos</h1>
-  <p class="mt-3 max-w-2xl leading-7 text-muted-color">
-    Contrasta dos o tres sitios terrestres frente a una región planetaria. Cada diferencia se
-    calcula como valor terrestre menos valor de referencia.
-  </p>
-  <a
-    routerLink="/explorar/catalogo"
-    [queryParams]="query()"
-    class="mt-4 inline-block text-sm font-semibold text-primary underline underline-offset-4"
-    >Volver al explorador</a
-  >
+<section class="mx-auto max-w-7xl px-5 py-6 sm:px-8 sm:py-10">
+  <header class="border-b border-surface-200 pb-5 dark:border-surface-700">
+    <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">Comparar candidatos</h1>
+    <p class="mt-3 max-w-2xl leading-7 text-muted-color">
+      Contrasta dos o tres sitios terrestres frente a una región planetaria. Cada diferencia se
+      calcula como valor terrestre menos valor de referencia.
+    </p>
+    <a
+      routerLink="/explorar/catalogo"
+      [queryParams]="query()"
+      class="mt-4 inline-block text-sm font-semibold text-primary underline underline-offset-4"
+      >Volver al explorador</a
+    >
+  </header>
 
   <app-data-state
     [loading]="catalog.isLoading()"
@@ -18,7 +20,7 @@
   >
     @if (catalog.dataset()) {
       <div
-        class="mt-7 rounded-xl border border-surface-200 bg-surface-0 p-5 dark:border-surface-700 dark:bg-surface-900"
+        class="mt-5 rounded-xl border border-surface-200 bg-surface-0 p-4 sm:p-6 dark:border-surface-700 dark:bg-surface-900"
       >
         <label
           id="compare-region-label"
@@ -44,11 +46,15 @@
         }
         <fieldset class="mt-5">
           <legend class="mb-2 text-sm font-semibold">Candidatos compatibles</legend>
+          <p class="mb-3 text-xs text-muted-color">
+            Selecciona de dos a tres sitios que compartan esta referencia.
+          </p>
           <div class="flex flex-wrap gap-2">
             @for (site of state().candidates; track site.id) {
               <button
                 pButton
                 type="button"
+                size="small"
                 [outlined]="!state().siteIds.includes(site.id)"
                 [attr.aria-pressed]="state().siteIds.includes(site.id)"
                 [disabled]="state().siteIds.length >= 3 && !state().siteIds.includes(site.id)"
@@ -102,7 +108,12 @@
                   </caption>
                   <thead class="bg-surface-100 dark:bg-surface-800">
                     <tr>
-                      <th scope="col" class="p-4">Indicador</th>
+                      <th
+                        scope="col"
+                        class="sticky left-0 bg-surface-100 p-3 dark:bg-surface-800 sm:p-4"
+                      >
+                        Indicador
+                      </th>
                       <th scope="col" class="p-4">
                         {{ state().region?.name
                         }}<span class="block text-xs font-normal text-muted-color">Referencia</span>
@@ -115,7 +126,10 @@
                   <tbody class="divide-y divide-surface-200 dark:divide-surface-700">
                     @for (row of result.rows; track row.key) {
                       <tr>
-                        <th scope="row" class="p-4 align-top">
+                        <th
+                          scope="row"
+                          class="sticky left-0 bg-surface-0 p-3 align-top dark:bg-surface-900 sm:p-4"
+                        >
                           {{ labels[row.key] ?? row.key }}
                           <span class="mt-1 block text-xs font-normal text-muted-color">{{
                             row.comparable ? 'Comparable' : 'No comparable'
@@ -127,7 +141,9 @@
                             >
                           }
                         </th>
-                        <td class="p-4 align-top font-semibold tabular-nums">
+                        <td
+                          class="p-4 align-top bg-primary-50 font-semibold tabular-nums dark:bg-surface-800"
+                        >
                           {{ formatMetric(row.reference) }}
                         </td>
                         @for (metric of row.sites; track $index) {
@@ -160,6 +176,12 @@
                 FastAPI no devolvió indicadores para esta comparación.
               </p>
             }
+          } @else {
+            <p
+              class="rounded-xl border border-surface-200 p-4 text-sm leading-6 text-muted-color dark:border-surface-700"
+            >
+              La comparación aparecerá aquí cuando elijas los sitios y pulses Comparar.
+            </p>
           }
         </app-data-state>
       </div>

@@ -54,7 +54,7 @@ test('explora, abre una ficha, compara y conserva la selección después de reca
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
   await expect(page).toHaveTitle('Planetary Analogs | Inicio');
-  await page.getByRole('link', { name: 'Explorar candidatos' }).click();
+  await page.getByRole('link', { name: 'Explorar el planeta' }).click();
   await expect(page.getByRole('heading', { name: 'Explorar candidatos' })).toBeVisible();
   await page.getByRole('link', { name: 'Sitios del catálogo' }).click();
   await page.getByRole('button', { name: 'Luna', exact: true }).click();
@@ -92,6 +92,11 @@ test('explora, abre una ficha, compara y conserva la selección después de reca
   await page.getByRole('link', { name: 'Metodología', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Procedencia y sensibilidad' })).toBeVisible();
   await expect(page.getByText(/Huella SHA-256/)).toBeVisible();
+  await page
+    .getByRole('navigation', { name: 'Secciones de metodología' })
+    .getByRole('link', { name: 'Sensibilidad' })
+    .click();
+  await expect(page).toHaveURL(/\/metodologia#sensitivity$/);
   expect(errors).toEqual([]);
 });
 

@@ -1,11 +1,26 @@
-<section class="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
-  <header class="border-b border-surface-200 pb-8 dark:border-surface-700">
+<section class="mx-auto max-w-5xl px-5 py-6 sm:px-8 sm:py-10">
+  <header class="rounded-2xl bg-mission p-5 text-surface-0 sm:p-8">
     <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">Metodología y fuentes</h1>
-    <p class="mt-4 max-w-3xl leading-7 text-muted-color">
+    <p class="mt-3 max-w-3xl text-sm leading-7 text-surface-200 sm:text-base">
       Consulta cómo se obtuvieron los indicadores de pendiente y relieve, qué condiciones permiten
       compararlos y qué límites tiene la evidencia.
     </p>
   </header>
+
+  <nav
+    aria-label="Secciones de metodología"
+    class="mt-4 flex flex-wrap gap-x-5 gap-y-1 border-b border-surface-200 pb-3 text-sm font-semibold text-primary dark:border-surface-700"
+  >
+    <a routerLink="." fragment="analysis" class="py-2 underline underline-offset-4">Indicadores</a>
+    <a routerLink="." fragment="references" class="py-2 underline underline-offset-4"
+      >Referencias</a
+    >
+    <a routerLink="." fragment="methods" class="py-2 underline underline-offset-4">Métodos</a>
+    <a routerLink="." fragment="all-sources" class="py-2 underline underline-offset-4">Fuentes</a>
+    <a routerLink="." fragment="sensitivity" class="py-2 underline underline-offset-4"
+      >Sensibilidad</a
+    >
+  </nav>
 
   <app-data-state
     [loading]="catalog.isLoading()"
@@ -25,27 +40,35 @@
             relieve. La escala de análisis describe la malla de cálculo; la densidad de
             observaciones depende de cada producto.
           </p>
-          <dl class="mt-6 space-y-3 text-sm">
-            <div>
+          <dl class="mt-6 grid gap-3 text-sm sm:grid-cols-3">
+            <div
+              class="rounded-lg border border-surface-200 bg-surface-0 p-4 dark:border-surface-700 dark:bg-surface-900"
+            >
               <dt class="font-semibold">Pendiente mediana (°)</dt>
               <dd class="text-muted-color">
                 Pendiente central de las celdas válidas, expresada en grados.
               </dd>
             </div>
-            <div>
+            <div
+              class="rounded-lg border border-surface-200 bg-surface-0 p-4 dark:border-surface-700 dark:bg-surface-900"
+            >
               <dt class="font-semibold">Pendiente P90 (°)</dt>
               <dd class="text-muted-color">
                 El 90 % de las pendientes válidas es igual o inferior a este valor.
               </dd>
             </div>
-            <div>
+            <div
+              class="rounded-lg border border-surface-200 bg-surface-0 p-4 dark:border-surface-700 dark:bg-surface-900"
+            >
               <dt class="font-semibold">Relieve P95–P5 (m)</dt>
               <dd class="text-muted-color">
                 Diferencia entre los percentiles 95 y 5 de la elevación dentro del sector.
               </dd>
             </div>
           </dl>
-          <p class="mt-5 text-sm leading-6 text-muted-color">
+          <p
+            class="mt-5 rounded-lg border-l-2 border-primary bg-primary-50 p-4 text-sm leading-6 dark:bg-surface-800"
+          >
             La comparación exige coincidencia de método, escala y unidad. La cobertura indica la
             proporción de celdas válidas. Las diferencias describen topografía; la aptitud
             operacional y la revisión independiente quedan fuera de estos resultados.
@@ -129,7 +152,9 @@
       (retry)="provenance.reload()"
     >
       @if (provenance.hasValue()) {
-        <p class="my-4 text-xs break-all text-muted-color">
+        <p
+          class="my-4 rounded-lg bg-surface-100 p-4 font-mono text-xs break-all text-muted-color dark:bg-surface-800"
+        >
           Huella SHA-256 del catálogo: {{ provenance.value().scientificCatalogSha256 }}
         </p>
         <p class="mb-4 text-xs break-words text-muted-color">

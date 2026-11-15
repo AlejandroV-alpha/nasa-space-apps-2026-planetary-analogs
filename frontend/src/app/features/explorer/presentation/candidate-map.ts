@@ -56,8 +56,12 @@ export class CandidateMap {
   readonly windowSelected = output<string>();
   readonly areaChanged = output<Area | undefined>();
   private draw?: TerraDraw;
-  protected readonly drawing = signal(false);
+  readonly drawing = signal(false);
   protected readonly drawError = signal(false);
+  private readonly hoveredKey = signal<string | undefined>(undefined);
+  protected readonly hoveredWindow = computed(() =>
+    this.windows().find(({ key }) => key === this.hoveredKey()),
+  );
   protected readonly colors = signal({ land: '#1473D2', window: '#E87932' });
   protected readonly polygons = computed<FeatureCollection<Polygon>>(() => ({
     type: 'FeatureCollection',
@@ -193,6 +197,7 @@ export class CandidateMap {
     if (!this.draw) {
       return;
     }
+    this.previewWindow();
     this.drawError.set(false);
     this.areaChanged.emit(undefined);
     this.drawing.set(true);
@@ -215,6 +220,16 @@ export class CandidateMap {
     }
   }
 
+  protected previewWindow(features?: MapGeoJSONFeature[]): void {
+    const key: unknown = features?.[0]?.properties['key'];
+    const hovered = !this.drawing() && typeof key === 'string';
+    this.hoveredKey.set(hovered ? key : undefined);
+    const canvas = this.map()?.getCanvas();
+    if (canvas && !this.drawing()) {
+      canvas.style.cursor = hovered ? 'pointer' : '';
+    }
+  }
+
   private stopDraw(): void {
     this.draw?.stop();
     this.draw = undefined;
@@ -225,6 +240,7 @@ export class CandidateMap {
     this.drawing.set(false);
     this.failed.set(false);
     this.map.set(undefined);
+    this.hoveredKey.set(undefined);
     this.available.set(false);
     requestAnimationFrame(() => this.available.set(this.supportsWebGl()));
   }

@@ -14,6 +14,16 @@ html.app-dark {
   background: var(--p-surface-950);
 }
 
+a:focus-visible,
+summary:focus-visible {
+  outline: var(--p-focus-ring-width) var(--p-focus-ring-style) var(--p-focus-ring-color);
+  outline-offset: var(--p-focus-ring-offset);
+}
+
+.bg-mission a:focus-visible {
+  outline-color: var(--p-primary-300);
+}
+
 body {
   min-height: 100vh;
   margin: 0;

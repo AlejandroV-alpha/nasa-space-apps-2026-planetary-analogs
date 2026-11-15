@@ -2,19 +2,30 @@
   aria-label="Mapa terrestre de candidatos"
   class="relative overflow-hidden rounded-xl border border-surface-200 bg-surface-100 dark:border-surface-700 dark:bg-surface-900"
 >
-  @if (discovery() && available()) {
+  @if (discovery()) {
     <div
-      class="flex flex-wrap items-center gap-3 border-b border-surface-200 bg-surface-0 p-3 dark:border-surface-700 dark:bg-surface-900"
+      class="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-surface-200 bg-surface-0 p-3 dark:border-surface-700 dark:bg-surface-900"
     >
       @if (drawing()) {
         <button pButton type="button" size="small" [outlined]="true" (click)="cancelDraw()">
           Cancelar dibujo
         </button>
         <span role="status" class="text-sm">Marca dos esquinas opuestas en el mapa.</span>
-      } @else {
-        <button pButton type="button" size="small" [disabled]="!ready()" (click)="beginDraw()">
+      } @else if (available()) {
+        <button
+          pButton
+          type="button"
+          size="small"
+          [outlined]="true"
+          [disabled]="!ready()"
+          (click)="beginDraw()"
+        >
           <i class="pi pi-pencil" aria-hidden="true"></i> Dibujar rectángulo
         </button>
+      }
+      <ng-content select="[map-actions]" />
+      @if (!drawing()) {
+        <ng-content select="[map-status]" />
       }
       @if (drawError()) {
         <p role="alert" class="text-sm">
@@ -34,7 +45,7 @@
     </div>
   } @else {
     <mgl-map
-      class="block h-[28rem] w-full xl:h-[37rem]"
+      class="block h-[clamp(21rem,57svh,29rem)] w-full lg:h-[clamp(29rem,62vh,40rem)]"
       [mapStyle]="style"
       [scrollZoom]="false"
       [renderWorldCopies]="!discovery()"
@@ -69,6 +80,8 @@
             'fill-opacity': ['case', ['get', 'selected'], 0.55, 0.22],
           }"
           (layerClick)="chooseWindow($event.features)"
+          (layerMouseMove)="previewWindow($event.features)"
+          (layerMouseLeave)="previewWindow()"
         />
         <mgl-layer
           id="discovery-window-outline"
@@ -91,6 +104,8 @@
             'circle-stroke-width': 1,
           }"
           (layerClick)="chooseWindow($event.features)"
+          (layerMouseMove)="previewWindow($event.features)"
+          (layerMouseLeave)="previewWindow()"
         />
       }
       @for (point of points().features; track point.properties.id) {
@@ -107,6 +122,15 @@
         </mgl-marker>
       }
     </mgl-map>
+    @if (hoveredWindow(); as window) {
+      <div
+        aria-hidden="true"
+        class="pointer-events-none absolute bottom-10 left-3 hidden max-w-[calc(100%-2rem)] rounded-lg border border-surface-700 bg-surface-950 px-3 py-2 text-xs text-surface-0 shadow-sm sm:block"
+      >
+        <span class="font-semibold">Puesto {{ window.rank }}</span>
+        <span class="ml-2 font-mono break-all">{{ window.window.id }}</span>
+      </div>
+    }
     @if (!ready() && !failed()) {
       <p role="status" class="rounded-md bg-surface-0 px-3 py-2 text-xs text-surface-900">
         Cargando mapa…

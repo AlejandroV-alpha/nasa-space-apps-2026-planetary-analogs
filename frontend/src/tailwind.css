@@ -10,6 +10,11 @@
 
 @custom-variant dark (&:where(.app-dark, .app-dark *));
 
+@theme inline {
+  --color-mission: var(--p-mission-background);
+  --color-mission-border: var(--p-mission-border);
+}
+
 @theme static {
   --font-sans:
     'Poppins', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;

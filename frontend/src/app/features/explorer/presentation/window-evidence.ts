@@ -29,6 +29,14 @@ export class WindowEvidence {
   protected readonly tile = computed(() =>
     this.discovery().search.tiles.find((tile) => tile.tileId === this.window().properties.tileId),
   );
+  protected barWidth(value: number | null, other: number | null): number {
+    if (value === null || other === null) {
+      return 0;
+    }
+    const max = Math.max(value, other);
+    return max > 0 ? (100 * value) / max : 0;
+  }
+
   protected readonly interpretation = computed(() => {
     const slopes = this.window().properties.comparison.metrics.filter(
       (metric): metric is WindowMetric & { signedDifference: number } =>
@@ -42,6 +50,9 @@ export class WindowEvidence {
     }, undefined);
     if (!nearest) {
       return 'No hay diferencias de pendiente comparables a esta escala.';
+    }
+    if (slopes.length === 1) {
+      return 'Solo hay una diferencia de pendiente comparable a esta escala.';
     }
     return (
       'Entre las pendientes, el menor contraste absoluto corresponde a ' +

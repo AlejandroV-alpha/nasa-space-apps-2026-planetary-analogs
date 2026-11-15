@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { TagModule } from 'primeng/tag';
 import { AnalogDataService } from '../../../core/data/analog-data.service';
 import { DataState } from '../../../shared/components/data-state';
@@ -13,7 +14,7 @@ import { ProvenanceData } from '../infrastructure/provenance-data';
 
 @Component({
   selector: 'app-methodology',
-  imports: [DataState, ScienceSources, TagModule],
+  imports: [RouterLink, DataState, ScienceSources, TagModule],
   providers: [ProvenanceData],
   templateUrl: './methodology.html',
 })

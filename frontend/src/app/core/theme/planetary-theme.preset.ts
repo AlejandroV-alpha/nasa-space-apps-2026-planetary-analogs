@@ -122,6 +122,10 @@ export const PLANETARY_THEME_PRESET = definePreset<Preset>(Aura, {
   },
 
   extend: {
+    mission: {
+      background: '#0B1220',
+      border: '#28394D',
+    },
     planetaryAccent: {
       color: 'light-dark({marsOrange.600}, {marsOrange.500})',
       hoverColor: 'light-dark({marsOrange.700}, {marsOrange.400})',
