@@ -97,7 +97,7 @@ def window_detail(discovery: CandidateDiscovery, window_id: str) -> DiscoveredWi
 
 
 def search_candidates(
-    discovery: CandidateDiscovery, bounds: Bounds, reference_id: str | None, limit: int,
+    discovery: CandidateDiscovery, bounds: Bounds, reference_id: str | None, limit: int | None,
 ) -> CandidateSearchResult:
     results = []
     for group in discovery.results:

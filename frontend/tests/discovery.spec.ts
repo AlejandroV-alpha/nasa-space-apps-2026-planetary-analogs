@@ -98,6 +98,7 @@ test.describe('búsqueda contra FastAPI real', () => {
     expect(requests).toHaveLength(2);
     expect(requests[1].searchParams.has('reference_region_id')).toBe(false);
     expect(requests[1].searchParams.has('limit')).toBe(false);
+    expect(requests[1].searchParams.get('all_results')).toBe('true');
 
     await page.getByRole('button', { name: 'Luna', exact: true }).click();
     await expect(evidence.getByRole('table')).toHaveCount(1);
@@ -116,6 +117,22 @@ test.describe('búsqueda contra FastAPI real', () => {
       await page.evaluate(() => innerWidth),
     );
     expect(errors).toEqual([]);
+  });
+
+  test('abre la caracterización y el estudio respaldados por FastAPI', async ({ page }) => {
+    await page.goto('/explorar?cuerpo=mars&area=' + area);
+    await recommendations(page).getByRole('button', { name: new RegExp(marsFirst) }).click();
+    await page.getByText('Aplicaciones y evidencia científica', { exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Usos potenciales' })).toBeVisible();
+    await expect(page.getByText(/Comparación cualitativa por familia/)).toBeVisible();
+    await expect(page.getByText(/117 píxeles dentro de la ventana planetaria/)).toBeVisible();
+    await expect(page.getByText(/294.96 K/)).toBeVisible();
+    await expect(page.getByText(/24 registros en NASA Earthdata/)).toBeVisible();
+    await expect(page.getByText(/365 días válidos entre 2025-01-01 y 2025-12-31/)).toBeVisible();
+    await expect(page.getByText(/temperatura radiométrica equivalente/)).toBeVisible();
+    await expect(page.getByText('Revisión científica independiente pendiente.')).toBeVisible();
+    await page.getByRole('button', { name: /Relieve regional de una ventana andina/ }).click();
+    await expect(page.getByText(/Qué ensayos preliminares de planificación/)).toBeVisible();
   });
 
   test('sincroniza el polígono con la lista, dibuja y consulta solo al confirmar', async ({

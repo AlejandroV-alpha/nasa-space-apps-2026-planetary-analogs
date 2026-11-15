@@ -137,6 +137,14 @@ class MeasuredCoverage(BaseModel):
     features: list[MeasuredFootprint]
 
 
+SupplementState = Literal['qualitative', 'context_only', 'catalogued', 'not_evaluated']
+
+
+class SupplementAvailability(BaseModel):
+    geology: SupplementState
+    thermal: SupplementState
+
+
 class CandidateSearchResult(BaseModel):
     schemaVersion: Literal['1.0.0']
     boundsWgs84: Bounds
@@ -144,6 +152,7 @@ class CandidateSearchResult(BaseModel):
     method: DiscoveryMethod
     coverage: MeasuredCoverage
     results: list[DiscoveredWindows]
+    evidenceAvailability: dict[str, dict[str, SupplementAvailability]] | None = None
 
 
 class WindowReferenceComparison(BaseModel):

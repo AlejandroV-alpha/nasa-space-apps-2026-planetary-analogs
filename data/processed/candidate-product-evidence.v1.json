@@ -1,0 +1,792 @@
+{
+  "schemaVersion": "1.0.0",
+  "windows": {
+    "NASADEM_HGT_s23w066:0:1": {
+      "checkedAt": "2026-11-15T13:20:04.196481+00:00",
+      "emit": {
+        "product": "EMITL2BMIN",
+        "version": "001",
+        "boundsWgs84": [
+          -65.597122295,
+          -22.409695507,
+          -65.402877705,
+          -22.229054506
+        ],
+        "temporal": null,
+        "queryUrl": "https://cmr.earthdata.nasa.gov/search/granules.json?short_name=EMITL2BMIN&version=001&bounding_box=-65.597122295%2C-22.409695507%2C-65.402877705%2C-22.229054506&page_size=1",
+        "catalogHits": 24,
+        "exampleGranuleId": "G2730218163-LPCLOUD"
+      },
+      "modis": {
+        "product": "MOD11A2",
+        "version": "061",
+        "boundsWgs84": [
+          -65.597122295,
+          -22.409695507,
+          -65.402877705,
+          -22.229054506
+        ],
+        "temporal": "2025-01-01T00:00:00Z,2025-01-31T23:59:59Z",
+        "queryUrl": "https://cmr.earthdata.nasa.gov/search/granules.json?short_name=MOD11A2&version=061&bounding_box=-65.597122295%2C-22.409695507%2C-65.402877705%2C-22.229054506&page_size=1&temporal=2025-01-01T00%3A00%3A00Z%2C2025-01-31T23%3A59%3A59Z",
+        "catalogHits": 4,
+        "exampleGranuleId": "G3366552930-LPCLOUD"
+      },
+      "earthSkinTemperature": {
+        "parameter": "TS",
+        "quantity": "earth_skin_temperature",
+        "units": "°C",
+        "period": {
+          "start": "2025-01-01",
+          "end": "2025-12-31",
+          "timeStandard": "LST"
+        },
+        "requestedCoordinates": [
+          -65.5,
+          -22.31939000525824
+        ],
+        "responseCoordinates": [
+          -65.5,
+          -22.319
+        ],
+        "apiVersion": "v2.10.3",
+        "products": [
+          "MERRA2"
+        ],
+        "aggregation": "Media, mínimo y máximo de los valores diarios válidos de la celda de reanálisis.",
+        "validDays": 365,
+        "expectedDays": 365,
+        "mean": 10.22,
+        "minDaily": -0.11,
+        "maxDaily": 18.14,
+        "sourceUrl": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=TS&community=RE&longitude=-65.5&latitude=-22.31939000525824&start=20250101&end=20251231&format=JSON&time-standard=LST",
+        "limitations": [
+          "Estimación regional de reanálisis para la celda consultada, no un promedio del polígono de 20 km.",
+          "Los extremos son de la serie diaria; no son extremos instantáneos, ni un contraste diurno/nocturno."
+        ]
+      },
+      "emitObservations": {
+        "screening": "Identificación positiva, ajuste finito e incertidumbre positiva; profundidad de banda ≥ 3 veces su incertidumbre.",
+        "selectedGranule": "EMIT_L2B_MIN_001_20230501T161609_2312110_026",
+        "scenes": [
+          {
+            "granule": "EMIT_L2B_MIN_001_20220829T171600_2224111_038",
+            "start": "2022-08-29T17:16:00+0000",
+            "end": "2022-08-29T17:16:21+0000",
+            "windowPixels": 119214,
+            "geolocatedPixels": 119214,
+            "validPixels": 0,
+            "coveragePercent": 0.0,
+            "sourceHashes": {
+              "EMIT_L2B_MIN_001_20220829T171600_2224111_038.nc": "08db58eac99bbb8602d196fec7358f18bac1b5345c8fe91205b58fee29d74a3b",
+              "EMIT_L2B_MINUNCERT_001_20220829T171600_2224111_038.nc": "bc197ac6a78fe930aacc8c2bd260d0b56af32f13b574ab5f4c438bcc0fb17efc"
+            },
+            "matches": []
+          },
+          {
+            "granule": "EMIT_L2B_MIN_001_20230501T161609_2312110_026",
+            "start": "2023-05-01T16:16:09+0000",
+            "end": "2023-05-01T16:16:29+0000",
+            "windowPixels": 119214,
+            "geolocatedPixels": 119214,
+            "validPixels": 118625,
+            "coveragePercent": 99.51,
+            "sourceHashes": {
+              "EMIT_L2B_MIN_001_20230501T161609_2312110_026.nc": "53ad0ccf7b9a8de4df05b598d3bde2bb5d972d6e96d883e7f12bef5acf49a828",
+              "EMIT_L2B_MINUNCERT_001_20230501T161609_2312110_026.nc": "af3893754923faf01884404a2486e4f1939c3b90fa7a9ff3d74b1734cfa87569"
+            },
+            "matches": [
+              {
+                "group": 1,
+                "libraryId": 45,
+                "label": "Nanohematite BR93-34B2 W1R1BbS",
+                "pixels": 51140
+              },
+              {
+                "group": 1,
+                "libraryId": 47,
+                "label": "Nanohematite FBR93-34B2b ed1 W1R1Hb",
+                "pixels": 29137
+              },
+              {
+                "group": 1,
+                "libraryId": 46,
+                "label": "nHematit+fg-Goethit 34B2+MPC W1R1Hb",
+                "pixels": 19532
+              },
+              {
+                "group": 1,
+                "libraryId": 4,
+                "label": "Goethite0.02+Quartz GDS240 W1R1Ba",
+                "pixels": 11803
+              },
+              {
+                "group": 1,
+                "libraryId": 8,
+                "label": "Goethite_Thin_Film WS222 W1R1Ba",
+                "pixels": 4876
+              },
+              {
+                "group": 1,
+                "libraryId": 6,
+                "label": "Goethite MPCMA2-C M-Crsgrad2 W1R1Hb AREF",
+                "pixels": 870
+              },
+              {
+                "group": 1,
+                "libraryId": 2,
+                "label": "Hematite.02+Quartz.98 GDS76 W1R1Ha",
+                "pixels": 322
+              },
+              {
+                "group": 1,
+                "libraryId": 28,
+                "label": "Fe-Hydroxide SU93-106 amorph W1R1Bb",
+                "pixels": 21
+              },
+              {
+                "group": 1,
+                "libraryId": 40,
+                "label": "Basalt_weathered BR93-43 W1R1Bb",
+                "pixels": 8
+              },
+              {
+                "group": 1,
+                "libraryId": 10,
+                "label": "Pyrite LV95-6A Weath on Tail W1R1Bb",
+                "pixels": 4
+              },
+              {
+                "group": 1,
+                "libraryId": 20,
+                "label": "Cummingtonite HS294.3B W1R1Bc",
+                "pixels": 4
+              },
+              {
+                "group": 1,
+                "libraryId": 32,
+                "label": "Hematite FE2602 W1R1Bb",
+                "pixels": 2
+              },
+              {
+                "group": 2,
+                "libraryId": 227,
+                "label": "Calcite+.33Muscov AMX5 Ruby W1R1Ba",
+                "pixels": 62164
+              },
+              {
+                "group": 2,
+                "libraryId": 228,
+                "label": "Grass_dry+0.17%Na-Mont AMX35 W1R1Ba AREF",
+                "pixels": 15494
+              },
+              {
+                "group": 2,
+                "libraryId": 126,
+                "label": "Calcite.33+Kaol.33+Mus AMXr2 W1R1Ba",
+                "pixels": 10403
+              },
+              {
+                "group": 2,
+                "libraryId": 215,
+                "label": "Calcite WS272 W1R1Ha",
+                "pixels": 8683
+              },
+              {
+                "group": 2,
+                "libraryId": 127,
+                "label": "Muscovite GDS113 Ruby W1R1Bb splib06 3348",
+                "pixels": 8155
+              },
+              {
+                "group": 2,
+                "libraryId": 97,
+                "label": "Grass_Golden_Dry GDS480 W1R1Fa",
+                "pixels": 6316
+              },
+              {
+                "group": 2,
+                "libraryId": 125,
+                "label": "Muscovite CU91-250A med Al W2R4NbS",
+                "pixels": 2633
+              },
+              {
+                "group": 2,
+                "libraryId": 177,
+                "label": "Muscovite+Chlorite CU91-253D W2R4Na",
+                "pixels": 1732
+              },
+              {
+                "group": 2,
+                "libraryId": 216,
+                "label": "Calcite+Dolomite.5 AMX8 W1R1Bb",
+                "pixels": 1286
+              },
+              {
+                "group": 2,
+                "libraryId": 221,
+                "label": "Nontronite NG-1.a W1R1Bb",
+                "pixels": 433
+              },
+              {
+                "group": 2,
+                "libraryId": 168,
+                "label": "Kaol+Musc_intimate CU93-5C W1R1Ha AREF",
+                "pixels": 356
+              },
+              {
+                "group": 2,
+                "libraryId": 100,
+                "label": "Plastic_Vinyl GDS372 White W1R1Fa",
+                "pixels": 349
+              },
+              {
+                "group": 2,
+                "libraryId": 256,
+                "label": "Lepidolite NMNH88526-1 W1R1Ba",
+                "pixels": 321
+              },
+              {
+                "group": 2,
+                "libraryId": 167,
+                "label": "Kaol_Wxl+0.5Musc_Ruby AMX12 W1R1Ba",
+                "pixels": 88
+              },
+              {
+                "group": 2,
+                "libraryId": 99,
+                "label": "Plastic_Tarp GDS340 Blu_Wovn W1R1Fa",
+                "pixels": 68
+              },
+              {
+                "group": 2,
+                "libraryId": 257,
+                "label": "Margarite GDS106 W1R1Bc",
+                "pixels": 41
+              },
+              {
+                "group": 2,
+                "libraryId": 267,
+                "label": "Strontianite HS272.3B W1R1Bb",
+                "pixels": 37
+              },
+              {
+                "group": 2,
+                "libraryId": 128,
+                "label": "Paragonite GDS109 W1R1Ba",
+                "pixels": 17
+              },
+              {
+                "group": 2,
+                "libraryId": 136,
+                "label": "Nacrite GDS88 s06crj3a=c",
+                "pixels": 11
+              },
+              {
+                "group": 2,
+                "libraryId": 281,
+                "label": "Montmorill+Unleaded_Gas SWy W1R1Ba",
+                "pixels": 11
+              },
+              {
+                "group": 2,
+                "libraryId": 131,
+                "label": "Muscovite CU93-1 low-Al Phyl W2R4Nb",
+                "pixels": 7
+              },
+              {
+                "group": 2,
+                "libraryId": 150,
+                "label": "Beidellite+Montmor GDS123 =b",
+                "pixels": 4
+              },
+              {
+                "group": 2,
+                "libraryId": 105,
+                "label": "Plastic_HDPE GDS393 GlosWhTr W1R1Fa",
+                "pixels": 3
+              },
+              {
+                "group": 2,
+                "libraryId": 225,
+                "label": "Calcite.80+Mont_Swy-1 GDS212 W1R1Ba",
+                "pixels": 3
+              },
+              {
+                "group": 2,
+                "libraryId": 232,
+                "label": "Calcite.7+Kaolwxl.3 AMX9 W1R1Ba",
+                "pixels": 2
+              },
+              {
+                "group": 2,
+                "libraryId": 139,
+                "label": "Kaolin_Smect H89-FR-2 .5Kaol W1R1Bb",
+                "pixels": 1
+              },
+              {
+                "group": 2,
+                "libraryId": 226,
+                "label": "Calcite+.50Ca-Mont AMX6 W1R1Bb",
+                "pixels": 1
+              },
+              {
+                "group": 2,
+                "libraryId": 229,
+                "label": "Dolomite.5+Na-mont.5 AMX21 W1R1Bb",
+                "pixels": 1
+              },
+              {
+                "group": 2,
+                "libraryId": 264,
+                "label": "Chrysotile HS323.1B W1R1Ba",
+                "pixels": 1
+              }
+            ]
+          },
+          {
+            "granule": "EMIT_L2B_MIN_001_20240830T152815_2424310_038",
+            "start": "2024-08-30T15:28:15+0000",
+            "end": "2024-08-30T15:28:29+0000",
+            "windowPixels": 119214,
+            "geolocatedPixels": 41607,
+            "validPixels": 41603,
+            "coveragePercent": 34.9,
+            "sourceHashes": {
+              "EMIT_L2B_MIN_001_20240830T152815_2424310_038.nc": "924f06fd736b18536710582ee4a99e50d282672559b4bccc692983b4d602d7f1",
+              "EMIT_L2B_MINUNCERT_001_20240830T152815_2424310_038.nc": "5f252cdd2eafba3e298bacee34e80e74e2bacc5d13ff375d861846a33cec2d19"
+            },
+            "matches": [
+              {
+                "group": 1,
+                "libraryId": 47,
+                "label": "Nanohematite FBR93-34B2b ed1 W1R1Hb",
+                "pixels": 20521
+              },
+              {
+                "group": 1,
+                "libraryId": 45,
+                "label": "Nanohematite BR93-34B2 W1R1BbS",
+                "pixels": 10258
+              },
+              {
+                "group": 1,
+                "libraryId": 46,
+                "label": "nHematit+fg-Goethit 34B2+MPC W1R1Hb",
+                "pixels": 6148
+              },
+              {
+                "group": 1,
+                "libraryId": 4,
+                "label": "Goethite0.02+Quartz GDS240 W1R1Ba",
+                "pixels": 2692
+              },
+              {
+                "group": 1,
+                "libraryId": 2,
+                "label": "Hematite.02+Quartz.98 GDS76 W1R1Ha",
+                "pixels": 1457
+              },
+              {
+                "group": 1,
+                "libraryId": 8,
+                "label": "Goethite_Thin_Film WS222 W1R1Ba",
+                "pixels": 247
+              },
+              {
+                "group": 1,
+                "libraryId": 6,
+                "label": "Goethite MPCMA2-C M-Crsgrad2 W1R1Hb AREF",
+                "pixels": 8
+              },
+              {
+                "group": 1,
+                "libraryId": 17,
+                "label": "Chlorite+Muscovite CU93-65A W1R1Ba",
+                "pixels": 8
+              },
+              {
+                "group": 1,
+                "libraryId": 20,
+                "label": "Cummingtonite HS294.3B W1R1Bc",
+                "pixels": 3
+              },
+              {
+                "group": 1,
+                "libraryId": 40,
+                "label": "Basalt_weathered BR93-43 W1R1Bb",
+                "pixels": 3
+              },
+              {
+                "group": 1,
+                "libraryId": 32,
+                "label": "Hematite FE2602 W1R1Bb",
+                "pixels": 2
+              },
+              {
+                "group": 1,
+                "libraryId": 64,
+                "label": "Siderite HS271.3B W1R1Ba",
+                "pixels": 2
+              },
+              {
+                "group": 2,
+                "libraryId": 227,
+                "label": "Calcite+.33Muscov AMX5 Ruby W1R1Ba",
+                "pixels": 23153
+              },
+              {
+                "group": 2,
+                "libraryId": 228,
+                "label": "Grass_dry+0.17%Na-Mont AMX35 W1R1Ba AREF",
+                "pixels": 3637
+              },
+              {
+                "group": 2,
+                "libraryId": 127,
+                "label": "Muscovite GDS113 Ruby W1R1Bb splib06 3348",
+                "pixels": 3596
+              },
+              {
+                "group": 2,
+                "libraryId": 215,
+                "label": "Calcite WS272 W1R1Ha",
+                "pixels": 3112
+              },
+              {
+                "group": 2,
+                "libraryId": 126,
+                "label": "Calcite.33+Kaol.33+Mus AMXr2 W1R1Ba",
+                "pixels": 2059
+              },
+              {
+                "group": 2,
+                "libraryId": 97,
+                "label": "Grass_Golden_Dry GDS480 W1R1Fa",
+                "pixels": 1841
+              },
+              {
+                "group": 2,
+                "libraryId": 167,
+                "label": "Kaol_Wxl+0.5Musc_Ruby AMX12 W1R1Ba",
+                "pixels": 870
+              },
+              {
+                "group": 2,
+                "libraryId": 168,
+                "label": "Kaol+Musc_intimate CU93-5C W1R1Ha AREF",
+                "pixels": 758
+              },
+              {
+                "group": 2,
+                "libraryId": 125,
+                "label": "Muscovite CU91-250A med Al W2R4NbS",
+                "pixels": 567
+              },
+              {
+                "group": 2,
+                "libraryId": 256,
+                "label": "Lepidolite NMNH88526-1 W1R1Ba",
+                "pixels": 414
+              },
+              {
+                "group": 2,
+                "libraryId": 177,
+                "label": "Muscovite+Chlorite CU91-253D W2R4Na",
+                "pixels": 406
+              },
+              {
+                "group": 2,
+                "libraryId": 257,
+                "label": "Margarite GDS106 W1R1Bc",
+                "pixels": 301
+              },
+              {
+                "group": 2,
+                "libraryId": 100,
+                "label": "Plastic_Vinyl GDS372 White W1R1Fa",
+                "pixels": 201
+              },
+              {
+                "group": 2,
+                "libraryId": 221,
+                "label": "Nontronite NG-1.a W1R1Bb",
+                "pixels": 122
+              },
+              {
+                "group": 2,
+                "libraryId": 267,
+                "label": "Strontianite HS272.3B W1R1Bb",
+                "pixels": 107
+              },
+              {
+                "group": 2,
+                "libraryId": 136,
+                "label": "Nacrite GDS88 s06crj3a=c",
+                "pixels": 106
+              },
+              {
+                "group": 2,
+                "libraryId": 281,
+                "label": "Montmorill+Unleaded_Gas SWy W1R1Ba",
+                "pixels": 73
+              },
+              {
+                "group": 2,
+                "libraryId": 216,
+                "label": "Calcite+Dolomite.5 AMX8 W1R1Bb",
+                "pixels": 62
+              },
+              {
+                "group": 2,
+                "libraryId": 139,
+                "label": "Kaolin_Smect H89-FR-2 .5Kaol W1R1Bb",
+                "pixels": 38
+              },
+              {
+                "group": 2,
+                "libraryId": 99,
+                "label": "Plastic_Tarp GDS340 Blu_Wovn W1R1Fa",
+                "pixels": 27
+              },
+              {
+                "group": 2,
+                "libraryId": 128,
+                "label": "Paragonite GDS109 W1R1Ba",
+                "pixels": 23
+              },
+              {
+                "group": 2,
+                "libraryId": 150,
+                "label": "Beidellite+Montmor GDS123 =b",
+                "pixels": 21
+              },
+              {
+                "group": 2,
+                "libraryId": 286,
+                "label": "Coated_Steel_Girder WTC01-8 W1R1Fa",
+                "pixels": 15
+              },
+              {
+                "group": 2,
+                "libraryId": 131,
+                "label": "Muscovite CU93-1 low-Al Phyl W2R4Nb",
+                "pixels": 12
+              },
+              {
+                "group": 2,
+                "libraryId": 232,
+                "label": "Calcite.7+Kaolwxl.3 AMX9 W1R1Ba",
+                "pixels": 9
+              },
+              {
+                "group": 2,
+                "libraryId": 96,
+                "label": "Dry_Long_Grass AV87-2 W1R1Ba",
+                "pixels": 8
+              },
+              {
+                "group": 2,
+                "libraryId": 181,
+                "label": "Buddingtnt+Na-Mont CU93-260B W2R4Nb",
+                "pixels": 8
+              },
+              {
+                "group": 2,
+                "libraryId": 182,
+                "label": "Alunite_NH4+Jaro NMNH145596A W1R1Bb",
+                "pixels": 7
+              },
+              {
+                "group": 2,
+                "libraryId": 134,
+                "label": "Kaolinite KGa-2 (pxl) W1R1Hb",
+                "pixels": 4
+              },
+              {
+                "group": 2,
+                "libraryId": 151,
+                "label": "Beidellite+Montmor GDS124 =b",
+                "pixels": 4
+              },
+              {
+                "group": 2,
+                "libraryId": 225,
+                "label": "Calcite.80+Mont_Swy-1 GDS212 W1R1Ba",
+                "pixels": 4
+              },
+              {
+                "group": 2,
+                "libraryId": 143,
+                "label": "Montmorillonite SAz-1 W1R1Hb",
+                "pixels": 3
+              },
+              {
+                "group": 2,
+                "libraryId": 230,
+                "label": "Calcite.33+Ca-mont.67 AMX19 W1R1Bb",
+                "pixels": 3
+              },
+              {
+                "group": 2,
+                "libraryId": 135,
+                "label": "Halloysite NMNH106237 W1R1Ha",
+                "pixels": 2
+              },
+              {
+                "group": 2,
+                "libraryId": 194,
+                "label": "Aragonite GDS898 Moracco",
+                "pixels": 2
+              },
+              {
+                "group": 2,
+                "libraryId": 166,
+                "label": "Kaol.5+MuscCU91-250A AMX13 W1R1Bb",
+                "pixels": 1
+              },
+              {
+                "group": 2,
+                "libraryId": 218,
+                "label": "Calc.25+dolo.25+mont.5 AMX18 W1R1Bb",
+                "pixels": 1
+              },
+              {
+                "group": 2,
+                "libraryId": 229,
+                "label": "Dolomite.5+Na-mont.5 AMX21 W1R1Bb",
+                "pixels": 1
+              },
+              {
+                "group": 2,
+                "libraryId": 290,
+                "label": "Vermiculite GDS458 W1R1Hc",
+                "pixels": 1
+              },
+              {
+                "group": 2,
+                "libraryId": 294,
+                "label": "CO2+O2+CH4 TRANSM ModtranZ20 r06crj3a=",
+                "pixels": 1
+              }
+            ]
+          }
+        ]
+      },
+      "modisObservations": {
+        "granule": "MOD11A2.A2025001.h11v11.061.2025011011148",
+        "sourceSha256": "81f5d4942a4c604c29c7c6148dbf9bbee16c380545d500e3a25cd479b4d807c0",
+        "start": "2025-01-01",
+        "end": "2025-01-08",
+        "units": "K",
+        "windowPixels": 474,
+        "daytime": {
+          "validPixels": 474,
+          "coveragePercent": 100.0,
+          "mean": 294.96,
+          "minimum": 290.7,
+          "maximum": 297.7,
+          "medianLocalSolarHour": 9.4
+        },
+        "nighttime": {
+          "validPixels": 380,
+          "coveragePercent": 80.17,
+          "mean": 275.69,
+          "minimum": 264.46,
+          "maximum": 279.68,
+          "medianLocalSolarHour": 22.1
+        }
+      }
+    }
+  },
+  "mappedGeology": {
+    "jezero-sector": {
+      "source": {
+        "id": "usgs-jezero-sim3464",
+        "title": "USGS SIM 3464 — Sun y Stack (2020)",
+        "url": "https://pubs.usgs.gov/publication/sim3464"
+      },
+      "layer": "GeoUnits_v1",
+      "coveragePercent": 100.0,
+      "units": [
+        {
+          "code": "2",
+          "name": "Jezero floor unit",
+          "percentOfWindow": 69.94
+        },
+        {
+          "code": "3",
+          "name": "Lower etched unit",
+          "percentOfWindow": 13.68
+        },
+        {
+          "code": "7",
+          "name": "Eolian bedform unit",
+          "percentOfWindow": 5.11
+        },
+        {
+          "code": "10",
+          "name": "Upper etched unit",
+          "percentOfWindow": 4.62
+        },
+        {
+          "code": "0",
+          "name": "Jezero fan 2 unit",
+          "percentOfWindow": 2.96
+        },
+        {
+          "code": "1",
+          "name": "Jezero fan 1 unit",
+          "percentOfWindow": 2.19
+        },
+        {
+          "code": "11",
+          "name": "Crater rim unit",
+          "percentOfWindow": 0.97
+        },
+        {
+          "code": "8",
+          "name": "Smooth unit, undivided",
+          "percentOfWindow": 0.54
+        }
+      ],
+      "limitations": [
+        "Fracciones de unidades cartográficas de USGS dentro del polígono, no abundancias minerales.",
+        "Áreas calculadas en la proyección MTM de la fuente. Se interpretan las coordenadas angulares de la ventana en Mars 2000."
+      ]
+    }
+  },
+  "localizedSpectra": {
+    "jezero-sector": {
+      "source": {
+        "id": "crism-jezero-roi444",
+        "title": "Tarnas et al. (2021) — espectros CRISM, figura 9",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8597593/"
+      },
+      "observation": "HRL000040FF",
+      "roi": "ROI #444, figura 9",
+      "localizedSamples": 117,
+      "bounds": [
+        77.41053,
+        18.35387,
+        77.437622,
+        18.366991
+      ],
+      "mineralGroups": [
+        "carbonatos",
+        "filosilicatos",
+        "olivino"
+      ],
+      "roiArchiveUrl": "https://zenodo.org/records/5525282/files/Data_Repository.zip?download=1",
+      "ddrUrl": "https://pds-geosciences.wustl.edu/mro/mro-m-crism-6-ddr-v1/mrocr_1001/ddr/2007/2007_029/hrl000040ff/hrl000040ff_07_de183l_ddr1.img",
+      "sourceHashes": {
+        "roiXml": "4196577627ca459a0310ff0121fa03b459c53cd7d8d9cc215c207ed129c26bd0",
+        "ddrImg": "55c386461c7edbb0b103fa7e7b3b2d94384d910cfb1b132d09b760707b871277"
+      },
+      "limitations": [
+        "Se localizó la muestra del estudio original y se conserva su interpretación espectral.",
+        "Los 117 píxeles pertenecen a un recorte de afloramiento, no a un inventario mineral de toda la ventana.",
+        "La identificación se compara a nivel cualitativo de familias; las abundancias y especies exactas quedan por verificar."
+      ]
+    }
+  }
+}

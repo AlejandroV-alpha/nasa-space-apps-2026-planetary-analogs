@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0.0",
+  "studies": [
+    {
+      "id": "jezero-andes-terrain-study",
+      "title": "Relieve regional de una ventana andina frente a Jezero",
+      "researchQuestion": "¿Qué ensayos preliminares de planificación de recorridos podría motivar la comparación del relieve de esta ventana terrestre con el sector de Jezero?",
+      "windowId": "NASADEM_HGT_s23w066:0:1",
+      "referenceRegionId": "jezero-sector",
+      "reviewStatus": "pending",
+      "limitations": [
+        "Caso exploratorio seleccionado entre las ventanas calculadas. La revisión científica independiente está pendiente.",
+        "Las diferencias topográficas no demuestran coincidencia mineralógica, aptitud de un rover ni seguridad de acceso.",
+        "El contexto térmico terrestre de una celda regional no sustituye una comparación interplanetaria homologada."
+      ]
+    }
+  ]
+}

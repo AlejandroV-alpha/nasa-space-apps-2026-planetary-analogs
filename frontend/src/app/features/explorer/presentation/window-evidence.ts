@@ -11,9 +11,11 @@ import {
   type WindowMetric,
 } from '../domain/discovery';
 
+import { WindowCharacterization } from './window-characterization';
+
 @Component({
   selector: 'app-window-evidence',
-  imports: [ScienceSources, NgTemplateOutlet],
+  imports: [ScienceSources, NgTemplateOutlet, WindowCharacterization],
   templateUrl: './window-evidence.html',
 })
 export class WindowEvidence {

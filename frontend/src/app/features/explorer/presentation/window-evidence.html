@@ -43,6 +43,7 @@
     }
     <app-science-sources [sources]="sources()" />
   </details>
+  <app-window-characterization [windowId]="window().id" [referenceId]="reference().id" />
 </article>
 
 <ng-template #metrics let-block>

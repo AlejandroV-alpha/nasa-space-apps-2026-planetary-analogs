@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0.0",
+  "references": {
+    "lunar-south-sector": {
+      "sourceId": "lro-diviner-prp",
+      "product": "DLRE_PRP_SOUTH, temp_max",
+      "sourceUrl": "https://pds-geosciences.wustl.edu/lro/urn-nasa-pds-lro_diviner_derived1/data_derived_prp/dlre_prp_south.tab",
+      "labelUrl": "https://pds-geosciences.wustl.edu/lro/urn-nasa-pds-lro_diviner_derived1/data_derived_prp/dlre_prp_south.xml",
+      "sourceSha256": "d75d363734e69687e8e6a7f6bf88a6e9ab8e16342fbe887c6c28db84b2f9f48d",
+      "selection": "bytes=272160210-302400209; centroides dentro del cuadrado de estudio",
+      "quantity": "modeled_annual_maximum_surface_temperature",
+      "summary": "Mediana y rango espacial del máximo anual de superficie modelado por triángulo.",
+      "units": "K",
+      "samples": 3160,
+      "median": 222.182,
+      "minimum": 36.374,
+      "maximum": 302.834,
+      "limitations": [
+        "Modelo de máximos anuales en superficie, asociado a centroides de un mallado triangular.",
+        "Selección por coordenadas planetocéntricas. No se ajustaron diferencias entre marcos de referencia.",
+        "Los extremos son espaciales entre los máximos de cada triángulo."
+      ]
+    },
+    "jezero-sector": {
+      "sourceId": "perseverance-meda-tirs",
+      "product": "WE__0001___________DER_TIRS________________P04",
+      "sourceUrl": "https://atmos.nmsu.edu/PDS/data/PDS4/Mars2020/mars2020_meda/data_derived_env/sol_0000_0089/sol_0001/WE__0001___________DER_TIRS________________P04.CSV",
+      "labelUrl": "https://atmos.nmsu.edu/PDS/data/PDS4/Mars2020/mars2020_meda/data_derived_env/sol_0000_0089/sol_0001/WE__0001___________DER_TIRS________________P04.xml",
+      "sourceSha256": "ded7c255c90ede5fbbfbb66396c562b0ebc4d1682b71e29976e23cbc4cb47815",
+      "selection": "0001 15:28:45 a 0001 15:30:11 LTST",
+      "quantity": "blackbody_equivalent_radiometric_temperature",
+      "summary": "Mediana y rango de temperatura radiométrica equivalente, inferida de la irradiancia ascendente.",
+      "units": "K",
+      "samples": 90,
+      "median": 200.03,
+      "minimum": 199.215,
+      "maximum": 201.317,
+      "coordinates": [
+        77.45088,
+        18.44463
+      ],
+      "locationSourceUrl": "https://ntrs.nasa.gov/citations/20210024644",
+      "limitations": [
+        "Muestra puntual del sol 1 cerca del sitio de aterrizaje, anterior al primer desplazamiento.",
+        "Conversión de Stefan–Boltzmann con emisividad unitaria. No corrige emisividad ni obstrucción por rueda.",
+        "Intervalo diurno breve. No representa toda la ventana, la noche ni un extremo estacional."
+      ]
+    }
+  }
+}

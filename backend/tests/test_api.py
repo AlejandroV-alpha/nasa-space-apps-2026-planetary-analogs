@@ -1,4 +1,5 @@
 from copy import deepcopy
+from hashlib import sha256
 import json
 
 import pytest
@@ -110,7 +111,7 @@ def test_search_filters_then_limits_local_ranking(client):
     (top_five,) = client.get(SEARCH_URL, params=params).json()['results']
     assert top_five['comparableWindows'] == 9
     assert len(top_five['features']) == 5
-    (local,) = client.get(SEARCH_URL, params={**params, 'limit': 9}).json()['results']
+    (local,) = client.get(SEARCH_URL, params={**params, 'all_results': 'true'}).json()['results']
     assert top_five['features'] == local['features'][:5]
     assert len(local['features']) == 9
     assert group['features'] == local['features'][:2]
@@ -272,3 +273,147 @@ def test_cors_and_openapi(client):
     assert '/api/v1/discovery-coverage' in paths
     assert '/api/v1/science-status' in paths
     assert '/api/v1/sites/{site_id}/environment' in paths
+
+
+STUDY_WINDOW = 'NASADEM_HGT_s23w066:0:1'
+WINDOW_URL = f'/api/v1/discovered-candidates/{STUDY_WINDOW}'
+JEZERO = {'reference_region_id': 'jezero-sector'}
+
+
+def test_geology_publishes_a_qualified_carbonate_match_with_spatial_evidence(client):
+    response = client.get(WINDOW_URL + '/geology', params=JEZERO)
+    assert response.status_code == 200
+    body = response.json()
+    assert body['status'] == 'qualitative'
+    assert body['earth']['catalogCheck']['catalogHits'] > 0
+    assert body['earth']['coveragePercent'] == 99.51
+    observations = body['earth']['emitObservations']
+    selected = next(scene for scene in observations['scenes'] if scene['granule'] == observations['selectedGranule'])
+    assert selected['validPixels'] == 118625 and selected['windowPixels'] == 119214
+    assert any(match['label'].startswith('Calcite ') for match in selected['matches'])
+    assert body['planetary']['localizedSpectra']['localizedSamples'] == 117
+    assert body['comparison']['commonMinerals'] == ['carbonatos']
+    assert body['planetary']['regionalContext']['source']['id'] == 'crism-jezero-regional'
+    mapped = body['planetary']['mappedGeology']
+    assert mapped['source']['id'] == 'usgs-jezero-sim3464'
+    assert mapped['coveragePercent'] == 100
+    assert len(mapped['units']) == 8
+    assert mapped['units'][0]['name'] == 'Jezero floor unit'
+    assert body['planetary']['coveragePercent'] is None
+    response = client.get(WINDOW_URL + '/geology', params={'reference_region_id': 'lunar-south-sector'})
+    lunar = response.json()
+    assert lunar['planetary']['regionalContext'] is None
+    assert lunar['status'] == 'unavailable' and lunar['comparison']['commonMinerals'] == []
+
+
+def test_applications_use_calculated_metrics_and_preserve_scientific_limits(client):
+    terrain = next(item['comparison'] for item in client.get(WINDOW_URL).json()['comparisons']
+                   if item['reference']['id'] == JEZERO['reference_region_id'])
+    response = client.get(WINDOW_URL + '/applications', params={**JEZERO, 'mission_type': 'rover_mobility'})
+    assert response.status_code == 200
+    (mobility,) = response.json()['applications']
+    assert mobility['supportingMetrics'] == [metric['key'] for metric in terrain['metrics']]
+    assert mobility['status'] == 'potential'
+    assert mobility['validatedForOperations'] is False
+    assert 'surface_bearing_strength' in mobility['missingEvidence']
+
+    response = client.get(WINDOW_URL + '/applications', params={**JEZERO, 'mission_type': 'geological_sampling'})
+    (sampling,) = response.json()['applications']
+    assert sampling['status'] == 'insufficient_evidence'
+    assert sampling['supportingMetrics'] == []
+    assert client.get(WINDOW_URL + '/applications', params={**JEZERO, 'mission_type': 'landing'}).status_code == 422
+
+
+def test_evidence_and_thermal_use_the_versioned_context(client):
+    thermal = client.get(WINDOW_URL + '/thermal', params=JEZERO)
+    assert thermal.status_code == 200
+    body = thermal.json()
+    assert body['status'] == 'context_only'
+    assert body['comparison']['comparable'] is False
+    assert body['comparison']['differenceK'] is None
+    assert body['earth']['daytime'] == 294.96 and body['earth']['nighttime'] == 275.69
+    modis = body['earth']['modisObservations']
+    assert modis['daytime']['validPixels'] == modis['windowPixels'] == 474
+    assert modis['nighttime']['validPixels'] == 380
+    assert modis['start'] == '2025-01-01' and modis['end'] == '2025-01-08'
+    summary = body['earth']['surfaceTemperature']
+    assert summary['parameter'] == 'TS' and summary['units'] == '°C'
+    assert summary['validDays'] == summary['expectedDays'] == 365
+    assert summary['minDaily'] <= summary['mean'] <= summary['maxDaily']
+    meda = body['planetary']['surfaceTemperature']
+    assert meda['quantity'] == 'blackbody_equivalent_radiometric_temperature'
+    assert meda['units'] == 'K' and meda['samples'] == 90
+    assert meda['minimum'] <= meda['median'] <= meda['maximum']
+    lunar = client.get(WINDOW_URL + '/thermal', params={'reference_region_id': 'lunar-south-sector'}).json()
+    diviner = lunar['planetary']['surfaceTemperature']
+    assert diviner['quantity'] == 'modeled_annual_maximum_surface_temperature'
+    assert diviner['samples'] == 3160
+    assert diviner['minimum'] <= diviner['median'] <= diviner['maximum']
+    assert lunar['comparison']['differenceK'] is None
+
+    evidence = client.get(WINDOW_URL + '/evidence', params=JEZERO).json()
+    assert evidence['scientificReview']['status'] == 'pending'
+    assert [study['id'] for study in evidence['relatedStudies']] == ['jezero-andes-terrain-study']
+    assert evidence['dimensions']['topography']['status'] == 'available'
+    assert {'nasadem', 'mola'} == set(evidence['dimensions']['topography']['sourceIds'])
+    assert set(evidence['dimensions']['topography']['quality']) == {'1000', '2000'}
+    assert evidence['dimensions']['geology']['status'] == 'qualitative'
+    assert evidence['dimensions']['thermal']['status'] == 'context_only'
+    source_ids = {source['id'] for source in evidence['sources']}
+    assert all(set(dimension['sourceIds']) <= source_ids for dimension in evidence['dimensions'].values())
+
+
+def test_study_matches_the_focused_endpoints(client):
+    response = client.get('/api/v1/analog-studies/jezero-andes-terrain-study')
+    assert response.status_code == 200
+    study = response.json()
+    assert study['reviewStatus'] == 'pending'
+    assert study['windowId'] == STUDY_WINDOW
+    assert study['geologyResults'] == client.get(WINDOW_URL + '/geology', params=JEZERO).json()
+    assert study['thermalResults'] == client.get(WINDOW_URL + '/thermal', params=JEZERO).json()
+    assert study['potentialApplications'] == client.get(WINDOW_URL + '/applications', params=JEZERO).json()['applications']
+    assert client.get('/api/v1/analog-studies/unknown').status_code == 404
+
+
+@pytest.mark.parametrize('suffix', ['geology', 'applications', 'evidence', 'thermal'])
+def test_characterization_rejects_wrong_ids_or_missing_reference(client, suffix):
+    assert client.get(f'{WINDOW_URL}/{suffix}').status_code == 422
+    assert client.get(f'{WINDOW_URL}/{suffix}', params={'reference_region_id': 'invalid'}).status_code == 404
+    assert client.get(f'/api/v1/discovered-candidates/amboy-sector/{suffix}', params=JEZERO).status_code == 404
+
+
+def test_search_can_report_availability_with_identical_ranking(client):
+    bounds = {'west': -66, 'south': -23, 'east': -65, 'north': -22, **JEZERO}
+    baseline = client.get(SEARCH_URL, params=bounds).json()
+    search = client.get(SEARCH_URL, params={**bounds, 'include_evidence': 'true'})
+    assert search.status_code == 200
+    body = search.json()
+    assert body.pop('evidenceAvailability')['jezero-sector'][STUDY_WINDOW] == {
+        'geology': 'qualitative', 'thermal': 'context_only',
+    }
+    assert body == baseline
+
+
+def test_characterization_provenance_matches_export_bytes(client):
+    exports = client.get('/api/v1/provenance').json()['characterizationExports']
+    assert set(exports) == {
+        'candidate-product-evidence.v1.json', 'analog-studies.v1.json', 'planetary-thermal-context.v1.json',
+    }
+    root = Repository().root
+    for metadata in exports.values():
+        assert sha256((root / metadata['path']).read_bytes()).hexdigest() == metadata['sha256']
+        assert metadata['version'] == '1.0.0'
+
+
+def test_missing_product_evidence_only_disables_dependent_routes(tmp_path):
+    repo = Repository()
+    repo.load()
+    repo.full_discovery()
+    repo.root = tmp_path
+    app = create_app()
+    app.dependency_overrides[get_repository] = lambda: repo
+    with TestClient(app) as client:
+        assert client.get(WINDOW_URL + '/evidence', params=JEZERO).status_code == 503
+        assert client.get(WINDOW_URL + '/applications', params=JEZERO).status_code == 200
+        assert client.get('/api/v1/analog-studies/jezero-andes-terrain-study').status_code == 503
+        assert client.get('/api/v1/provenance').json()['characterizationExports'] == {}

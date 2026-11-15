@@ -328,7 +328,11 @@ export class DiscoveryData {
     const [west, south, east, north] = area;
     const params: Record<string, string | number> = { west, south, east, north };
     if (referenceId) params['reference_region_id'] = referenceId;
-    if (limit !== undefined) params['limit'] = limit;
+    if (limit !== undefined) {
+      params['limit'] = limit;
+    } else {
+      params['all_results'] = 'true';
+    }
 
     return this.http
       .get<unknown>(this.api + '/discovered-candidates/search', { params, timeout: 12000 })

@@ -143,3 +143,68 @@ El resultado se guarda en `data/processed/discovered-candidates.v1.json`. Usa `-
 La búsqueda ordena por la media de las tres diferencias relativas absolutas a 1 km, con igual peso por indicador. Cada diferencia se divide por el mayor valor absoluto del par y el caso cero contra cero aporta cero. Las ventanas con mediciones incompletas quedan fuera del orden. El orden describe cercanía topográfica en el área muestreada. La búsqueda evalúa ventanas contenidas en una tesela con margen para calcular pendientes, por lo que puede omitir zonas entre teselas. Revisar las mediciones a 2 km, el contexto del terreno y las condiciones de campo antes de interpretar la utilidad de una ventana.
 
 Para generar la exportación completa que consume la consulta espacial de FastAPI, ejecuta el mismo módulo con `--all`. El comando guarda `data/processed/discovered-candidates.full.v1.json` y conserva todas las ventanas medidas por referencia. Incluye las huellas medidas aunque falten métricas para el ranking. La exportación resumida se sigue generando sin esa opción.
+
+
+### Rastrear productos geológicos y térmicos de una ventana
+
+```powershell
+uv run --with-requirements backend/processing/requirements.txt python -m backend.processing.check_candidate_products 'NASADEM_HGT_s23w066:0:1'
+```
+
+El script guarda las coincidencias de NASA CMR para EMIT L2BMIN y MODIS MOD11A2 y un resumen reproducible de temperatura superficial regional NASA POWER TS para 2025. El producto TS es un reanálisis regional y la consulta usa el centro de la ventana. El resumen no debe atribuirse a todos los puntos del polígono. El archivo `data/processed/candidate-product-evidence.v1.json` conserva URL, versión, período y alcance de cada dato.
+
+En el caso publicado se encontraron 24 registros EMIT, sin filtro de fechas, y 4 registros MODIS para enero de 2025. Las descargas de los archivos científicos muestreados requirieron Earthdata Login. Para avanzar en mineralogía, descargar los productos de identificación y de incertidumbre, georreferenciar según su guía, recortar al polígono y aplicar el control de calidad antes de reportar clases y cobertura. La referencia requiere un producto mineralógico espacialmente cotejado. Para temperatura, procesar la calidad y las horas de observación MODIS y contrastarlas con Diviner o THEMIS antes de publicar una diferencia.
+
+
+### Reproducir el contexto térmico planetario
+
+```powershell
+uv run --with-requirements backend/processing/requirements.txt python -m backend.processing.export_planetary_thermal
+```
+
+El script guarda `data/processed/planetary-thermal-context.v1.json`. Para Luna, selecciona los centroides del producto polar Diviner con coordenadas planetocéntricas en la ventana de estudio y resume sus máximos modelados de superficie. Verifica el rango solicitado al servidor y conserva su SHA-256. Para Marte, verifica que el sitio de aterrizaje documentado de Perseverance esté dentro de la ventana y usa un intervalo del sol 1, previo al primer desplazamiento. Convierte la irradiancia ascendente publicada por MEDA/TIRS a temperatura radiométrica equivalente con la relación de Stefan–Boltzmann y emisividad unitaria. Conserva el SHA-256 de la tabla original. La ausencia de una bandera de obstrucción por rueda queda indicada como límite del resultado.
+
+Los tres contextos (reanálisis terrestre, máximo anual lunar y muestra radiométrica marciana) describen cantidades, escalas y tiempos distintos. El API los presenta con su procedencia y marca la diferencia como no comparable.
+
+
+### Reproducir las unidades geológicas cartografiadas en Jezero
+
+Descarga y extrae el ZIP de la [base de datos oficial de USGS SIM 3464](https://pubs.usgs.gov/sim/3464/sim3464_database.zip). Pasa la carpeta extraída `Nili.gdb` al script desde la raíz del repositorio.
+
+```powershell
+uv run --with-requirements backend/processing/requirements.txt --with pyogrio --with shapely python -m backend.processing.export_jezero_geology 'ruta/a/Nili.gdb'
+```
+
+La capa `GeoUnits_v1` se recorta en la proyección MTM del mapa y se publican sus fracciones de área en `candidate-product-evidence.v1.json`. La publicación actual identifica ocho unidades y cobertura cartográfica completa en ese polígono según el mapa. Los porcentajes corresponden a unidades geológicas cartografiadas. La abundancia mineral y el cotejo espectral Tierra–Marte quedan pendientes.
+
+
+### Descargar los archivos científicos indexados
+
+Los enlaces exactos se pueden consultar sin iniciar sesión:
+
+```powershell
+uv run --with requests python -m backend.processing.download_earthdata_products 'NASADEM_HGT_s23w066:0:1'
+```
+
+Para descargarlos, inicia sesión de forma interactiva con una cuenta personal de [NASA Earthdata](https://urs.earthdata.nasa.gov/):
+
+```powershell
+uv run --with earthaccess python -m backend.processing.download_earthdata_products 'NASADEM_HGT_s23w066:0:1' --download
+```
+
+El comando descarga los dos NetCDF de EMIT y el HDF de MODIS en `data/raw/earthdata/`, excluido de Git. Conserva los archivos de identificación e incertidumbre juntos para el control de calidad. Se requiere procesar los archivos y comprobar su cobertura antes de publicar nuevas métricas.
+
+
+### Reproducir la comparación de superficie en el caso Andes–Jezero
+
+El código de acceso descarga el granulo EMIT registrado y, con `--emit-granule`, los pares de dos escenas adicionales. Usa estos IDs para reproducir exactamente el conjunto de entrada.
+
+```powershell
+uv run --with earthaccess python -m backend.processing.download_earthdata_products 'NASADEM_HGT_s23w066:0:1' --emit-granule G2733662962-LPCLOUD --emit-granule G3240664743-LPCLOUD --download
+uv run --with-requirements backend/processing/requirements.txt --with netcdf4 --with pyhdf python -m backend.processing.export_earth_observations 'NASADEM_HGT_s23w066:0:1'
+uv run --with-requirements backend/processing/requirements.txt --with remotezip python -m backend.processing.export_jezero_spectral_context
+```
+
+- **EMIT.** Las tablas GLT sitúan las recuperaciones en la cuadrícula del polígono. El filtro exploratorio exige ID positivo, ajuste finito, incertidumbre positiva y profundidad de banda de al menos tres veces su incertidumbre. Retiene las etiquetas originales de la biblioteca, incluidas mezclas. La mejor escena tiene 118.625 celdas válidas de 119.214 (99,51 %). Esta es cobertura de datos, no abundancia de minerales.
+- **CRISM.** El DDR de PDS geolocaliza los índices de ROI #444, figura 9 de [Tarnas et al. (2021)](https://pmc.ncbi.nlm.nih.gov/articles/PMC8597593/). Los 117 índices de la muestra caen dentro de la ventana de Jezero con ambas convenciones de origen de índices. Se usa la interpretación publicada para la familia de los carbonatos. La comparación deja pendiente la equivalencia de especies y abundancias.
+- **MODIS.** El HDF de MOD11A2 se recorta en su proyección sinusoidal. Se aplican los rangos del archivo, bits QA de temperatura recuperada, calidad de datos buena, error estimado de hasta 2 K y hora local válida. Se reportan aparte las franjas diurna y nocturna del compuesto de ocho días. El contraste interplanetario sigue marcado como no comparable debido a las distintas magnitudes, escalas y condiciones temporales.
