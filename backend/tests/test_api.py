@@ -1,5 +1,6 @@
 from copy import deepcopy
-from pathlib import Path
+import json
+
 import pytest
 from fastapi.testclient import TestClient
 from backend.app.main import create_app
@@ -46,6 +47,61 @@ def test_missing_entities(client):
     assert client.get('/api/v1/reference-regions/unknown').status_code==404
 
 
+def test_discovered_candidates_preserve_science_export(client):
+    path = Repository().root / 'data/processed/discovered-candidates.v1.json'
+    export = json.loads(path.read_text(encoding='utf-8'))
+    url = '/api/v1/discovered-candidates'
+    response = client.get(url)
+    assert response.status_code == 200
+    assert response.json() == export
+
+    response = client.get(url, params={'reference_region_id': 'jezero-sector'})
+    assert response.status_code == 200
+    assert response.json() == {
+        **export,
+        'results': [result for result in export['results'] if result['reference']['id'] == 'jezero-sector'],
+    }
+    assert client.get(url, params={'reference_region_id': 'unknown'}).status_code == 404
+    assert client.get(url).json() == export
+
+
+def test_site_environment_preserves_nasa_power_export(client):
+    path = Repository().root / 'data/processed/terrestrial-environment.v1.json'
+    export = json.loads(path.read_text(encoding='utf-8'))
+    sites = export.pop('sites')
+    response = client.get('/api/v1/sites/coipasa-sector/environment')
+    assert response.status_code == 200
+    assert response.json() == {
+        **export,
+        'site': next(site for site in sites if site['siteId'] == 'coipasa-sector'),
+    }
+    assert client.get('/api/v1/sites/unknown/environment').status_code == 404
+
+
+@pytest.mark.parametrize(('route', 'filename'), [
+    ('discovered-candidates', 'discovered-candidates.v1.json'),
+    ('sites/coipasa-sector/environment', 'terrestrial-environment.v1.json'),
+])
+def test_unavailable_science_export_does_not_break_catalog(tmp_path, route, filename):
+    repository = Repository()
+    repository.load()
+    original_root = repository.root
+    repository.root = tmp_path
+    export_path = tmp_path / 'data/processed' / filename
+    export_path.parent.mkdir(parents=True)
+    app = create_app()
+    app.dependency_overrides[get_repository] = lambda: repository
+
+    with TestClient(app) as client:
+        url = '/api/v1/' + route
+        assert client.get(url).status_code == 503
+        export_path.write_text('{"schemaVersion": "1.0.0"}', encoding='utf-8')
+        assert client.get(url).status_code == 503
+        assert client.get('/api/v1/catalog').status_code == 200
+        export_path.write_bytes((original_root / 'data/processed' / filename).read_bytes())
+        assert client.get(url).status_code == 200
+
+
 def test_compare_difference_and_zero(client):
     response=client.post('/api/v1/compare',json={'reference_region_id':'jezero-sector','site_ids':['siloli-sector','coipasa-sector']})
     assert response.status_code==200
@@ -83,3 +139,5 @@ def test_cors_and_openapi(client):
     assert client.get('/docs').status_code==200
     paths=client.get('/openapi.json').json()['paths']
     assert '/api/v1/compare' in paths
+    assert '/api/v1/discovered-candidates' in paths
+    assert '/api/v1/sites/{site_id}/environment' in paths

@@ -1,12 +1,12 @@
 """HTTP access to computed planetary analog data; see /docs for the API contract."""
 import os
-from typing import Annotated, Literal
+from typing import Annotated
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field
 from .repository import Repository, get_repository
+from .science_exports import Body, CandidateDiscovery, SiteEnvironmentResponse
 
-Body = Literal['moon', 'mars']
 Repo = Annotated[Repository, Depends(get_repository)]
 
 
@@ -36,6 +36,21 @@ def create_app() -> FastAPI:
     def provenance(repo: Repo):
         return repo.provenance()
 
+    @api.get(
+        '/api/v1/discovered-candidates', tags=['Ciencia'],
+        summary='Consultar ventanas terrestres detectadas y sus comparaciones precalculadas',
+        responses={404: {'description': 'Referencia planetaria desconocida'},
+                   503: {'description': 'Exportación científica ausente o inválida'}},
+    )
+    def discovered_candidates(repo: Repo, reference_region_id: str | None = None) -> CandidateDiscovery:
+        if reference_region_id is not None:
+            repo.find('referenceRegions', reference_region_id)
+        discovery = repo.discovery()
+        if reference_region_id is None:
+            return discovery
+        results = [result for result in discovery.results if result.reference.id == reference_region_id]
+        return discovery.model_copy(update={'results': results})
+
     @api.get('/api/v1/sites', tags=['Sitios'], summary='Listar y filtrar candidatos terrestres')
     def sites(repo: Repo, target_body: Body | None = None,
               country: Annotated[str | None, Query(pattern='^[A-Z]{2}$')] = None,
@@ -52,6 +67,20 @@ def create_app() -> FastAPI:
     @api.get('/api/v1/sites/{site_id}', tags=['Sitios'], summary='Obtener la ficha completa de un candidato')
     def site(site_id: str, repo: Repo):
         return repo.find('sites', site_id)
+
+    @api.get(
+        '/api/v1/sites/{site_id}/environment', tags=['Sitios'],
+        summary='Consultar el contexto ambiental terrestre histórico de un candidato',
+        responses={404: {'description': 'Sitio desconocido o sin datos ambientales publicados'},
+                   503: {'description': 'Exportación científica ausente o inválida'}},
+    )
+    def site_environment(site_id: str, repo: Repo) -> SiteEnvironmentResponse:
+        repo.find('sites', site_id)
+        environment = repo.environment()
+        for site_data in environment.sites:
+            if site_data.siteId == site_id:
+                return SiteEnvironmentResponse(site=site_data, **environment.model_dump(exclude={'sites'}))
+        raise HTTPException(404, f'No hay datos ambientales publicados para {site_id}.')
 
     @api.get('/api/v1/reference-regions', tags=['Referencias'], summary='Listar regiones de la Luna y Marte')
     def references(repo: Repo, target_body: Body | None = None):
